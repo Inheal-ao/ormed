@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Pencil, Trash2, Loader2, Eye, EyeOff, MapPin } from "lucide-react";
+import { Pencil, Trash2, Loader2, Eye, EyeOff, MapPin, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { Paginated, EventItem } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
@@ -75,6 +75,9 @@ export default function EventosListPage() {
                 </span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <Link href={`/admin/eventos/${item._id}/inscricoes`} className="p-2 text-gray-500 hover:text-angola-navy hover:bg-gray-100 rounded-lg" aria-label="Ver inscritos" title="Ver inscritos">
+                  <Users className="w-4 h-4" />
+                </Link>
                 <Link href={`/admin/eventos/${item._id}`} className="p-2 text-gray-500 hover:text-angola-navy hover:bg-gray-100 rounded-lg" aria-label="Editar">
                   <Pencil className="w-4 h-4" />
                 </Link>

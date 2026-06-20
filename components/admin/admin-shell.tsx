@@ -26,6 +26,7 @@ import {
   GraduationCap,
   Briefcase,
   Megaphone,
+  Inbox,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
@@ -47,6 +48,7 @@ const navLinks = [
   { href: "/admin/parceiros", label: "Parceiros", icon: Handshake },
   { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3 },
   { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope },
+  { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox },
   { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
   { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote },
   { href: "/admin/cronologia", label: "Cronologia", icon: History },

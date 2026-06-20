@@ -80,6 +80,7 @@ export interface AnnouncementItem {
   category: string;
   content: string;
   coverImage: Asset | null;
+  images: Asset[];
   pdf: Asset | null;
   isPublished: boolean;
   publishedAt: string | null;

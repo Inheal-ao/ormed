@@ -80,7 +80,7 @@ export const navItems = [
     children: [
       { label: "Consulta de Médicos", href: "/consulta-medicos/" },
       { label: "Validação de Documentos", href: "/validacao/" },
-      { label: "Pesquisa Científica", href: "/pesquisa/" },
+      { label: "Apoio à Pesquisa Científica", href: "/pesquisa/" },
       { label: "Biblioteca", href: "/biblioteca/" },
     ],
   },

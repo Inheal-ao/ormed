@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { AnnouncementItem, Asset } from "@/lib/admin-types";
 import { BackLink, Field, TextInput, TextArea, Toggle, SaveButton, CategorySelect } from "@/components/admin/admin-ui";
 import { MediaUpload } from "@/components/admin/media-upload";
+import { MultiImageUpload } from "@/components/admin/multi-image-upload";
 import { CATEGORIES } from "@/lib/categories";
 
 function toDateInput(value: string | null): string {
@@ -28,6 +29,7 @@ export default function ComunicadoFormPage() {
   const [content, setContent] = useState("");
   const [publishDate, setPublishDate] = useState("");
   const [coverImage, setCoverImage] = useState<Asset | null>(null);
+  const [images, setImages] = useState<Asset[]>([]);
   const [pdf, setPdf] = useState<Asset | null>(null);
   const [isPublished, setIsPublished] = useState(false);
 
@@ -41,6 +43,7 @@ export default function ComunicadoFormPage() {
         setContent(item.content);
         setPublishDate(toDateInput(item.publishedAt));
         setCoverImage(item.coverImage);
+        setImages(item.images ?? []);
         setPdf(item.pdf);
         setIsPublished(item.isPublished);
       } catch (err) {
@@ -58,7 +61,7 @@ export default function ComunicadoFormPage() {
     const payload = {
       title, category, content,
       publishedAt: publishDate ? new Date(publishDate).toISOString() : undefined,
-      coverImage: coverImage ?? undefined, pdf: pdf ?? undefined, isPublished,
+      coverImage: coverImage ?? undefined, images, pdf: pdf ?? undefined, isPublished,
     };
     try {
       if (isNew) await api.post("/announcements", payload, true);
@@ -86,8 +89,9 @@ export default function ComunicadoFormPage() {
           <Field label="Categoria"><CategorySelect value={category} onChange={setCategory} options={CATEGORIES} /></Field>
           <Field label="Data"><TextInput type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} /></Field>
         </div>
-        <Field label="Conteúdo"><TextArea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Texto do comunicado" /></Field>
-        <MediaUpload label="Imagem (opcional)" kind="image" value={coverImage} onChange={setCoverImage} />
+        <Field label="Conteúdo (opcional)"><TextArea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Texto do comunicado" /></Field>
+        <MultiImageUpload label="Documentos (imagens) — partilhados como na galeria" value={images} onChange={setImages} />
+        <MediaUpload label="Imagem de capa (opcional)" kind="image" value={coverImage} onChange={setCoverImage} />
         <MediaUpload label="Documento PDF (opcional)" kind="pdf" value={pdf} onChange={setPdf} />
         <Toggle checked={isPublished} onChange={setIsPublished} label="Publicado no site" />
         {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}

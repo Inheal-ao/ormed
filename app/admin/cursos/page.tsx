@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Pencil, Trash2, Loader2, Eye, EyeOff, GraduationCap } from "lucide-react";
+import { Pencil, Trash2, Loader2, Eye, EyeOff, GraduationCap, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { Paginated, CourseItem } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
@@ -69,6 +69,9 @@ export default function CursosListPage() {
                 </span>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <Link href={`/admin/cursos/${item._id}/inscricoes`} className="p-2 text-gray-500 hover:text-angola-navy hover:bg-gray-100 rounded-lg" aria-label="Ver inscritos" title="Ver inscritos">
+                  <Users className="w-4 h-4" />
+                </Link>
                 <Link href={`/admin/cursos/${item._id}`} className="p-2 text-gray-500 hover:text-angola-navy hover:bg-gray-100 rounded-lg" aria-label="Editar">
                   <Pencil className="w-4 h-4" />
                 </Link>
