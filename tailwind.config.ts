@@ -56,6 +56,8 @@ const config: Config = {
           gold: "#FFD700",
           navy: "#002147",
           blue: "#003366",
+          dark: "#001226",
+          green: "#1B5E20",
           light: "#F8FAFC",
           cream: "#FFF8E7",
         },
