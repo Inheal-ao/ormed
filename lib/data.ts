@@ -35,6 +35,7 @@ export const navItems = [
       { label: "Carteira Profissional", href: "/carteira/" },
       { label: "Especialidades", href: "/especialidades/" },
       { label: "Formação Contínua", href: "/formacao-continua/" },
+      { label: "Vagas de Emprego", href: "/vagas/" },
       { label: "Área do Membro", href: "/area-membro/" },
     ],
   },
@@ -52,6 +53,10 @@ export const navItems = [
   {
     label: "Notícias",
     href: "/noticias/",
+  },
+  {
+    label: "Comunicados",
+    href: "/comunicados/",
   },
   {
     label: "Eventos",

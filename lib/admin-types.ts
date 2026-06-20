@@ -56,6 +56,36 @@ export interface EventItem {
   createdAt: string;
 }
 
+export interface JobItem {
+  _id: string;
+  title: string;
+  slug: string;
+  entity: string;
+  location: string;
+  type: string;
+  description: string;
+  requirements: string;
+  deadline: string | null;
+  applicationEmail: string;
+  externalLink: string;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export interface AnnouncementItem {
+  _id: string;
+  title: string;
+  slug: string;
+  category: string;
+  content: string;
+  coverImage: Asset | null;
+  pdf: Asset | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
 export interface CourseItem {
   _id: string;
   title: string;

@@ -24,12 +24,16 @@ import {
   Quote,
   History,
   GraduationCap,
+  Briefcase,
+  Megaphone,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
 const navLinks = [
   { href: "/admin", label: "Painel", icon: LayoutDashboard, exact: true },
   { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
+  { href: "/admin/comunicados", label: "Comunicados", icon: Megaphone },
+  { href: "/admin/vagas", label: "Vagas de Emprego", icon: Briefcase },
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/admin/cursos", label: "Formação/Cursos", icon: GraduationCap },
   { href: "/admin/revistas", label: "Revistas", icon: BookOpen },
