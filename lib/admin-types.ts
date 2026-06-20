@@ -154,6 +154,26 @@ export interface GalleryItem {
   createdAt: string;
 }
 
+export interface ArticleItem {
+  _id: string;
+  title: string;
+  slug: string;
+  subtitle: string;
+  authors: string;
+  affiliation: string;
+  category: string;
+  abstract: string;
+  content: string;
+  keywords: string[];
+  coverImage: Asset | null;
+  pdf: Asset | null;
+  externalLink: string;
+  doi: string;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
 export interface StatItem {
   _id: string;
   value: string;

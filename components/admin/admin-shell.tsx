@@ -19,6 +19,7 @@ import {
   BookMarked,
   Images,
   FileText,
+  FlaskConical,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
@@ -27,6 +28,7 @@ const navLinks = [
   { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/admin/revistas", label: "Revistas", icon: BookOpen },
+  { href: "/admin/revmed", label: "RevMed", icon: FlaskConical },
   { href: "/admin/boletins", label: "Boletins", icon: FileText },
   { href: "/admin/livros", label: "Livros", icon: BookMarked },
   { href: "/admin/podcast", label: "Podcast", icon: Mic },

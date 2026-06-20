@@ -62,6 +62,7 @@ export const navItems = [
     href: "#",
     children: [
       { label: "Revista ORMED", href: "/revista/" },
+      { label: "RevMed (Científica)", href: "/revmed/" },
       { label: "Boletins", href: "/boletins/" },
       { label: "Livros", href: "/livros/" },
       { label: "Podcast", href: "/podcast/" },
