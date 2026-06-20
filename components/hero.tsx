@@ -2,17 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  Shield,
-  GraduationCap,
-  Stethoscope,
-  Users,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { usePublicData } from "@/lib/use-public-data";
+import { getStatIcon } from "@/lib/stat-icons";
+import { StatItem } from "@/lib/admin-types";
 
 const slides = [
   {
@@ -44,16 +39,11 @@ const slides = [
   },
 ];
 
-const quickStats = [
-  { icon: Users, value: "12.500+", label: "Médicos Inscritos" },
-  { icon: Shield, value: "35+", label: "Anos de História" },
-  { icon: GraduationCap, value: "50+", label: "Especialidades" },
-  { icon: Stethoscope, value: "18", label: "Delegações" },
-];
-
 export function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(0);
+  const { data: statsData } = usePublicData<StatItem[]>("/stats");
+  const quickStats = (statsData ?? []).slice(0, 4);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -173,31 +163,38 @@ export function Hero() {
           </AnimatePresence>
         </div>
 
-        {/* Quick Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
-          className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4"
-        >
-          {quickStats.map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 + index * 0.1 }}
-              className="bg-white dark:bg-gray-900/10 backdrop-blur-md border border-white/10 rounded-xl p-4 flex items-center gap-4 hover:bg-white/15 transition-colors"
-            >
-              <div className="w-12 h-12 rounded-lg bg-angola-gold/20 flex items-center justify-center">
-                <stat.icon className="w-6 h-6 text-angola-gold" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
-                <p className="text-sm text-gray-400">{stat.label}</p>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+        {/* Quick Stats (do painel admin) */}
+        {quickStats.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {quickStats.map((stat, index) => {
+              const Icon = getStatIcon(stat.icon);
+              return (
+                <motion.div
+                  key={stat._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1 + index * 0.1 }}
+                  className="bg-white dark:bg-gray-900/10 backdrop-blur-md border border-white/10 rounded-xl p-4 flex items-center gap-4 hover:bg-white/15 transition-colors"
+                >
+                  <div className="w-12 h-12 rounded-lg bg-angola-gold/20 flex items-center justify-center shrink-0">
+                    <Icon className="w-6 h-6 text-angola-gold" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                      {stat.value}
+                    </p>
+                    <p className="text-sm text-gray-400">{stat.label}</p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
       </div>
 
       {/* Navigation Arrows */}
