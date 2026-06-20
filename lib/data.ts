@@ -43,6 +43,7 @@ export const navItems = [
     label: "Ética & Deontologia",
     href: "#",
     children: [
+      { label: "Textos Fundadores da Ética", href: "/textos-fundadores/" },
       { label: "Código Deontológico", href: "/codigo-deontologico/" },
       { label: "Código Disciplinar", href: "/codigo-disciplinar/" },
       { label: "Regulamento Geral", href: "/regulamento-geral/" },
