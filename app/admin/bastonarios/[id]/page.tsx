@@ -20,6 +20,7 @@ export default function BastonarioFormPage() {
   const [name, setName] = useState("");
   const [mandate, setMandate] = useState("");
   const [bio, setBio] = useState("");
+  const [quote, setQuote] = useState("");
   const [order, setOrder] = useState("0");
   const [photo, setPhoto] = useState<Asset | null>(null);
   const [isCurrent, setIsCurrent] = useState(false);
@@ -33,6 +34,7 @@ export default function BastonarioFormPage() {
         setName(item.name);
         setMandate(item.mandate);
         setBio(item.bio);
+        setQuote(item.quote ?? "");
         setOrder(String(item.order));
         setPhoto(item.photo);
         setIsCurrent(item.isCurrent);
@@ -54,6 +56,7 @@ export default function BastonarioFormPage() {
       name,
       mandate,
       bio,
+      quote,
       order: Number(order) || 0,
       photo: photo ?? undefined,
       isCurrent,
@@ -95,6 +98,9 @@ export default function BastonarioFormPage() {
         </div>
         <Field label="Biografia">
           <TextArea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Breve biografia" />
+        </Field>
+        <Field label="Frase / Mensagem" hint="Citação mostrada em destaque (opcional)">
+          <TextArea value={quote} onChange={(e) => setQuote(e.target.value)} placeholder="Mensagem do bastonário" />
         </Field>
         <MediaUpload label="Fotografia" kind="image" value={photo} onChange={setPhoto} />
         <Toggle checked={isCurrent} onChange={setIsCurrent} label="Bastonário em exercício" />

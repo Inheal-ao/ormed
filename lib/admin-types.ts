@@ -68,6 +68,7 @@ export interface BastonarioItem {
   photo: Asset | null;
   mandate: string;
   bio: string;
+  quote: string;
   isCurrent: boolean;
   order: number;
   isPublished: boolean;
@@ -78,6 +79,22 @@ export interface PartnerItem {
   name: string;
   logo: Asset | null;
   website: string;
+  order: number;
+  isPublished: boolean;
+}
+
+export interface StatItem {
+  _id: string;
+  value: string;
+  label: string;
+  icon: string;
+  order: number;
+  isPublished: boolean;
+}
+
+export interface SpecialtyItem {
+  _id: string;
+  name: string;
   order: number;
   isPublished: boolean;
 }

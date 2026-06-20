@@ -13,6 +13,8 @@ import {
   Settings,
   LogOut,
   Loader2,
+  BarChart3,
+  Stethoscope,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
@@ -23,6 +25,8 @@ const navLinks = [
   { href: "/admin/revistas", label: "Revistas", icon: BookOpen },
   { href: "/admin/bastonarios", label: "Bastonários", icon: Users },
   { href: "/admin/parceiros", label: "Parceiros", icon: Handshake },
+  { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3 },
+  { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope },
   { href: "/admin/definicoes", label: "Definições", icon: Settings },
 ];
 
