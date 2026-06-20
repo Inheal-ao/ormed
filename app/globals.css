@@ -82,6 +82,21 @@
     color: inherit;
   }
 
+  /* Cartões de fundo claro (creme) mantêm texto escuro no modo escuro,
+     para o conteúdo não ficar branco-sobre-claro (ilegível). */
+  .dark .bg-angola-cream h1,
+  .dark .bg-angola-cream h2,
+  .dark .bg-angola-cream h3,
+  .dark .bg-angola-cream h4,
+  .dark .bg-angola-cream .text-gray-900 {
+    color: #111827;
+  }
+  .dark .bg-angola-cream p,
+  .dark .bg-angola-cream .text-gray-600,
+  .dark .bg-angola-cream .text-gray-700 {
+    color: #374151;
+  }
+
   .dark .text-gray-600 {
     color: #9CA3AF;
   }

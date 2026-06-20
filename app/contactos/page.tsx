@@ -182,7 +182,7 @@ export default function ContactosPage() {
                 </div>
                 <Button
                   type="submit"
-                  className="bg-angola-navy hover:bg-angola-blue w-full sm:w-auto"
+                  className="bg-angola-navy hover:bg-angola-blue text-white w-full sm:w-auto"
                 >
                   <Send className="w-4 h-4 mr-2" />
                   Enviar Mensagem
