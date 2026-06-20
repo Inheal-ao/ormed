@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Menu,
@@ -33,8 +34,19 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchTerm.trim();
+    if (!q) return;
+    setIsSearchOpen(false);
+    setSearchTerm("");
+    router.push(`/procurar?q=${encodeURIComponent(q)}`);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -186,25 +198,30 @@ export function Header() {
               {/* Search */}
               <AnimatePresence>
                 {isSearchOpen && (
-                  <motion.div
+                  <motion.form
+                    onSubmit={submitSearch}
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 200, opacity: 1 }}
+                    animate={{ width: 220, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     className="overflow-hidden"
                   >
                     <Input
-                      placeholder="Pesquisar..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      placeholder="Pesquisar e Enter..."
                       className="h-9 text-sm border border-gray-200 bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
                       autoFocus
                     />
-                  </motion.div>
+                  </motion.form>
                 )}
               </AnimatePresence>
               <Button
+                type="button"
                 variant="ghost"
                 size="icon"
-                className="hidden sm:flex dark:text-gray-300 dark:hover:text-white"
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                aria-label="Pesquisar"
+                className="dark:text-gray-300 dark:hover:text-white"
+                onClick={() => setIsSearchOpen((v) => !v)}
               >
                 <Search className="w-4 h-4" />
               </Button>
