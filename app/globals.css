@@ -74,6 +74,14 @@
     @apply text-gray-300;
   }
 
+  /* Spans dentro de botões/links herdam a cor do elemento (evita texto
+     ilegível em botões coloridos, ex.: "Área do Membro" dourado). */
+  .dark button span,
+  .dark a span,
+  .dark [role="button"] span {
+    color: inherit;
+  }
+
   .dark .text-gray-600 {
     color: #9CA3AF;
   }
