@@ -1,9 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { timeline } from "@/lib/data";
+import { usePublicData } from "@/lib/use-public-data";
+import { MilestoneItem } from "@/lib/admin-types";
 
 export function TimelineSection() {
+  const { data } = usePublicData<MilestoneItem[]>("/timeline");
+  const timeline = data ?? [];
+
+  if (timeline.length === 0) return null;
+
   return (
     <section className="py-24 bg-white relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4">
@@ -36,7 +42,7 @@ export function TimelineSection() {
 
               return (
                 <motion.div
-                  key={`${item.year}-${index}`}
+                  key={item._id}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

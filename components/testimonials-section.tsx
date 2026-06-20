@@ -3,10 +3,17 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Quote, Star, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
-import { testimonials } from "@/lib/data";
+import { usePublicData } from "@/lib/use-public-data";
+import { TestimonialItem } from "@/lib/admin-types";
 
 export function TestimonialsSection() {
+  const { data } = usePublicData<TestimonialItem[]>("/testimonials");
+  const testimonials = data ?? [];
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (testimonials.length === 0) return null;
+  const safeIndex = Math.min(currentIndex, testimonials.length - 1);
+  const t = testimonials[safeIndex];
 
   const next = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length);
@@ -45,7 +52,7 @@ export function TestimonialsSection() {
         <div className="max-w-4xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
-              key={currentIndex}
+              key={safeIndex}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -70,35 +77,32 @@ export function TestimonialsSection() {
 
                 {/* Quote */}
                 <blockquote className="text-xl md:text-2xl text-gray-700 leading-relaxed mb-8 font-display italic">
-                  "{testimonials[currentIndex].text}"
+                  &quot;{t.text}&quot;
                 </blockquote>
 
                 {/* Author */}
                 <div className="flex flex-col items-center">
                   <div className="mb-3">
-                    {testimonials[currentIndex].avatar ? (
+                    {t.avatar?.url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={testimonials[currentIndex].avatar}
-                        alt={testimonials[currentIndex].name}
+                        src={t.avatar.url}
+                        alt={t.name}
                         className="w-16 h-16 rounded-full object-cover mx-auto"
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-gradient-to-br from-angola-gold to-angola-gold flex items-center justify-center mx-auto">
                         <span className="text-xl font-bold text-white">
-                          {testimonials[currentIndex].name.charAt(0)}
+                          {t.name.charAt(0)}
                         </span>
                       </div>
                     )}
                   </div>
-                  <h4 className="font-bold text-gray-900">
-                    {testimonials[currentIndex].name}
-                  </h4>
-                  <p className="text-sm text-gray-500">
-                    {testimonials[currentIndex].role}
-                  </p>
+                  <h4 className="font-bold text-gray-900">{t.name}</h4>
+                  <p className="text-sm text-gray-500">{t.role}</p>
                   <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
                     <MapPin className="w-3 h-3" />
-                    {testimonials[currentIndex].location}
+                    {t.location}
                   </div>
                 </div>
               </div>
@@ -114,12 +118,14 @@ export function TestimonialsSection() {
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
             <div className="flex gap-2">
-              {testimonials.map((_, index) => (
+              {testimonials.map((item, index) => (
                 <button
-                  key={index}
+                  key={item._id}
+                  type="button"
                   onClick={() => setCurrentIndex(index)}
+                  aria-label={`Ver testemunho ${index + 1}`}
                   className={`h-2 rounded-full transition-all ${
-                    index === currentIndex
+                    index === safeIndex
                       ? "w-8 bg-angola-gold"
                       : "w-2 bg-gray-300 hover:bg-gray-400"
                   }`}

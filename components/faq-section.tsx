@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { HelpCircle, MessageCircle } from "lucide-react";
 import Link from "next/link";
-import { faqs } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import {
   Accordion,
@@ -11,8 +10,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { usePublicData } from "@/lib/use-public-data";
+import { FaqItem } from "@/lib/admin-types";
 
 export function FAQSection() {
+  const { data } = usePublicData<FaqItem[]>("/faqs");
+  const faqs = data ?? [];
+
+  if (faqs.length === 0) return null;
+
   return (
     <section className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
@@ -70,7 +76,7 @@ export function FAQSection() {
             <Accordion type="single" collapsible className="space-y-3">
               {faqs.map((faq, index) => (
                 <motion.div
-                  key={index}
+                  key={faq._id}
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}

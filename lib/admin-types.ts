@@ -201,6 +201,34 @@ export interface SpecialtyItem {
   isPublished: boolean;
 }
 
+export interface FaqItem {
+  _id: string;
+  question: string;
+  answer: string;
+  order: number;
+  isPublished: boolean;
+}
+
+export interface TestimonialItem {
+  _id: string;
+  name: string;
+  role: string;
+  location: string;
+  text: string;
+  avatar: Asset | null;
+  order: number;
+  isPublished: boolean;
+}
+
+export interface MilestoneItem {
+  _id: string;
+  year: string;
+  title: string;
+  description: string;
+  order: number;
+  isPublished: boolean;
+}
+
 export interface SiteSettings {
   phone: string;
   email: string;
