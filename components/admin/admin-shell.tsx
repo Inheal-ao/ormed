@@ -31,7 +31,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, loading, logout } = useAdminAuth();
 
-  const isLoginPage = pathname === "/admin/login";
+  // Normaliza barras finais (o site usa trailingSlash)
+  const normalizedPath = pathname?.replace(/\/+$/, "") || "/admin";
+  const isLoginPage = normalizedPath === "/admin/login";
 
   // Redireciona para login se não autenticado (exceto na própria página de login)
   useEffect(() => {
@@ -62,8 +64,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navLinks.map((link) => {
             const active = link.exact
-              ? pathname === link.href
-              : pathname?.startsWith(link.href);
+              ? normalizedPath === link.href
+              : normalizedPath.startsWith(link.href);
             return (
               <Link
                 key={link.href}
