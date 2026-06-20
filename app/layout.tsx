@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { ConditionalChrome } from "@/components/conditional-chrome";
 import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({
@@ -43,9 +42,7 @@ export default function RootLayout({
     <html lang="pt" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} min-h-screen bg-background font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <Header />
-          <main>{children}</main>
-          <Footer />
+          <ConditionalChrome>{children}</ConditionalChrome>
           <Toaster />
         </ThemeProvider>
       </body>

@@ -1,0 +1,93 @@
+export interface Asset {
+  url: string;
+  publicId?: string;
+}
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "super_admin" | "admin" | "editor";
+  lastLoginAt?: string | null;
+}
+
+export interface Paginated<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface NewsItem {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImage: Asset | null;
+  category: string;
+  author: string;
+  tags: string[];
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export interface EventItem {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  coverImage: Asset | null;
+  location: string;
+  startDate: string;
+  endDate: string | null;
+  isPublished: boolean;
+  createdAt: string;
+}
+
+export interface MagazineItem {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  edition: string;
+  year: number;
+  coverImage: Asset | null;
+  pdf: Asset | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export interface BastonarioItem {
+  _id: string;
+  name: string;
+  photo: Asset | null;
+  mandate: string;
+  bio: string;
+  isCurrent: boolean;
+  order: number;
+  isPublished: boolean;
+}
+
+export interface PartnerItem {
+  _id: string;
+  name: string;
+  logo: Asset | null;
+  website: string;
+  order: number;
+  isPublished: boolean;
+}
+
+export interface SiteSettings {
+  phone: string;
+  email: string;
+  address: string;
+  facebook: string;
+  instagram: string;
+  linkedin: string;
+  youtube: string;
+}
