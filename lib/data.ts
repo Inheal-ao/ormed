@@ -65,6 +65,7 @@ export const navItems = [
       { label: "Boletins", href: "/boletins/" },
       { label: "Livros", href: "/livros/" },
       { label: "Podcast", href: "/podcast/" },
+      { label: "Galeria", href: "/galeria/" },
     ],
   },
   {

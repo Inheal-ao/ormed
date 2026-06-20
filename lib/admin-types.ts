@@ -83,6 +83,55 @@ export interface PartnerItem {
   isPublished: boolean;
 }
 
+export interface BulletinItem {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  edition: string;
+  year: number;
+  coverImage: Asset | null;
+  pdf: Asset | null;
+  isPublished: boolean;
+  createdAt: string;
+}
+
+export interface BookItem {
+  _id: string;
+  title: string;
+  slug: string;
+  author: string;
+  description: string;
+  year: number;
+  coverImage: Asset | null;
+  pdf: Asset | null;
+  externalLink: string;
+  isPublished: boolean;
+  createdAt: string;
+}
+
+export interface PodcastItem {
+  _id: string;
+  title: string;
+  slug: string;
+  episode: string;
+  description: string;
+  youtubeUrl: string;
+  coverImage: Asset | null;
+  isPublished: boolean;
+  publishedAt: string | null;
+  createdAt: string;
+}
+
+export interface GalleryItem {
+  _id: string;
+  image: Asset;
+  caption: string;
+  order: number;
+  isPublished: boolean;
+  createdAt: string;
+}
+
 export interface StatItem {
   _id: string;
   value: string;

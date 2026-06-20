@@ -15,6 +15,10 @@ import {
   Loader2,
   BarChart3,
   Stethoscope,
+  Mic,
+  BookMarked,
+  Images,
+  FileText,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
@@ -23,6 +27,10 @@ const navLinks = [
   { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/admin/revistas", label: "Revistas", icon: BookOpen },
+  { href: "/admin/boletins", label: "Boletins", icon: FileText },
+  { href: "/admin/livros", label: "Livros", icon: BookMarked },
+  { href: "/admin/podcast", label: "Podcast", icon: Mic },
+  { href: "/admin/galeria", label: "Galeria", icon: Images },
   { href: "/admin/bastonarios", label: "Bastonários", icon: Users },
   { href: "/admin/parceiros", label: "Parceiros", icon: Handshake },
   { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3 },
