@@ -1,0 +1,188 @@
+
+================================================================================
+                    ORMED - GUIA DE INSTALACAO RAPIDA
+                    Ordem dos Medicos de Angola
+================================================================================
+
+PRE-REQUISITOS (Instalar antes de comecar)
+================================================================================
+
+1. NODE.JS (Obrigatorio)
+   -> Acesse: https://nodejs.org/
+   -> Clique no botao VERDE "LTS" (Recommended For Most Users)
+   -> Baixe e instale (clique duplo no arquivo, Next, Next, Finish)
+   -> Para verificar: abra o terminal e digite: node --version
+
+2. VS CODE (Recomendado - Editor de codigo)
+   -> Acesse: https://code.visualstudio.com/
+   -> Baixe e instale
+
+================================================================================
+
+COMO RODAR O SITE (3 PASSOS SIMPLES)
+================================================================================
+
+PASSO 1: EXTRAIR O ARQUIVO
+--------------------------------------------------------------------------------
+- Clique com botao direito no arquivo ZIP
+- Escolha "Extrair tudo..." ou "Extract All..."
+- Escolha uma pasta (ex: C:\Users\SeuNome\Desktop\ORMED)
+
+PASSO 2: ABRIR A PASTA NO TERMINAL
+--------------------------------------------------------------------------------
+METODO FACIL (Windows):
+- Abra a pasta extraida
+- Clique na barra de endereco do Windows Explorer
+- Digite: cmd  e pressione ENTER
+- O terminal (Prompt de Comando) abre ja na pasta correta!
+
+METODO ALTERNATIVO:
+- Abra o VS Code
+- File -> Open Folder -> Selecione a pasta do projeto
+- Terminal -> New Terminal
+
+PASSO 3: RODAR OS COMANDOS
+--------------------------------------------------------------------------------
+No terminal que abriu, digite UM COMANDO DE CADA VEZ:
+
+    npm install
+
+    -> Isso instala todas as bibliotecas necessarias
+    -> Pode demorar 2-5 minutos na primeira vez
+    -> Aguarde terminar (vai aparecer uma nova linha no terminal)
+
+Depois digite:
+
+    npm run dev
+
+    -> Isso inicia o servidor do site
+    -> Vai aparecer uma mensagem como:
+       "Local: http://localhost:3000"
+
+    -> Abra o navegador e acesse: http://localhost:3000
+    -> PRONTO! O site esta rodando!
+
+================================================================================
+
+COMO PARAR O SERVIDOR
+================================================================================
+- No terminal, pressione: CTRL + C
+- Confirme com: Y  (se pedir)
+- Para rodar novamente: npm run dev
+
+================================================================================
+
+COMO GERAR A VERSAO FINAL (BUILD)
+================================================================================
+Quando quiser publicar o site online:
+
+    npm run build
+
+    -> Isso cria a pasta "dist/" com os arquivos finais
+    -> E essa pasta que voce envia para o servidor de hospedagem
+
+================================================================================
+
+PROBLEMAS COMUNS E SOLUCOES
+================================================================================
+
+ERRO: "npm nao e reconhecido"
+-> Solucao: Node.js nao esta instalado. Instale o Node.js primeiro.
+
+ERRO: "Cannot find module 'tailwindcss-animate'"
+-> Solucao: No terminal, rode:  npm install tailwindcss-animate
+
+ERRO: "Port 3000 is already in use"
+-> Solucao: Outro programa esta usando a porta 3000.
+   Feche outros programas ou use: npm run dev -- --port 3001
+
+ERRO: "Cannot find module 'next'"
+-> Solucao: Delete a pasta "node_modules" e o arquivo "package-lock.json",
+   depois rode: npm install
+
+SITE NAO ABRE NO NAVEGADOR
+-> Solucao: Abra manualmente: http://localhost:3000
+
+================================================================================
+
+ESTRUTURA DO PROJETO
+================================================================================
+
+ordem-dos-medicos-angola/
+|-- app/                    <- PAGINAS DO SITE
+|   |-- page.tsx            <- Pagina inicial (Home)
+|   |-- sobre/              <- Pagina "Sobre Nos"
+|   |-- noticias/           <- Pagina de Noticias
+|   |-- eventos/            <- Pagina de Eventos
+|   |-- contactos/          <- Pagina de Contactos
+|   |-- area-membro/        <- Area do Membro (login)
+|   |-- inscricao/          <- Formulario de Inscricao
+|   |-- consulta-medicos/   <- Consulta publica de medicos
+|   +-- ... (outras paginas)
+|
+|-- components/             <- COMPONENTES REUTILIZAVEIS
+|   |-- header.tsx          <- Menu de navegacao
+|   |-- footer.tsx          <- Rodape
+|   |-- hero.tsx            <- Banner principal
+|   +-- ui/                 <- Botoes, cards, etc.
+|
+|-- lib/                    <- DADOS E FUNCOES
+|   |-- data.ts             <- Textos, noticias, eventos (EDITAR AQUI!)
+|   +-- utils.ts            <- Funcoes uteis
+|
+|-- public/                 <- IMAGENS E ARQUIVOS
+|   +-- images/             <- Coloque as fotos aqui
+|
+|-- package.json            <- Lista de bibliotecas
+|-- tailwind.config.ts      <- Cores e estilos
++-- next.config.js          <- Configuracao
+
+================================================================================
+
+COMO PERSONALIZAR O SITE
+================================================================================
+
+EDITAR TEXTOS:
+-> Abra o arquivo: lib/data.ts
+-> Edite os textos entre aspas
+-> Salve (Ctrl+S) e o site atualiza automaticamente!
+
+TROCAR CORES:
+-> Abra: tailwind.config.ts
+-> Procure as cores (ex: "red: '#CE1126'")
+-> Altere os codigos hexadecimais
+
+COLOCAR IMAGENS:
+-> Coloque as fotos na pasta: public/images/
+-> No arquivo data.ts, atualize os caminhos das imagens
+
+================================================================================
+
+RESUMO DOS COMANDOS
+================================================================================
+
+  npm install          -> Instala tudo (primeira vez apenas)
+  npm run dev          -> Roda o site localmente
+  npm run build        -> Gera a versao final
+  CTRL + C             -> Para o servidor
+
+================================================================================
+
+DICA: Use o arquivo INICIAR.bat (Windows) para automatizar!
+   Clique duplo no arquivo INICIAR.bat e ele faz tudo sozinho!
+
+================================================================================
+
+PRECISA DE AJUDA?
+================================================================================
+1. Verifique se Node.js esta instalado: node --version
+2. Verifique se esta na pasta correta do projeto
+3. Delete node_modules e package-lock.json, depois rode npm install
+4. Consulte o arquivo INSTRUCOES.md para mais detalhes
+
+================================================================================
+
+           Pela Dignidade Medica Rumo a Excelencia
+           Ordem dos Medicos de Angola - ORMED
+
+================================================================================

@@ -1,0 +1,110 @@
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                    COMO ADICIONAR SUAS IMAGENS - ORMED                      ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 PASSO 1: PREPARE AS IMAGENS
+═══════════════════════════════════════════════════════════════════════════════
+
+Crie uma pasta chamada "img" no seu computador com esta estrutura:
+
+img/
+├── logo.svg                    ← Logo oficial da ORMED (SVG ou PNG)
+│
+├── bastonaria/
+│   └── bastonaria.jpg          ← Foto da Dra. Jovita André
+│
+├── hero/
+│   ├── hero-1.jpg              ← Banner principal (1920x1080)
+│   ├── hero-2.jpg              ← Banner ética
+│   └── hero-3.jpg              ← Banner formação
+│
+├── news/
+│   ├── news-1.jpg              ← Notícia 1
+│   ├── news-2.jpg              ← Notícia 2
+│   └── ...                     ← Outras notícias
+│
+├── events/
+│   ├── event-1.jpg             ← Evento 1
+│   └── ...                     ← Outros eventos
+│
+└── avatars/
+    ├── avatar-1.jpg            ← Testemunho 1
+    └── ...                     ← Outros avatars
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📤 PASSO 2: ENVIE AS IMAGENS
+═══════════════════════════════════════════════════════════════════════════════
+
+OPÇÃO A - Google Drive (como tentou):
+1. Acesse https://drive.google.com
+2. Arraste a pasta "img" para o Drive
+3. Clique com botão direito na pasta → "Compartilhar"
+4. Mude para "Qualquer pessoa com o link"
+5. Copie o link e cole aqui no chat
+
+OPÇÃO B - WeTransfer (mais simples):
+1. Acesse https://wetransfer.com
+2. Arraste a pasta "img"
+3. Digite seu email
+4. Clique "Transferir"
+5. Copie o link de download
+6. Cole aqui no chat
+
+OPÇÃO C - Dropbox:
+1. Acesse https://dropbox.com
+2. Upload da pasta "img"
+3. Clique em "Compartilhar"
+4. Crie link público
+5. Cole aqui no chat
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔧 PASSO 3: EU PROCESSO TUDO
+═══════════════════════════════════════════════════════════════════════════════
+
+Quando enviar o link, eu vou automaticamente:
+
+1. ✅ Baixar todas as imagens
+2. ✅ Otimizar (redimensionar, comprimir)
+3. ✅ Converter para WebP (mais leve)
+4. ✅ Organizar em public/images/
+5. ✅ Atualizar todos os componentes
+6. ✅ Adicionar lazy loading
+7. ✅ Adicionar responsividade
+8. ✅ Criar placeholders (blur-up)
+9. ✅ Gerar ZIP final pronto para usar
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💡 PASSO 4: OU FAÇA MANUALMENTE
+═══════════════════════════════════════════════════════════════════════════════
+
+Se preferir, pode adicionar as imagens manualmente:
+
+1. Extraia o ZIP do projeto
+2. Vá para a pasta: public/images/
+3. Cole suas imagens lá (substitua os existentes)
+4. Abra o arquivo: lib/data.ts
+5. Atualize os nomes das imagens se necessário
+6. Rode: npm run dev
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📐 TAMANHOS RECOMENDADOS
+═══════════════════════════════════════════════════════════════════════════════
+
+| Tipo          | Tamanho      | Formato | Tamanho Máx |
+|---------------|-------------|---------|-------------|
+| Logo          | 200x200     | SVG/PNG | 50 KB       |
+| Hero/Banner   | 1920x1080   | JPG     | 300 KB      |
+| Notícias      | 800x450     | JPG     | 150 KB      |
+| Eventos       | 800x450     | JPG     | 150 KB      |
+| Avatars       | 200x200     | JPG     | 50 KB       |
+| Bastonária    | 600x800     | JPG     | 200 KB      |
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 ENVIE O LINK AQUI QUANDO ESTIVER PRONTO!
+═══════════════════════════════════════════════════════════════════════════════

@@ -1,0 +1,165 @@
+
+╔══════════════════════════════════════════════════════════════════════════════╗
+║           COMO ADICIONAR IMAGENS - ORMED (MÉTODO MANUAL)                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+📁 PASSO 1: BAIXE AS IMAGENS DO WETRANSFER
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Acesse o link que você enviou:
+   https://we.tl/t-mi8KO5RfhZzCK5NL
+
+2. Clique no botão "Download" ou "Transferir"
+
+3. Os arquivos serão baixados como um ZIP
+
+4. Extraia o ZIP no seu computador
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📂 PASSO 2: ORGANIZE AS IMAGENS
+═══════════════════════════════════════════════════════════════════════════════
+
+Crie esta estrutura dentro da pasta do projeto:
+
+ordem-dos-medicos-angola/
+└── public/
+    └── images/
+        ├── logo.svg                    ← Logo oficial (ou .png)
+        ├── bastonaria.jpg              ← Foto da Dra. Jovita André
+        ├── hero-1.jpg                  ← Banner principal
+        ├── hero-2.jpg                  ← Banner ética
+        ├── hero-3.jpg                  ← Banner formação
+        ├── news-1.jpg                  ← Notícia 1
+        ├── news-2.jpg                  ← Notícia 2
+        ├── news-3.jpg                  ← Notícia 3
+        ├── news-4.jpg                  ← Notícia 4
+        ├── news-5.jpg                  ← Notícia 5
+        ├── news-6.jpg                  ← Notícia 6
+        ├── event-1.jpg                 ← Evento 1
+        ├── event-2.jpg                 ← Evento 2
+        ├── event-3.jpg                 ← Evento 3
+        ├── event-4.jpg                 ← Evento 4
+        ├── avatar-1.jpg                ← Testemunho 1
+        ├── avatar-2.jpg                ← Testemunho 2
+        ├── avatar-3.jpg                ← Testemunho 3
+        └── avatar-4.jpg                ← Testemunho 4
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📝 PASSO 3: ATUALIZE OS NOMES (SE NECESSÁRIO)
+═══════════════════════════════════════════════════════════════════════════════
+
+Abra o arquivo: lib/data.ts
+
+Procure por estas linhas e atualize os nomes das imagens:
+
+// Logo
+image: "/images/logo.svg",          ← Troque pelo nome do seu logo
+
+// Bastonária
+image: "/images/bastonaria.jpg",    ← Troque pelo nome da foto
+
+// Notícias
+image: "/images/news-1.jpg",       ← Troque pelos nomes das suas fotos
+
+// Eventos
+image: "/images/event-1.jpg",      ← Troque pelos nomes das suas fotos
+
+// Hero (banner principal)
+image: "/images/hero-1.jpg",       ← Troque pelos nomes dos seus banners
+
+DICA: Se os nomes forem IGUAIS, não precisa mudar nada!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 PASSO 4: RODE O SITE
+═══════════════════════════════════════════════════════════════════════════════
+
+No terminal, na pasta do projeto:
+
+    npm install
+    npm run dev
+
+Acesse: http://localhost:3000
+
+Pronto! As imagens aparecerão automaticamente!
+
+═══════════════════════════════════════════════════════════════════════════════
+
+💡 DICAS IMPORTANTES
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ FORMATOS ACEITOS:
+   • JPG/JPEG (recomendado para fotos)
+   • PNG (recomendado para logo com transparência)
+   • SVG (melhor para logo, não perde qualidade)
+   • WebP (formato moderno, mais leve)
+
+✅ TAMANHOS RECOMENDADOS:
+   • Logo: 200x200 pixels (máx 50KB)
+   • Hero/Banner: 1920x1080 pixels (máx 300KB)
+   • Notícias: 800x450 pixels (máx 150KB)
+   • Eventos: 800x450 pixels (máx 150KB)
+   • Avatars: 200x200 pixels (máx 50KB)
+   • Bastonária: 600x800 pixels (máx 200KB)
+
+✅ NOMES DE ARQUIVO:
+   • Use nomes SIMPLES: "logo.png", "bastonaria.jpg"
+   • NÃO use espaços: "minha foto.jpg" ❌
+   • Use hífens: "minha-foto.jpg" ✅
+   • NÃO use caracteres especiais: ç, ã, õ, á, etc.
+
+✅ OTIMIZAÇÃO:
+   • Se as imagens estiverem muito grandes, use:
+     https://tinypng.com/ (comprime JPG/PNG)
+   • Ou https://squoosh.app/ (converte para WebP)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+❓ PROBLEMAS COMUNS
+═══════════════════════════════════════════════════════════════════════════════
+
+❌ "Imagem não aparece"
+→ Verifique se o nome do arquivo está EXATAMENTE igual no lib/data.ts
+→ Verifique se a imagem está na pasta public/images/
+→ Verifique se o servidor está rodando (npm run dev)
+
+❌ "Imagem muito grande, site lento"
+→ Comprima a imagem em https://tinypng.com/
+→ Ou converta para WebP em https://squoosh.app/
+
+❌ "Logo com fundo branco feio"
+→ Use formato PNG com transparência
+→ Ou SVG (vetor, sem fundo)
+
+❌ "Modo noturno não funciona"
+→ O projeto já tem dark mode integrado
+→ Clique no ícone 🌙 no header para alternar
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🎨 CORES DO SITE
+═══════════════════════════════════════════════════════════════════════════════
+
+• Dourado: #FFD700 (destaques, CTAs, badges)
+• Azul Escuro: #002147 (fundo escuro, textos)
+• Azul Médio: #003366 (variações)
+• Creme: #FFF8E7 (fundo suave)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📞 PRECISA DE AJUDA?
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Verifique se as imagens estão em: public/images/
+2. Verifique os nomes em: lib/data.ts
+3. Verifique se o servidor está rodando: npm run dev
+4. Limpe o cache do navegador (Ctrl+F5)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+           Pela Dignidade Médica Rumo à Excelência
+           Ordem dos Médicos de Angola · ORMED
+
+═══════════════════════════════════════════════════════════════════════════════
