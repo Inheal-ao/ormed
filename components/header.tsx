@@ -45,6 +45,31 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Bloqueia o scroll da página por trás enquanto o menu mobile está aberto
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isMobileMenuOpen]);
+
+  // Fecha o menu ao redimensionar para desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setIsMobileMenuOpen(false);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const topBarLinks = [
     { icon: Phone, label: siteConfig.phone, href: `tel:${siteConfig.phone}` },
     { icon: Mail, label: siteConfig.email, href: `mailto:${siteConfig.email}` },
@@ -231,13 +256,24 @@ export function Header() {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="lg:hidden bg-white dark:bg-gray-900 border-b dark:border-gray-800 shadow-lg overflow-hidden"
-          >
-            <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
+          <>
+            {/* Backdrop - fecha o menu ao tocar fora */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="lg:hidden fixed inset-0 top-16 bg-black/40 backdrop-blur-sm z-40"
+              aria-hidden="true"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden absolute top-full left-0 right-0 z-50 bg-white dark:bg-gray-900 border-b dark:border-gray-800 shadow-lg max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain"
+            >
+              <div className="max-w-7xl mx-auto px-4 py-4 space-y-1">
               {navItems.map((item) => (
                 <div key={item.label}>
                   {item.children ? (
@@ -267,14 +303,15 @@ export function Header() {
                   )}
                 </div>
               ))}
-              <div className="pt-4 border-t dark:border-gray-800">
-                <Button variant="angola" className="w-full">
-                  <User className="w-4 h-4 mr-2" />
-                  Área do Membro
-                </Button>
+                <div className="pt-4 border-t dark:border-gray-800">
+                  <Button variant="angola" className="w-full">
+                    <User className="w-4 h-4 mr-2" />
+                    Área do Membro
+                  </Button>
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </header>
