@@ -203,13 +203,13 @@ export function Header() {
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: 220, opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
-                    className="overflow-hidden"
+                    className="overflow-hidden px-0.5 py-0.5"
                   >
                     <Input
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Pesquisar e Enter..."
-                      className="h-9 text-sm border border-gray-200 bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                      className="h-9 text-sm rounded-full border border-gray-300 bg-white text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-white focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-angola-gold"
                       autoFocus
                     />
                   </motion.form>
