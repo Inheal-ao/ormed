@@ -15,6 +15,7 @@ export default function EstatisticasPage() {
   const [items, setItems] = useState<StatItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -33,16 +34,26 @@ export default function EstatisticasPage() {
     setItems((prev) => prev.map((s) => (s._id === id ? { ...s, ...patch } : s)));
 
   const addNew = async () => {
-    const created = await api.post<StatItem>(
-      "/stats",
-      { value: "0", label: "Novo indicador", icon: "Activity", order: items.length },
-      true,
-    );
-    setItems((prev) => [...prev, created]);
+    setError(null);
+    try {
+      const created = await api.post<StatItem>(
+        "/stats",
+        { value: "0", label: "Novo indicador", icon: "Activity", order: items.length },
+        true,
+      );
+      setItems((prev) => [...prev, created]);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? `Não foi possível adicionar: ${err.message}`
+          : "Erro ao adicionar.",
+      );
+    }
   };
 
   const save = async (item: StatItem) => {
     setSavingId(item._id);
+    setError(null);
     try {
       await api.patch(`/stats/${item._id}`, {
         value: item.value,
@@ -50,6 +61,10 @@ export default function EstatisticasPage() {
         icon: item.icon,
         order: item.order,
       });
+    } catch (err) {
+      setError(
+        err instanceof Error ? `Não foi possível guardar: ${err.message}` : "Erro ao guardar.",
+      );
     } finally {
       setSavingId(null);
     }
@@ -67,6 +82,12 @@ export default function EstatisticasPage() {
         title="Estatísticas"
         description="Números mostrados na página inicial (médicos inscritos, anos, etc.)."
       />
+
+      {error && (
+        <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center py-16">
@@ -98,6 +119,7 @@ export default function EstatisticasPage() {
                 <select
                   value={item.icon}
                   onChange={(e) => updateLocal(item._id, { icon: e.target.value })}
+                  aria-label="Ícone do indicador"
                   className="w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none text-gray-900"
                 >
                   {ICON_OPTIONS.map((ic) => (
