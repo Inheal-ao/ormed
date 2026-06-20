@@ -56,6 +56,28 @@ export interface EventItem {
   createdAt: string;
 }
 
+export interface CourseItem {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  coverImage: Asset | null;
+  instructor: string;
+  area: string;
+  modality: "presencial" | "online" | "misto";
+  duration: string;
+  location: string;
+  startDate: string | null;
+  capacity: number;
+  price: number;
+  registrationOpen: boolean;
+  registrationType: "internal" | "external";
+  externalLink: string;
+  isPublished: boolean;
+  createdAt: string;
+}
+
 export interface EventRegistration {
   _id: string;
   event: string;
