@@ -14,6 +14,12 @@ import {
   SaveButton,
 } from "@/components/admin/admin-ui";
 import { MediaUpload } from "@/components/admin/media-upload";
+import { MultiImageUpload } from "@/components/admin/multi-image-upload";
+
+function toDateInput(value: string | null): string {
+  if (!value) return "";
+  return new Date(value).toISOString().slice(0, 10);
+}
 
 export default function NoticiaFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -25,10 +31,14 @@ export default function NoticiaFormPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
   const [category, setCategory] = useState("Geral");
+  const [source, setSource] = useState("");
+  const [publishDate, setPublishDate] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [coverImage, setCoverImage] = useState<Asset | null>(null);
+  const [images, setImages] = useState<Asset[]>([]);
   const [isPublished, setIsPublished] = useState(false);
 
   useEffect(() => {
@@ -37,10 +47,14 @@ export default function NoticiaFormPage() {
       try {
         const item = await api.get<NewsItem>(`/news/admin/${id}`, true);
         setTitle(item.title);
+        setSubtitle(item.subtitle ?? "");
         setCategory(item.category);
+        setSource(item.source ?? "");
+        setPublishDate(toDateInput(item.publishedAt));
         setExcerpt(item.excerpt);
         setContent(item.content);
         setCoverImage(item.coverImage);
+        setImages(item.images ?? []);
         setIsPublished(item.isPublished);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro ao carregar.");
@@ -57,10 +71,14 @@ export default function NoticiaFormPage() {
     setError(null);
     const payload = {
       title,
+      subtitle,
       category,
+      source,
+      publishedAt: publishDate ? new Date(publishDate).toISOString() : undefined,
       excerpt,
       content,
       coverImage: coverImage ?? undefined,
+      images,
       isPublished,
     };
     try {
@@ -93,44 +111,37 @@ export default function NoticiaFormPage() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <Field label="Título">
-          <TextInput
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            placeholder="Título da notícia"
-          />
+          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Título da notícia" />
         </Field>
 
-        <Field label="Categoria">
-          <TextInput
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            placeholder="Ex.: Institucional"
-          />
+        <Field label="Subtítulo" hint="Linha secundária, mostrada por baixo do título.">
+          <TextInput value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="Subtítulo (opcional)" />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Categoria">
+            <TextInput value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Ex.: Institucional" />
+          </Field>
+          <Field label="Data de publicação">
+            <TextInput type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />
+          </Field>
+        </div>
+
+        <Field label="Fonte" hint="Origem da notícia (ex.: Jornal de Angola, link, autor).">
+          <TextInput value={source} onChange={(e) => setSource(e.target.value)} placeholder="Fonte (opcional)" />
         </Field>
 
         <Field label="Resumo" hint="Texto curto mostrado na listagem.">
-          <TextArea
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            placeholder="Breve resumo da notícia"
-          />
+          <TextArea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="Breve resumo da notícia" />
         </Field>
 
         <Field label="Conteúdo">
-          <TextArea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Conteúdo completo da notícia"
-          />
+          <TextArea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Conteúdo completo da notícia" />
         </Field>
 
-        <MediaUpload
-          label="Imagem de capa"
-          kind="image"
-          value={coverImage}
-          onChange={setCoverImage}
-        />
+        <MediaUpload label="Imagem de capa" kind="image" value={coverImage} onChange={setCoverImage} />
+
+        <MultiImageUpload label="Fotos adicionais (carrossel)" value={images} onChange={setImages} />
 
         <Toggle checked={isPublished} onChange={setIsPublished} label="Publicada no site" />
 

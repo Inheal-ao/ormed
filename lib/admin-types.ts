@@ -23,9 +23,12 @@ export interface NewsItem {
   _id: string;
   title: string;
   slug: string;
+  subtitle: string;
   excerpt: string;
   content: string;
+  source: string;
   coverImage: Asset | null;
+  images: Asset[];
   category: string;
   author: string;
   tags: string[];
@@ -44,7 +47,26 @@ export interface EventItem {
   location: string;
   startDate: string;
   endDate: string | null;
+  capacity: number;
+  price: number;
+  registrationOpen: boolean;
+  registrationType: "internal" | "external";
+  externalLink: string;
   isPublished: boolean;
+  createdAt: string;
+}
+
+export interface EventRegistration {
+  _id: string;
+  event: string;
+  name: string;
+  email: string;
+  phone: string;
+  notes: string;
+  attachments: Asset[];
+  paymentProof: Asset | null;
+  status: "pending" | "validated" | "rejected";
+  adminNotes: string;
   createdAt: string;
 }
 
