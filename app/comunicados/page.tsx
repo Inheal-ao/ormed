@@ -8,6 +8,7 @@ import { Paginated, AnnouncementItem, Asset } from "@/lib/admin-types";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { downloadUrl } from "@/lib/cloudinary-download";
+import { optImg } from "@/lib/img";
 
 /** Reúne as imagens de um comunicado (capa primeiro). */
 function imagesOf(c: AnnouncementItem): Asset[] {
@@ -71,7 +72,7 @@ export default function ComunicadosPage() {
                   <button type="button" onClick={() => openComunicado(c)} className="block w-full relative">
                     <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imgs[0].url} alt={c.title} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform" />
+                      <img src={optImg(imgs[0].url, 500)} alt={c.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform" />
                     </div>
                     {extra > 0 && (
                       <span className="absolute top-3 right-3 inline-flex items-center gap-1 bg-black/65 text-white text-xs font-medium px-2.5 py-1 rounded-full">

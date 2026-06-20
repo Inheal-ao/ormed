@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Handshake, Loader2 } from "lucide-react";
 import { usePublicData } from "@/lib/use-public-data";
 import { PartnerItem } from "@/lib/admin-types";
+import { optImg } from "@/lib/img";
 
 export function PartnersSection() {
   const { data, loading } = usePublicData<PartnerItem[]>("/partners");
@@ -58,8 +59,9 @@ export function PartnersSection() {
                       {partner.logo?.url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={partner.logo.url}
+                          src={optImg(partner.logo.url, 240)}
                           alt={partner.name}
+                          loading="lazy"
                           className="max-w-full max-h-20 object-contain"
                         />
                       ) : (

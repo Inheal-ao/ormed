@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BookOpen, FileText, Loader2, Download, X } from "lucide-react";
 import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, MagazineItem } from "@/lib/admin-types";
+import { optImg } from "@/lib/img";
 
 export default function RevistaPage() {
   const { data, loading } = usePublicData<Paginated<MagazineItem>>("/magazines?limit=100");
@@ -48,7 +49,7 @@ export default function RevistaPage() {
                   {mag.coverImage?.url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={mag.coverImage.url}
+                      src={optImg(mag.coverImage.url, 400)}
                       alt={mag.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />

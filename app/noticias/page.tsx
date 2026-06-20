@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, NewsItem } from "@/lib/admin-types";
+import { optImg } from "@/lib/img";
 
 export default function NoticiasPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -109,8 +110,9 @@ export default function NoticiasPage() {
                       {item.coverImage?.url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={item.coverImage.url}
+                          src={optImg(item.coverImage.url, 600)}
                           alt={item.title}
+                          loading="lazy"
                           className="absolute inset-0 h-full w-full object-cover"
                         />
                       ) : (

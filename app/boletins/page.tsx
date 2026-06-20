@@ -6,6 +6,7 @@ import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, BulletinItem, Asset } from "@/lib/admin-types";
 import { downloadUrl } from "@/lib/cloudinary-download";
 import { youtubeId } from "@/lib/youtube";
+import { optImg } from "@/lib/img";
 
 function imagesOf(b: BulletinItem): Asset[] {
   return [...(b.coverImage?.url ? [b.coverImage] : []), ...(b.images ?? [])];
@@ -73,7 +74,7 @@ export default function BoletinsPage() {
                   <div className="aspect-[3/4] bg-angola-navy relative overflow-hidden">
                     {cover ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={cover} alt={b.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      <img src={optImg(cover, 400)} alt={b.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     ) : vId ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={`https://img.youtube.com/vi/${vId}/hqdefault.jpg`} alt={b.title} className="w-full h-full object-cover" />

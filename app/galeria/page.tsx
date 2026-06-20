@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Images, Loader2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePublicData } from "@/lib/use-public-data";
 import { GalleryItem } from "@/lib/admin-types";
+import { optImg } from "@/lib/img";
 
 export default function GaleriaPage() {
   const { data, loading } = usePublicData<GalleryItem[]>("/gallery");
@@ -51,8 +52,9 @@ export default function GaleriaPage() {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={photo.image.url}
+                  src={optImg(photo.image.url, 500)}
                   alt={photo.caption || "Foto da galeria"}
+                  loading="lazy"
                   className="w-full object-cover group-hover:scale-[1.03] transition-transform"
                 />
               </button>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, NewsItem } from "@/lib/admin-types";
+import { optImg } from "@/lib/img";
 
 export function NewsSection() {
   const { data, loading } = usePublicData<Paginated<NewsItem>>("/news?limit=5");
@@ -68,7 +69,7 @@ export function NewsSection() {
                     {featured.coverImage?.url && (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={featured.coverImage.url}
+                        src={optImg(featured.coverImage.url, 800)}
                         alt={featured.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
@@ -121,7 +122,7 @@ export function NewsSection() {
                       {item.coverImage?.url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={item.coverImage.url}
+                          src={optImg(item.coverImage.url, 300)}
                           alt={item.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />

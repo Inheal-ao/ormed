@@ -6,6 +6,7 @@ import { Quote, ChevronLeft, ChevronRight, GraduationCap, Loader2 } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { usePublicData } from "@/lib/use-public-data";
 import { BastonarioItem } from "@/lib/admin-types";
+import { optImg } from "@/lib/img";
 
 export function BastonariaSection() {
   const { data, loading } = usePublicData<BastonarioItem[]>("/bastonarios");
@@ -70,7 +71,7 @@ export function BastonariaSection() {
                 {current.photo?.url && (
                   <div
                     className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${current.photo.url})` }}
+                    style={{ backgroundImage: `url(${optImg(current.photo.url, 600)})` }}
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-angola-navy via-transparent to-transparent" />
