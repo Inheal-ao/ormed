@@ -166,8 +166,11 @@ export interface BulletinItem {
   edition: string;
   year: number;
   coverImage: Asset | null;
+  images: Asset[];
   pdf: Asset | null;
+  videoUrl: string;
   isPublished: boolean;
+  publishedAt: string | null;
   createdAt: string;
 }
 
