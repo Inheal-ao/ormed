@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { usePublicData } from "@/lib/use-public-data";
 import { getStatIcon } from "@/lib/stat-icons";
 import { StatItem } from "@/lib/admin-types";
+import { AnimatedStatValue } from "@/components/animated-stat-value";
 
 const slides = [
   {
@@ -186,7 +187,7 @@ export function Hero() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {stat.value}
+                      <AnimatedStatValue value={stat.value} />
                     </p>
                     <p className="text-sm text-gray-400">{stat.label}</p>
                   </div>

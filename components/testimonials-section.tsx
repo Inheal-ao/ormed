@@ -49,7 +49,7 @@ export function TestimonialsSection() {
           </p>
         </motion.div>
 
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-2xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={safeIndex}
@@ -60,47 +60,44 @@ export function TestimonialsSection() {
               className="relative"
             >
               {/* Quote Icon */}
-              <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-16 h-16 bg-angola-gold rounded-full flex items-center justify-center shadow-lg shadow-angola-gold/25">
-                <Quote className="w-8 h-8 text-white" />
+              <div className="absolute -top-5 left-1/2 -translate-x-1/2 w-11 h-11 bg-angola-gold rounded-full flex items-center justify-center shadow-md shadow-angola-gold/25">
+                <Quote className="w-5 h-5 text-white" />
               </div>
 
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 md:p-12 pt-16 text-center">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-6 md:p-8 pt-10 text-center border border-gray-100">
                 {/* Stars */}
-                <div className="flex items-center justify-center gap-1 mb-6">
+                <div className="flex items-center justify-center gap-0.5 mb-4">
                   {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 text-angola-gold fill-angola-gold"
-                    />
+                    <Star key={i} className="w-4 h-4 text-angola-gold fill-angola-gold" />
                   ))}
                 </div>
 
                 {/* Quote */}
-                <blockquote className="text-xl md:text-2xl text-gray-700 leading-relaxed mb-8 font-display italic">
+                <blockquote className="text-base md:text-lg text-gray-700 leading-relaxed mb-6 font-display italic">
                   &quot;{t.text}&quot;
                 </blockquote>
 
                 {/* Author */}
                 <div className="flex flex-col items-center">
-                  <div className="mb-3">
+                  <div className="mb-2">
                     {t.avatar?.url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={t.avatar.url}
                         alt={t.name}
-                        className="w-16 h-16 rounded-full object-cover mx-auto"
+                        className="w-12 h-12 rounded-full object-cover mx-auto"
                       />
                     ) : (
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-angola-gold to-angola-gold flex items-center justify-center mx-auto">
-                        <span className="text-xl font-bold text-white">
+                      <div className="w-12 h-12 rounded-full bg-angola-gold flex items-center justify-center mx-auto">
+                        <span className="text-lg font-bold text-white">
                           {t.name.charAt(0)}
                         </span>
                       </div>
                     )}
                   </div>
-                  <h4 className="font-bold text-gray-900">{t.name}</h4>
-                  <p className="text-sm text-gray-500">{t.role}</p>
-                  <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                  <h4 className="font-bold text-gray-900 text-sm">{t.name}</h4>
+                  <p className="text-xs text-gray-500">{t.role}</p>
+                  <div className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
                     <MapPin className="w-3 h-3" />
                     {t.location}
                   </div>
@@ -110,10 +107,12 @@ export function TestimonialsSection() {
           </AnimatePresence>
 
           {/* Navigation */}
-          <div className="flex items-center justify-center gap-4 mt-8">
+          <div className="flex items-center justify-center gap-4 mt-6">
             <button
+              type="button"
               onClick={prev}
-              className="w-12 h-12 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 transition-colors"
+              aria-label="Testemunho anterior"
+              className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 transition-colors"
             >
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
@@ -133,8 +132,10 @@ export function TestimonialsSection() {
               ))}
             </div>
             <button
+              type="button"
               onClick={next}
-              className="w-12 h-12 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 transition-colors"
+              aria-label="Testemunho seguinte"
+              className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex items-center justify-center hover:bg-gray-50 transition-colors"
             >
               <ChevronRight className="w-5 h-5 text-gray-600" />
             </button>

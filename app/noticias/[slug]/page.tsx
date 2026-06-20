@@ -55,7 +55,7 @@ export default function NoticiaDetailPage() {
       <div className="max-w-3xl mx-auto px-4">
         <Link
           href="/noticias/"
-          className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-angola-navy mb-6"
+          className="flex w-fit items-center gap-1.5 text-sm text-gray-500 hover:text-angola-navy mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar às notícias

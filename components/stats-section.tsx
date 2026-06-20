@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { usePublicData } from "@/lib/use-public-data";
 import { StatItem } from "@/lib/admin-types";
+import { AnimatedStatValue } from "@/components/animated-stat-value";
 
 // Mapa de nomes de ícone (definidos no painel) para componentes
 const ICONS: Record<string, LucideIcon> = {
@@ -91,7 +92,9 @@ export function StatsSection() {
                 <div className="w-14 h-14 rounded-xl bg-angola-gold/20 flex items-center justify-center mb-6 mx-auto group-hover:scale-110 transition-transform">
                   <Icon className="w-7 h-7 text-angola-gold" />
                 </div>
-                <p className="text-4xl font-bold text-white mb-2">{stat.value}</p>
+                <p className="text-4xl font-bold text-white mb-2">
+                  <AnimatedStatValue value={stat.value} />
+                </p>
                 <h3 className="text-lg font-semibold text-gray-200">{stat.label}</h3>
               </motion.div>
             );

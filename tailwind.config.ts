@@ -6,6 +6,15 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  safelist: [
+    "bg-blue-500",
+    "bg-angola-gold",
+    "bg-medical-teal",
+    "bg-medical-emerald",
+    "bg-medical-indigo",
+    "bg-amber-500",
   ],
   theme: {
     extend: {

@@ -122,10 +122,10 @@ export function Header() {
 
       {/* Main Header */}
       <div
-        className={`transition-all duration-300 ${
+        className={`transition-all duration-300 bg-white dark:bg-angola-navy ${
           isScrolled
-            ? "glass-effect shadow-lg border-b border-gray-200/50 dark:border-gray-800/50"
-            : "bg-white/95 dark:bg-angola-navy/95 backdrop-blur-sm"
+            ? "shadow-lg border-b border-gray-200 dark:border-gray-800"
+            : "border-b border-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4">
