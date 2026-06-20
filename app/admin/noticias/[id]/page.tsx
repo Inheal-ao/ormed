@@ -12,9 +12,11 @@ import {
   TextArea,
   Toggle,
   SaveButton,
+  CategorySelect,
 } from "@/components/admin/admin-ui";
 import { MediaUpload } from "@/components/admin/media-upload";
 import { MultiImageUpload } from "@/components/admin/multi-image-upload";
+import { CATEGORIES } from "@/lib/categories";
 
 function toDateInput(value: string | null): string {
   if (!value) return "";
@@ -120,7 +122,7 @@ export default function NoticiaFormPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <Field label="Categoria">
-            <TextInput value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Ex.: Institucional" />
+            <CategorySelect value={category} onChange={setCategory} options={CATEGORIES} />
           </Field>
           <Field label="Data de publicação">
             <TextInput type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} />

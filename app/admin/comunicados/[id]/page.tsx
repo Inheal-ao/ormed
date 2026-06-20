@@ -5,8 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { AnnouncementItem, Asset } from "@/lib/admin-types";
-import { BackLink, Field, TextInput, TextArea, Toggle, SaveButton } from "@/components/admin/admin-ui";
+import { BackLink, Field, TextInput, TextArea, Toggle, SaveButton, CategorySelect } from "@/components/admin/admin-ui";
 import { MediaUpload } from "@/components/admin/media-upload";
+import { CATEGORIES } from "@/lib/categories";
 
 function toDateInput(value: string | null): string {
   if (!value) return "";
@@ -82,7 +83,7 @@ export default function ComunicadoFormPage() {
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Título do comunicado" />
         </Field>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Categoria"><TextInput value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Ex.: Institucional" /></Field>
+          <Field label="Categoria"><CategorySelect value={category} onChange={setCategory} options={CATEGORIES} /></Field>
           <Field label="Data"><TextInput type="date" value={publishDate} onChange={(e) => setPublishDate(e.target.value)} /></Field>
         </div>
         <Field label="Conteúdo"><TextArea value={content} onChange={(e) => setContent(e.target.value)} placeholder="Texto do comunicado" /></Field>

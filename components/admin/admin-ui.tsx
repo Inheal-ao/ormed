@@ -72,6 +72,32 @@ export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return <textarea {...props} className={`${inputClass} min-h-[120px]`} />;
 }
 
+/** Seletor de categoria padrão (lista uniforme da plataforma). */
+export function CategorySelect({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      aria-label="Categoria"
+      className={inputClass}
+    >
+      {options.map((c) => (
+        <option key={c} value={c}>
+          {c}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function Toggle({
   checked,
   onChange,
