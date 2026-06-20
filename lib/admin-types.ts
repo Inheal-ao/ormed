@@ -154,6 +154,17 @@ export interface GalleryItem {
   createdAt: string;
 }
 
+export interface DocumentItem {
+  _id: string;
+  title: string;
+  category: string;
+  description: string;
+  pdf: Asset | null;
+  externalLink: string;
+  order: number;
+  isPublished: boolean;
+}
+
 export interface ArticleItem {
   _id: string;
   title: string;

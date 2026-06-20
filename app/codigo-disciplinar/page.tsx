@@ -1,17 +1,20 @@
+import { DocumentsList } from "@/components/documents-list";
+
+export const metadata = { title: "Código Disciplinar" };
+
 export default function CodigoDisciplinarPage() {
   return (
     <div className="pt-28 pb-16 min-h-screen">
-      <section className="bg-slate-900 text-white py-16">
+      <section className="bg-angola-navy text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold">Código Disciplinar</h1>
-          <p className="text-gray-300 text-lg mt-4">Normas disciplinares da ORMED</p>
+          <p className="text-gray-300 text-lg mt-4 max-w-2xl">
+            Normas disciplinares da Ordem dos Médicos de Angola.
+          </p>
         </div>
       </section>
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="bg-gray-50 rounded-2xl p-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Em desenvolvimento</h2>
-          <p className="text-gray-600">Esta página está a ser desenvolvida. Volte em breve.</p>
-        </div>
+      <div className="max-w-3xl mx-auto px-4 py-16">
+        <DocumentsList category="codigo-disciplinar" emptyText="O documento será disponibilizado em breve." />
       </div>
     </div>
   );

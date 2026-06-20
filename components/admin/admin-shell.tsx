@@ -29,6 +29,7 @@ const navLinks = [
   { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/admin/revistas", label: "Revistas", icon: BookOpen },
   { href: "/admin/revmed", label: "RevMed", icon: FlaskConical },
+  { href: "/admin/documentos", label: "Documentos", icon: FileText },
   { href: "/admin/boletins", label: "Boletins", icon: FileText },
   { href: "/admin/livros", label: "Livros", icon: BookMarked },
   { href: "/admin/podcast", label: "Podcast", icon: Mic },

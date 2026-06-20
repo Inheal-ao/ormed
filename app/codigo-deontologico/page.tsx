@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DocumentsList } from "@/components/documents-list";
 import {
   Accordion,
   AccordionContent,
@@ -334,6 +335,12 @@ Se verdadeiramente queres seguir esta profissão, prepara-te para uma vida de se
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Documentos oficiais em PDF (geridos no painel) */}
+      <div className="max-w-3xl mx-auto px-4 pb-16">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Documentos oficiais</h2>
+        <DocumentsList category="codigo-deontologico" emptyText="O documento oficial será disponibilizado em breve." />
       </div>
     </div>
   );
