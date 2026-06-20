@@ -1,18 +1,135 @@
+"use client";
+
+import { useState } from "react";
+import { BookOpen, FileText, Loader2, Download, X } from "lucide-react";
+import { usePublicData } from "@/lib/use-public-data";
+import { Paginated, MagazineItem } from "@/lib/admin-types";
+
 export default function RevistaPage() {
+  const { data, loading } = usePublicData<Paginated<MagazineItem>>("/magazines?limit=100");
+  const magazines = data?.items ?? [];
+  const [active, setActive] = useState<MagazineItem | null>(null);
+
   return (
     <div className="pt-28 pb-16 min-h-screen">
-      <section className="bg-slate-900 text-white py-16">
+      <section className="bg-angola-navy text-white py-16">
         <div className="max-w-7xl mx-auto px-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-angola-gold/20 text-angola-gold text-sm font-medium mb-4">
+            <BookOpen className="w-4 h-4" />
+            Publicações
+          </div>
           <h1 className="text-4xl md:text-5xl font-bold">Revista ORMED</h1>
-          <p className="text-gray-300 text-lg mt-4">A revista científica da Ordem dos Médicos</p>
+          <p className="text-gray-300 text-lg mt-4 max-w-2xl">
+            A revista científica da Ordem dos Médicos de Angola. Consulte e descarregue as
+            edições em PDF.
+          </p>
         </div>
       </section>
+
       <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="bg-gray-50 rounded-2xl p-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Em desenvolvimento</h2>
-          <p className="text-gray-600">Esta página está a ser desenvolvida. Volte em breve.</p>
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="w-8 h-8 animate-spin text-angola-gold" />
+          </div>
+        ) : magazines.length === 0 ? (
+          <div className="bg-gray-50 rounded-2xl p-12 text-center">
+            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Brevemente</h2>
+            <p className="text-gray-600">As edições da revista serão publicadas em breve.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {magazines.map((mag) => (
+              <div
+                key={mag._id}
+                className="group bg-white rounded-2xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all"
+              >
+                <div className="aspect-[3/4] bg-angola-navy relative overflow-hidden">
+                  {mag.coverImage?.url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={mag.coverImage.url}
+                      alt={mag.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <BookOpen className="w-12 h-12 text-white/30" />
+                    </div>
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold text-gray-900 line-clamp-1">{mag.title}</h3>
+                  <p className="text-sm text-gray-500 mb-3">
+                    {mag.edition}
+                    {mag.year ? ` · ${mag.year}` : ""}
+                  </p>
+                  {mag.pdf?.url && (
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setActive(mag)}
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-angola-gold text-angola-navy text-sm font-semibold py-2 rounded-lg hover:brightness-95 transition"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        Ler
+                      </button>
+                      <a
+                        href={mag.pdf.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center px-3 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50"
+                        aria-label="Descarregar PDF"
+                      >
+                        <Download className="w-4 h-4" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Leitor de PDF em modal */}
+      {active?.pdf?.url && (
+        <div className="fixed inset-0 z-[60] bg-black/80 flex flex-col">
+          <div className="flex items-center justify-between p-4 text-white">
+            <div className="min-w-0">
+              <p className="font-semibold truncate">{active.title}</p>
+              <p className="text-sm text-white/60">
+                {active.edition}
+                {active.year ? ` · ${active.year}` : ""}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <a
+                href={active.pdf.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg text-sm"
+              >
+                <Download className="w-4 h-4" />
+                <span className="hidden sm:inline">Descarregar</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => setActive(null)}
+                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg"
+                aria-label="Fechar"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          <iframe
+            src={active.pdf.url}
+            title={active.title}
+            className="flex-1 w-full bg-white"
+          />
+        </div>
+      )}
     </div>
   );
 }

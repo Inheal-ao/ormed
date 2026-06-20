@@ -1,16 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Calendar, ArrowRight, User, Tag } from "lucide-react";
+import { Calendar, ArrowRight, User, Tag, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { news } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { usePublicData } from "@/lib/use-public-data";
+import { Paginated, NewsItem } from "@/lib/admin-types";
 
 export function NewsSection() {
-  const featuredNews = news.filter((n) => n.featured);
-  const regularNews = news.filter((n) => !n.featured).slice(0, 4);
+  const { data, loading } = usePublicData<Paginated<NewsItem>>("/news?limit=5");
+  const items = data?.items ?? [];
+  const featuredNews = items.slice(0, 1);
+  const regularNews = items.slice(1, 5);
+
+  // Não mostra a secção se ainda não houver notícias publicadas
+  if (!loading && items.length === 0) return null;
 
   return (
     <section className="py-24 bg-white">
@@ -41,105 +47,115 @@ export function NewsSection() {
           </Link>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Featured News */}
-          <div className="space-y-6">
-            {featuredNews.map((item, index) => (
-              <motion.article
-                key={item.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 * index }}
-                className="group relative bg-gray-50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
-              >
-                <Link href={`/noticias/${item.id}/`}>
-                  <div className="aspect-[16/10] relative overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-angola-dark to-gray-700 flex items-center justify-center">
-                      <div className="text-center">
-                        <Tag className="w-12 h-12 text-white/30 mx-auto mb-2" />
-                        <span className="text-white/50 text-sm">{item.title}</span>
+        {loading ? (
+          <div className="flex justify-center py-16">
+            <Loader2 className="w-7 h-7 animate-spin text-angola-gold" />
+          </div>
+        ) : (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Featured News */}
+            <div className="space-y-6">
+              {featuredNews.map((item, index) => (
+                <motion.article
+                  key={item._id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 * index }}
+                  className="group relative bg-gray-50 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300"
+                >
+                  <Link href={`/noticias/${item.slug}/`}>
+                    <div className="aspect-[16/10] relative overflow-hidden bg-angola-navy">
+                      {item.coverImage?.url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.coverImage.url}
+                          alt={item.title}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Tag className="w-12 h-12 text-white/30" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute top-4 left-4">
+                        <Badge variant="angola">{item.category}</Badge>
                       </div>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="angola">{item.category}</Badge>
+                    <div className="p-6">
+                      <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                        <span className="flex items-center gap-1.5">
+                          <Calendar className="w-3.5 h-3.5" />
+                          {formatDate(item.publishedAt ?? item.createdAt)}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <User className="w-3.5 h-3.5" />
+                          {item.author}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-angola-gold transition-colors">
+                        {item.title}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-2">
+                        {item.excerpt}
+                      </p>
+                      <div className="mt-4 flex items-center text-angola-gold text-sm font-medium">
+                        Ler mais
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                      <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {formatDate(item.date)}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <User className="w-3.5 h-3.5" />
-                        {item.author}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-angola-gold transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed line-clamp-2">
-                      {item.excerpt}
-                    </p>
-                    <div className="mt-4 flex items-center text-angola-gold text-sm font-medium opacity-100 transition-opacity">
-                      Ler mais
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </div>
-                  </div>
-                </Link>
-              </motion.article>
-            ))}
-          </div>
+                  </Link>
+                </motion.article>
+              ))}
+            </div>
 
-          {/* Regular News List */}
-          <div className="space-y-4">
-            {regularNews.map((item, index) => (
-              <motion.article
-                key={item.id}
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 * index }}
-              >
-                <Link
-                  href={`/noticias/${item.id}/`}
-                  className="group flex gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors"
+            {/* Regular News List */}
+            <div className="space-y-4">
+              {regularNews.map((item, index) => (
+                <motion.article
+                  key={item._id}
+                  initial={{ opacity: 0, x: 30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 * index }}
                 >
-                  <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-gray-200 relative">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {item.category}
-                      </Badge>
-                      <span className="text-xs text-gray-400">
-                        {formatDate(item.date)}
-                      </span>
+                  <Link
+                    href={`/noticias/${item.slug}/`}
+                    className="group flex gap-4 p-4 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-gray-200 relative">
+                      {item.coverImage?.url && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.coverImage.url}
+                          alt={item.title}
+                          className="absolute inset-0 h-full w-full object-cover"
+                        />
+                      )}
                     </div>
-                    <h4 className="font-semibold text-gray-900 group-hover:text-angola-gold transition-colors line-clamp-2 text-sm leading-snug">
-                      {item.title}
-                    </h4>
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">
-                      {item.excerpt}
-                    </p>
-                  </div>
-                </Link>
-              </motion.article>
-            ))}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {item.category}
+                        </Badge>
+                        <span className="text-xs text-gray-400">
+                          {formatDate(item.publishedAt ?? item.createdAt)}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-gray-900 group-hover:text-angola-gold transition-colors line-clamp-2 text-sm leading-snug">
+                        {item.title}
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                        {item.excerpt}
+                      </p>
+                    </div>
+                  </Link>
+                </motion.article>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );
