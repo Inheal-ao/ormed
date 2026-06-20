@@ -51,7 +51,7 @@ export default function NoticiaDetailPage() {
   const current = photos[Math.min(photoIndex, photos.length - 1)];
 
   return (
-    <article className="pt-28 pb-16">
+    <article className="pt-36 pb-16">
       <div className="max-w-3xl mx-auto px-4">
         <Link
           href="/noticias/"

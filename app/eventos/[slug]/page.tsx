@@ -157,7 +157,7 @@ export default function EventoDetailPage() {
   const canRegister = event.registrationOpen && !isPast;
 
   return (
-    <div className="pt-28 pb-16">
+    <div className="pt-36 pb-16">
       <div className="max-w-5xl mx-auto px-4">
         <Link href="/eventos/" className="flex w-fit items-center gap-1.5 text-sm text-gray-500 hover:text-angola-navy mb-6">
           <ArrowLeft className="w-4 h-4" />

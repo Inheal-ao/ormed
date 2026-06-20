@@ -71,7 +71,7 @@ export default function ArtigoDetailPage() {
   }
 
   return (
-    <article className="pt-28 pb-16">
+    <article className="pt-36 pb-16">
       <div className="max-w-3xl mx-auto px-4">
         <Link href="/revmed/" className="flex w-fit items-center gap-1.5 text-sm text-gray-500 hover:text-angola-navy mb-6">
           <ArrowLeft className="w-4 h-4" /> Voltar à RevMed
