@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { AiAssistant } from "@/components/ai-assistant";
 
 /**
  * Mostra o header/footer públicos em todas as páginas exceto no painel admin,
@@ -21,6 +22,7 @@ export function ConditionalChrome({ children }: { children: React.ReactNode }) {
       <Header />
       <main>{children}</main>
       <Footer />
+      <AiAssistant />
     </>
   );
 }
