@@ -5,6 +5,7 @@ import { BookOpen, FileText, Loader2, Download, X } from "lucide-react";
 import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, MagazineItem } from "@/lib/admin-types";
 import { optImg } from "@/lib/img";
+import { CoverImage } from "@/components/cover-image";
 
 export default function RevistaPage() {
   const { data, loading } = usePublicData<Paginated<MagazineItem>>("/magazines?limit=100");
@@ -47,12 +48,7 @@ export default function RevistaPage() {
               >
                 <div className="aspect-[3/4] bg-angola-navy relative overflow-hidden">
                   {mag.coverImage?.url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={optImg(mag.coverImage.url, 400)}
-                      alt={mag.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
+                    <CoverImage src={mag.coverImage.url} alt={mag.title} width={400} className="w-full h-full group-hover:scale-105 transition-transform" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <BookOpen className="w-12 h-12 text-white/30" />

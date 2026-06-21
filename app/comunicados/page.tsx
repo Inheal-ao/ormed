@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 import { downloadUrl } from "@/lib/cloudinary-download";
 import { optImg } from "@/lib/img";
+import { CoverImage } from "@/components/cover-image";
 
 /** Reúne as imagens de um comunicado (capa primeiro). */
 function imagesOf(c: AnnouncementItem): Asset[] {
@@ -71,8 +72,7 @@ export default function ComunicadosPage() {
                 >
                   <button type="button" onClick={() => openComunicado(c)} className="block w-full relative">
                     <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={optImg(imgs[0].url, 500)} alt={c.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform" />
+                      <CoverImage src={imgs[0].url} alt={c.title} width={500} className="w-full h-full group-hover:scale-[1.03] transition-transform" />
                     </div>
                     {extra > 0 && (
                       <span className="absolute top-3 right-3 inline-flex items-center gap-1 bg-black/65 text-white text-xs font-medium px-2.5 py-1 rounded-full">
