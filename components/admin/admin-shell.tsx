@@ -35,6 +35,7 @@ import {
   School,
   UserCog,
   User,
+  Activity,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { useNotifications, NotifSummary } from "@/components/admin/notifications-context";
@@ -91,6 +92,7 @@ const navLinks: NavLink[] = [
   { href: "/admin/cronologia", label: "Cronologia", icon: History, key: "cronologia" },
   // Gestão (apenas Admin/Bastonária)
   { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true },
+  { href: "/admin/relatorios", label: "Relatórios", icon: Activity, manager: true },
   { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true },
   // Portal da universidade
   { href: "/admin/minhas-listas", label: "Listas de Finalistas", icon: School, uni: true },
