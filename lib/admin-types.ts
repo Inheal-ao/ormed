@@ -3,12 +3,34 @@ export interface Asset {
   publicId?: string;
 }
 
+export type UserRoleType =
+  | "super_admin" | "admin" | "editor"
+  | "bastonaria" | "funcionario" | "universidade";
+
 export interface AdminUser {
   id: string;
   name: string;
   email: string;
-  role: "super_admin" | "admin" | "editor";
+  role: UserRoleType;
+  permissions?: string[];
+  universityName?: string;
+  responsibleType?: string;
   lastLoginAt?: string | null;
+}
+
+export interface ManagedUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: UserRoleType;
+  permissions: string[];
+  universityName: string;
+  responsibleType: string;
+  phone: string;
+  isActive: boolean;
+  isBlocked: boolean;
+  lastLoginAt?: string | null;
+  createdAt: string;
 }
 
 export interface Paginated<T> {

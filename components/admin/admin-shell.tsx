@@ -32,39 +32,67 @@ import {
   FileCheck,
   MessageSquare,
   Building2,
+  School,
+  UserCog,
+  User,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
-const navLinks = [
+type NavLink = {
+  href: string; label: string; icon: any; exact?: boolean;
+  key?: string; manager?: boolean; uni?: boolean;
+};
+
+const navLinks: NavLink[] = [
   { href: "/admin", label: "Painel", icon: LayoutDashboard, exact: true },
-  { href: "/admin/noticias", label: "Notícias", icon: Newspaper },
-  { href: "/admin/comunicados", label: "Comunicados", icon: Megaphone },
-  { href: "/admin/vagas", label: "Vagas de Emprego", icon: Briefcase },
-  { href: "/admin/eventos", label: "Eventos", icon: CalendarDays },
-  { href: "/admin/cursos", label: "Formação/Cursos", icon: GraduationCap },
-  { href: "/admin/revistas", label: "Revistas", icon: BookOpen },
-  { href: "/admin/revmed", label: "RevMed", icon: FlaskConical },
-  { href: "/admin/documentos", label: "Documentos", icon: FileText },
-  { href: "/admin/boletins", label: "Boletins", icon: FileText },
-  { href: "/admin/livros", label: "Livros", icon: BookMarked },
-  { href: "/admin/podcast", label: "Podcast", icon: Mic },
-  { href: "/admin/galeria", label: "Galeria", icon: Images },
-  { href: "/admin/bastonarios", label: "Bastonários", icon: Users },
-  { href: "/admin/orgaos", label: "Órgãos", icon: Building2 },
-  { href: "/admin/parceiros", label: "Parceiros", icon: Handshake },
-  { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3 },
-  { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope },
-  { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox },
-  { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck },
-  { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText },
-  { href: "/admin/denuncias", label: "Denúncias", icon: ShieldAlert },
-  { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare },
-  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
-  { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
-  { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote },
-  { href: "/admin/cronologia", label: "Cronologia", icon: History },
-  { href: "/admin/definicoes", label: "Definições", icon: Settings },
+  { href: "/admin/noticias", label: "Notícias", icon: Newspaper, key: "noticias" },
+  { href: "/admin/comunicados", label: "Comunicados", icon: Megaphone, key: "comunicados" },
+  { href: "/admin/vagas", label: "Vagas de Emprego", icon: Briefcase, key: "vagas" },
+  { href: "/admin/eventos", label: "Eventos", icon: CalendarDays, key: "eventos" },
+  { href: "/admin/cursos", label: "Formação/Cursos", icon: GraduationCap, key: "cursos" },
+  { href: "/admin/revistas", label: "Revistas", icon: BookOpen, key: "revistas" },
+  { href: "/admin/revmed", label: "RevMed", icon: FlaskConical, key: "revmed" },
+  { href: "/admin/documentos", label: "Documentos", icon: FileText, key: "documentos" },
+  { href: "/admin/boletins", label: "Boletins", icon: FileText, key: "boletins" },
+  { href: "/admin/livros", label: "Livros", icon: BookMarked, key: "livros" },
+  { href: "/admin/podcast", label: "Podcast", icon: Mic, key: "podcast" },
+  { href: "/admin/galeria", label: "Galeria", icon: Images, key: "galeria" },
+  { href: "/admin/bastonarios", label: "Bastonários", icon: Users, key: "bastonarios" },
+  { href: "/admin/orgaos", label: "Órgãos", icon: Building2, key: "orgaos" },
+  { href: "/admin/parceiros", label: "Parceiros", icon: Handshake, key: "parceiros" },
+  { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3, key: "estatisticas" },
+  { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope, key: "especialidades" },
+  { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa" },
+  { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck, key: "validacoes" },
+  { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes" },
+  { href: "/admin/listas-universidades", label: "Listas das Universidades", icon: School, key: "listas-universidades" },
+  { href: "/admin/denuncias", label: "Denúncias", icon: ShieldAlert, key: "denuncias" },
+  { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare, key: "mensagens" },
+  { href: "/admin/newsletter", label: "Newsletter", icon: Mail, key: "newsletter" },
+  { href: "/admin/faqs", label: "FAQs", icon: HelpCircle, key: "faqs" },
+  { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote, key: "testemunhos" },
+  { href: "/admin/cronologia", label: "Cronologia", icon: History, key: "cronologia" },
+  // Gestão (apenas Admin/Bastonária)
+  { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true },
+  { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true },
+  // Portal da universidade
+  { href: "/admin/minhas-listas", label: "Listas de Finalistas", icon: School, uni: true },
 ];
+
+function visibleLinks(role: string, permissions: string[]): NavLink[] {
+  if (role === "universidade") {
+    return navLinks.filter((l) => l.uni);
+  }
+  const manager = role === "super_admin" || role === "admin" || role === "bastonaria";
+  return navLinks.filter((l) => {
+    if (l.uni) return false;
+    if (l.manager) return manager;
+    if (l.exact) return true; // Painel
+    if (manager) return true; // gestores veem tudo
+    // funcionário: só as secções permitidas
+    return l.key ? permissions.includes(l.key) : false;
+  });
+}
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -81,6 +109,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       router.replace("/admin/login");
     }
   }, [loading, user, isLoginPage, router]);
+
+  // Universidade só acede ao seu portal de listas
+  useEffect(() => {
+    if (!loading && user?.role === "universidade" && !isLoginPage && !normalizedPath.startsWith("/admin/minhas-listas") && normalizedPath !== "/admin/perfil") {
+      router.replace("/admin/minhas-listas");
+    }
+  }, [loading, user, isLoginPage, normalizedPath, router]);
 
   // A página de login renderiza sem o shell
   if (isLoginPage) return <>{children}</>;
@@ -102,7 +137,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <span className="font-semibold">Gestão ORMED</span>
         </div>
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navLinks.map((link) => {
+          {visibleLinks(user.role, user.permissions ?? []).map((link) => {
             const active = link.exact
               ? normalizedPath === link.href
               : normalizedPath.startsWith(link.href);
@@ -124,6 +159,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         </nav>
         <div className="p-3 border-t border-white/10">
           <div className="px-3 py-2 text-xs text-gray-400 truncate">{user.email}</div>
+          <Link
+            href="/admin/perfil"
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              normalizedPath === "/admin/perfil" ? "bg-angola-gold text-angola-navy font-medium" : "text-gray-300 hover:bg-white/10"
+            }`}
+          >
+            <User className="w-4 h-4" />
+            O meu perfil
+          </Link>
           <button
             type="button"
             onClick={() => logout()}
