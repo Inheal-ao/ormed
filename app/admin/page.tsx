@@ -10,20 +10,25 @@ import { Loader2, FileText, Eye, EyeOff, Layers, Bell, ArrowRight } from "lucide
 import { api } from "@/lib/api";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { useNotifications } from "@/components/admin/notifications-context";
+import { isManagerRole } from "@/lib/permissions";
 
-const NOTIF_META: { key: string; label: string; link: string }[] = [
-  { key: "validacoes", label: "Validações", link: "/admin/validacoes" },
-  { key: "solicitacoes", label: "Documentos da Ordem", link: "/admin/solicitacoes" },
-  { key: "denuncias", label: "Denúncias", link: "/admin/denuncias" },
-  { key: "mensagens", label: "Mensagens", link: "/admin/mensagens" },
-  { key: "inscricoes", label: "Inscrições", link: "/admin/eventos" },
-  { key: "apoioPesquisa", label: "Apoio à Pesquisa", link: "/admin/apoio-pesquisa" },
-  { key: "listas", label: "Listas de finalistas", link: "/admin/listas-universidades" },
+const NOTIF_META: { key: string; label: string; link: string; perm: string[] }[] = [
+  { key: "validacoes", label: "Validações", link: "/admin/validacoes", perm: ["validacoes"] },
+  { key: "solicitacoes", label: "Documentos da Ordem", link: "/admin/solicitacoes", perm: ["solicitacoes"] },
+  { key: "denuncias", label: "Denúncias", link: "/admin/denuncias", perm: ["denuncias"] },
+  { key: "mensagens", label: "Mensagens", link: "/admin/mensagens", perm: ["mensagens"] },
+  { key: "inscricoes", label: "Inscrições", link: "/admin/eventos", perm: ["eventos", "cursos"] },
+  { key: "apoioPesquisa", label: "Apoio à Pesquisa", link: "/admin/apoio-pesquisa", perm: ["apoio-pesquisa"] },
+  { key: "listas", label: "Listas de finalistas", link: "/admin/listas-universidades", perm: ["listas-universidades"] },
 ];
 
 function NotificationsPanel() {
   const { summary } = useNotifications();
-  if (!summary) return null;
+  const { user } = useAdminAuth();
+  const manager = isManagerRole(user?.role);
+  const perms = user?.permissions ?? [];
+  const allowed = NOTIF_META.filter((m) => manager || m.perm.some((p) => perms.includes(p)));
+  if (!summary || allowed.length === 0) return null;
   const counts = summary.counts as Record<string, number>;
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8">
@@ -37,7 +42,7 @@ function NotificationsPanel() {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-5">
-        {NOTIF_META.map((m) => {
+        {allowed.map((m) => {
           const n = counts[m.key] ?? 0;
           return (
             <Link key={m.key} href={m.link} className={`rounded-xl p-3 text-center border transition ${n > 0 ? "border-angola-gold/40 bg-angola-cream/40 hover:bg-angola-cream" : "border-gray-100 bg-gray-50"}`}>
@@ -74,22 +79,23 @@ interface Source {
   path: string;
   paged: boolean;
   content?: boolean; // tem isPublished
+  perm: string;
 }
 
 const SOURCES: Source[] = [
-  { key: "Notícias", path: "/news/admin/all?limit=300", paged: true, content: true },
-  { key: "Comunicados", path: "/announcements/admin/all?limit=300", paged: true, content: true },
-  { key: "Vagas", path: "/jobs/admin/all?limit=300", paged: true, content: true },
-  { key: "Eventos", path: "/events/admin/all?limit=300", paged: true, content: true },
-  { key: "Cursos", path: "/courses/admin/all?limit=300", paged: true, content: true },
-  { key: "Revistas", path: "/magazines/admin/all?limit=300", paged: true, content: true },
-  { key: "Boletins", path: "/bulletins/admin/all?limit=300", paged: true, content: true },
-  { key: "Livros", path: "/books/admin/all?limit=300", paged: true, content: true },
-  { key: "Podcast", path: "/podcast/admin/all?limit=300", paged: true, content: true },
-  { key: "RevMed", path: "/revmed/admin/all?limit=300", paged: true, content: true },
-  { key: "Bastonários", path: "/bastonarios/admin/all", paged: false },
-  { key: "Parceiros", path: "/partners/admin/all", paged: false },
-  { key: "Galeria", path: "/gallery/admin/all", paged: false },
+  { key: "Notícias", path: "/news/admin/all?limit=300", paged: true, content: true, perm: "noticias" },
+  { key: "Comunicados", path: "/announcements/admin/all?limit=300", paged: true, content: true, perm: "comunicados" },
+  { key: "Vagas", path: "/jobs/admin/all?limit=300", paged: true, content: true, perm: "vagas" },
+  { key: "Eventos", path: "/events/admin/all?limit=300", paged: true, content: true, perm: "eventos" },
+  { key: "Cursos", path: "/courses/admin/all?limit=300", paged: true, content: true, perm: "cursos" },
+  { key: "Revistas", path: "/magazines/admin/all?limit=300", paged: true, content: true, perm: "revistas" },
+  { key: "Boletins", path: "/bulletins/admin/all?limit=300", paged: true, content: true, perm: "boletins" },
+  { key: "Livros", path: "/books/admin/all?limit=300", paged: true, content: true, perm: "livros" },
+  { key: "Podcast", path: "/podcast/admin/all?limit=300", paged: true, content: true, perm: "podcast" },
+  { key: "RevMed", path: "/revmed/admin/all?limit=300", paged: true, content: true, perm: "revmed" },
+  { key: "Bastonários", path: "/bastonarios/admin/all", paged: false, perm: "bastonarios" },
+  { key: "Parceiros", path: "/partners/admin/all", paged: false, perm: "parceiros" },
+  { key: "Galeria", path: "/gallery/admin/all", paged: false, perm: "galeria" },
 ];
 
 interface ItemLike {
@@ -112,8 +118,13 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const load = async () => {
+      // Só agrega as secções a que o utilizador tem acesso
+      const manager = isManagerRole(user?.role);
+      const perms = user?.permissions ?? [];
+      const mySources = manager ? SOURCES : SOURCES.filter((s) => perms.includes(s.perm));
+
       const results = await Promise.allSettled(
-        SOURCES.map((s) => api.get<unknown>(s.path, true)),
+        mySources.map((s) => api.get<unknown>(s.path, true)),
       );
 
       const typeCounts: { name: string; total: number }[] = [];
@@ -124,7 +135,7 @@ export default function AdminDashboard() {
       let all = 0;
 
       results.forEach((r, i) => {
-        const src = SOURCES[i];
+        const src = mySources[i];
         if (r.status !== "fulfilled") {
           typeCounts.push({ name: src.key, total: 0 });
           return;
@@ -175,7 +186,7 @@ export default function AdminDashboard() {
       setLoading(false);
     };
     load();
-  }, []);
+  }, [user]);
 
   if (loading) {
     return (

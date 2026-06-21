@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { API_URL } from "@/lib/api";
 import { ConsultPanel } from "@/components/service-portal";
+import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
 
 const steps = [
   { id: 1, title: "Dados Pessoais", icon: UserPlus },
@@ -39,6 +40,7 @@ export default function InscricaoPage() {
   const [code, setCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
   const nextStep = () => setCurrentStep((p) => Math.min(p + 1, 3));
@@ -53,6 +55,10 @@ export default function InscricaoPage() {
     const missing = DOCS.filter((d) => d.required && !docs[d.key]);
     if (missing.length > 0) {
       setError(`Anexe os documentos obrigatórios: ${missing.map((d) => d.label).join(", ")}.`);
+      return;
+    }
+    if (captchaEnabled && !captchaToken) {
+      setError("Complete a verificação anti-spam.");
       return;
     }
     setSubmitting(true);
@@ -84,7 +90,7 @@ export default function InscricaoPage() {
         if (f) fd.append("attachments", f, `${d.label} - ${f.name}`);
       });
 
-      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: fd });
+      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: fd, headers: captchaHeaders(captchaToken) });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(Array.isArray(err.message) ? err.message.join(", ") : err.message || "Falha ao enviar.");
@@ -211,6 +217,7 @@ export default function InscricaoPage() {
                     <p className="text-xs text-gray-500 bg-angola-cream/60 border border-angola-gold/20 rounded-lg p-3">
                       Após enviar, a sua inscrição será <strong>avaliada pela Ordem</strong>. Receberá um código de serviço para acompanhar o estado e, após aprovação, as <strong>coordenadas e o valor a pagar</strong> aparecerão no separador "Consultar Estado".
                     </p>
+                    {currentStep === 3 && <Turnstile onToken={setCaptchaToken} />}
                     {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
                   </div>
                 )}

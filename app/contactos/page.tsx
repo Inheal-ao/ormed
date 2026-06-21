@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { siteConfig } from "@/lib/data";
 import { API_URL } from "@/lib/api";
+import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,16 +28,21 @@ export default function ContactosPage() {
     message: "",
   });
   const [sending, setSending] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (captchaEnabled && !captchaToken) {
+      setFeedback({ ok: false, text: "Complete a verificação anti-spam." });
+      return;
+    }
     setSending(true);
     setFeedback(null);
     try {
       const res = await fetch(`${API_URL}/contact`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...captchaHeaders(captchaToken) },
         body: JSON.stringify(formData),
       });
       if (!res.ok) {
@@ -200,6 +206,7 @@ export default function ContactosPage() {
                     required
                   />
                 </div>
+                <Turnstile onToken={setCaptchaToken} />
                 <Button
                   type="submit"
                   disabled={sending}

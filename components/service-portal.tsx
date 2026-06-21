@@ -5,6 +5,7 @@ import { Loader2, Check, Upload, Send, Search, FileText, Copy, Download, CreditC
 import { API_URL } from "@/lib/api";
 import { ServiceType, ServiceTrack, SERVICE_LABEL, STATUS_META } from "@/lib/service-requests";
 import { ServiceStepper } from "@/components/service-stepper";
+import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
 
 const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-angola-gold outline-none text-gray-900 bg-white dark:bg-white/10 dark:text-white dark:border-white/20 dark:[color-scheme:dark]";
 
@@ -69,11 +70,16 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
   const [code, setCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (files.length === 0) {
       setError("Anexe pelo menos um documento.");
+      return;
+    }
+    if (captchaEnabled && !captchaToken) {
+      setError("Complete a verificação anti-spam.");
       return;
     }
     setSubmitting(true);
@@ -87,7 +93,7 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
       if (email) form.append("email", email);
       form.append("phone", phone);
       files.forEach((f) => form.append("attachments", f));
-      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: form });
+      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: form, headers: captchaHeaders(captchaToken) });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(Array.isArray(err.message) ? err.message.join(", ") : err.message || "Falha ao enviar.");
@@ -154,6 +160,7 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
           <input type="file" accept="image/*,application/pdf" multiple className="hidden" onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
         </label>
       </div>
+      <Turnstile onToken={setCaptchaToken} />
       {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
       <button type="submit" disabled={submitting} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
         {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

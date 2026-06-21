@@ -137,6 +137,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
   }, [loading, user, isLoginPage, normalizedPath, router]);
 
+  // Funcionário só pode abrir páginas a que tem permissão (bloqueia acesso direto por URL)
+  useEffect(() => {
+    if (loading || !user || isLoginPage) return;
+    const role = user.role;
+    if (role === "super_admin" || role === "admin" || role === "bastonaria" || role === "universidade") return;
+    const allowed = visibleLinks(role, user.permissions ?? []).map((l) => l.href);
+    const ok =
+      normalizedPath === "/admin" ||
+      normalizedPath === "/admin/perfil" ||
+      allowed.some((href) => href !== "/admin" && normalizedPath.startsWith(href));
+    if (!ok) router.replace("/admin");
+  }, [loading, user, isLoginPage, normalizedPath, router]);
+
   // A página de login renderiza sem o shell
   if (isLoginPage) return <>{children}</>;
 

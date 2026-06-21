@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ShieldAlert, Loader2, Check, Send, Upload, Lock } from "lucide-react";
 import { API_URL } from "@/lib/api";
+import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
 
 const CATEGORIES = [
   { value: "medico", label: "Conduta de um médico" },
@@ -24,9 +25,14 @@ export default function DenunciasPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (captchaEnabled && !captchaToken) {
+      setError("Complete a verificação anti-spam.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -43,7 +49,7 @@ export default function DenunciasPage() {
       if (externalLink) form.append("externalLink", externalLink);
       files.forEach((f) => form.append("attachments", f));
 
-      const res = await fetch(`${API_URL}/complaints`, { method: "POST", body: form });
+      const res = await fetch(`${API_URL}/complaints`, { method: "POST", body: form, headers: captchaHeaders(captchaToken) });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(Array.isArray(err.message) ? err.message.join(", ") : err.message || "Falha ao enviar.");
