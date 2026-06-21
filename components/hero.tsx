@@ -120,16 +120,6 @@ export function Hero() {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.5 }}
             >
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-angola-gold/20 border border-angola-gold/30 text-angola-navy text-sm font-medium mb-6"
-              >
-                <span className="w-2 h-2 rounded-full bg-angola-gold animate-pulse" />
-                Ordem dos Médicos de Angola
-              </motion.div>
-
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-4 leading-tight">
                 {slides[currentSlide].title}
               </h1>
