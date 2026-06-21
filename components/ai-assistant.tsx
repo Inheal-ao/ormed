@@ -65,6 +65,16 @@ export function AiAssistant() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading, open]);
 
+  // Bloqueia o scroll do site enquanto o chat está aberto (foco no chat)
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   const send = async (text: string) => {
     const content = text.trim();
     if (!content || loading) return;
@@ -145,7 +155,7 @@ export function AiAssistant() {
             </div>
 
             {/* Mensagens */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-angola-navy">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto overscroll-contain p-4 space-y-3 bg-gray-50 dark:bg-angola-navy">
               {messages.map((m, i) => (
                 <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div

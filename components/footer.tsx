@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { NewsletterSignup } from "@/components/newsletter-signup";
 import {
   MapPin,
   Phone,
@@ -75,16 +76,7 @@ export function Footer() {
                 diretamente no seu email.
               </p>
             </div>
-            <div className="flex w-full lg:w-auto gap-2">
-              <input
-                type="email"
-                placeholder="O seu email"
-                className="flex-1 lg:w-80 px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-angola-gold"
-              />
-              <Button className="bg-angola-gold text-angola-navy hover:bg-angola-gold/90 font-semibold px-6">
-                Subscrever
-              </Button>
-            </div>
+            <NewsletterSignup />
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ export function RegistrationForm({ targetId, price }: RegistrationFormProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [profile, setProfile] = useState("Médico");
   const [notes, setNotes] = useState("");
   const [proof, setProof] = useState<File | null>(null);
   const [docs, setDocs] = useState<File[]>([]);
@@ -35,6 +36,7 @@ export function RegistrationForm({ targetId, price }: RegistrationFormProps) {
       form.append("name", name);
       form.append("email", email);
       form.append("phone", phone);
+      form.append("profile", profile);
       form.append("notes", notes);
       if (proof) form.append("paymentProof", proof);
       docs.forEach((d) => form.append("documents", d));
@@ -90,6 +92,16 @@ export function RegistrationForm({ targetId, price }: RegistrationFormProps) {
           <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
           <input className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+244 ..." />
         </div>
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Perfil</label>
+        <select className={inputClass} value={profile} onChange={(e) => setProfile(e.target.value)} aria-label="Perfil">
+          <option>Médico</option>
+          <option>Estudante de Medicina</option>
+          <option>Outro profissional de saúde</option>
+          <option>Estudante de outro curso</option>
+          <option>Outro</option>
+        </select>
       </div>
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>

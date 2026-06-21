@@ -115,6 +115,7 @@ export interface EventRegistration {
   name: string;
   email: string;
   phone: string;
+  profile: string;
   notes: string;
   attachments: Asset[];
   paymentProof: Asset | null;

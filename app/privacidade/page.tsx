@@ -1,18 +1,47 @@
+import { LegalPage } from "@/components/legal-page";
+
+export const metadata = { title: "Política de Privacidade" };
+
 export default function PrivacidadePage() {
   return (
-    <div className="pt-28 pb-16 min-h-screen">
-      <section className="bg-slate-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold">Política de Privacidade</h1>
-          <p className="text-gray-300 text-lg mt-4">Política de privacidade da ORMED</p>
-        </div>
-      </section>
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="bg-gray-50 rounded-2xl p-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Em desenvolvimento</h2>
-          <p className="text-gray-600">Esta página está a ser desenvolvida. Volte em breve.</p>
-        </div>
-      </div>
-    </div>
+    <LegalPage
+      title="Política de Privacidade"
+      subtitle="Como a Ordem dos Médicos de Angola recolhe, usa e protege os seus dados pessoais."
+      updated="Junho de 2026"
+      sections={[
+        {
+          heading: "Âmbito",
+          body: "Esta política aplica-se a todos os dados pessoais tratados pela Ordem dos Médicos de Angola (ORMED) através deste site e dos seus serviços digitais. Ao utilizar a plataforma, concorda com as práticas aqui descritas.",
+        },
+        {
+          heading: "Dados que recolhemos",
+          body: "Recolhemos apenas os dados necessários, como: nome, email, telefone e perfil ao inscrever-se em eventos, cursos ou ao submeter formulários; conteúdos que nos envia (mensagens, denúncias, reclamações e respetivos anexos); e dados técnicos básicos de navegação. As denúncias podem ser submetidas de forma anónima.",
+        },
+        {
+          heading: "Finalidades do tratamento",
+          body: "Utilizamos os seus dados para: processar inscrições e pedidos; responder a contactos e dúvidas; gerir denúncias e reclamações; enviar comunicações e newsletter (quando subscritas); e melhorar os nossos serviços. Não vendemos os seus dados a terceiros.",
+        },
+        {
+          heading: "Partilha de dados",
+          body: "Os dados podem ser partilhados internamente com os órgãos competentes da ORMED para análise dos pedidos, e com prestadores técnicos (ex.: alojamento e armazenamento de ficheiros) estritamente para a operação da plataforma, sempre sob obrigações de confidencialidade.",
+        },
+        {
+          heading: "Segurança",
+          body: "Adotamos medidas técnicas e organizativas para proteger os seus dados contra acesso não autorizado, perda ou divulgação, incluindo cifragem de comunicações, controlo de acessos e mecanismos de proteção contra ataques.",
+        },
+        {
+          heading: "Conservação",
+          body: "Conservamos os dados apenas pelo período necessário às finalidades para que foram recolhidos ou conforme exigido por obrigações legais. Os pedidos resolvidos podem ser mantidos para fins de registo e estatística.",
+        },
+        {
+          heading: "Os seus direitos",
+          body: "Pode solicitar o acesso, a correção ou a eliminação dos seus dados, bem como opor-se a determinados tratamentos. Para exercer estes direitos, contacte-nos através dos canais indicados na página de Contactos.",
+        },
+        {
+          heading: "Alterações",
+          body: "Esta política pode ser atualizada periodicamente. A versão em vigor será sempre a publicada nesta página, com a respetiva data de atualização.",
+        },
+      ]}
+    />
   );
 }

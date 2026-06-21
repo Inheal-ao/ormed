@@ -27,6 +27,8 @@ import {
   Briefcase,
   Megaphone,
   Inbox,
+  ShieldAlert,
+  Mail,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
@@ -49,6 +51,8 @@ const navLinks = [
   { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3 },
   { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope },
   { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox },
+  { href: "/admin/denuncias", label: "Denúncias", icon: ShieldAlert },
+  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
   { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote },
   { href: "/admin/cronologia", label: "Cronologia", icon: History },

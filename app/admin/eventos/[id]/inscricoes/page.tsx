@@ -107,6 +107,7 @@ export default function InscricoesPage() {
                 <div className="min-w-0">
                   <p className="font-medium text-gray-900">{r.name}</p>
                   <p className="text-sm text-gray-500">{r.email} {r.phone ? `· ${r.phone}` : ""}</p>
+                  {r.profile && <p className="text-xs text-angola-navy mt-0.5">{r.profile}</p>}
                   {r.notes && <p className="text-sm text-gray-600 mt-1">{r.notes}</p>}
                 </div>
                 <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${STATUS_STYLE[r.status]}`}>
