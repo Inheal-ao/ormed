@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Loader2, Check, X, FileText, Download, Paperclip } from "lucide-react";
+import { Loader2, Check, X, FileText, Download, Paperclip, Printer } from "lucide-react";
 import { api, tokenStore, API_URL } from "@/lib/api";
 import { EventRegistration, EventItem } from "@/lib/admin-types";
 import { BackLink } from "@/components/admin/admin-ui";
+import { printTable } from "@/lib/print";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pendente",
@@ -81,15 +82,29 @@ export default function InscricoesPage() {
           </p>
         </div>
         {items.length > 0 && (
-          <button
-            type="button"
-            onClick={exportCsv}
-            disabled={exporting}
-            className="inline-flex items-center gap-2 bg-angola-navy text-white font-semibold px-4 py-2 rounded-lg hover:brightness-110 shrink-0"
-          >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            Exportar CSV
-          </button>
+          <div className="flex gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => printTable(
+                `Inscrições — ${event?.title ?? ""}`,
+                `Total: ${items.length}${event?.capacity ? ` / ${event.capacity} vagas` : ""}`,
+                ["Nome", "Email", "Telefone", "Perfil", "Estado", "Data"],
+                items.map((r) => [r.name, r.email, r.phone || "—", r.profile || "—", STATUS_LABEL[r.status] ?? r.status, new Date(r.createdAt).toLocaleDateString("pt-PT")]),
+              )}
+              className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-50"
+            >
+              <Printer className="w-4 h-4" /> Imprimir
+            </button>
+            <button
+              type="button"
+              onClick={exportCsv}
+              disabled={exporting}
+              className="inline-flex items-center gap-2 bg-angola-navy text-white font-semibold px-4 py-2 rounded-lg hover:brightness-110"
+            >
+              {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              Exportar CSV
+            </button>
+          </div>
         )}
       </div>
 

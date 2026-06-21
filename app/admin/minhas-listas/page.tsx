@@ -10,6 +10,7 @@ import { useAdminAuth } from "@/components/admin/auth-context";
 interface UniList {
   _id: string; universityName: string; year: string;
   digitalPdf: Asset; signedScan: Asset; notes: string; createdAt: string;
+  lastViewedAt?: string | null; lastViewedByName?: string; viewCount?: number;
 }
 
 const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900";
@@ -178,6 +179,14 @@ function ViewLists({ onConsumed }: { onConsumed: () => void }) {
             <span className="ml-auto text-xs text-gray-400">{new Date(l.createdAt).toLocaleDateString("pt-PT")}</span>
           </div>
           {l.notes && <p className="text-sm text-gray-600 mt-1">{l.notes}</p>}
+          {l.lastViewedAt ? (
+            <p className="text-xs text-green-700 mt-1 flex items-center gap-1">
+              <Check className="w-3.5 h-3.5" /> Vista pela Ordem em {new Date(l.lastViewedAt).toLocaleDateString("pt-PT")}
+              {l.lastViewedByName ? ` (${l.lastViewedByName})` : ""}
+            </p>
+          ) : (
+            <p className="text-xs text-amber-600 mt-1">Ainda não vista pela Ordem</p>
+          )}
           <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t">
             <a href={l.digitalPdf.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
               <FileText className="w-3.5 h-3.5" /> Lista digital

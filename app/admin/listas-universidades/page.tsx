@@ -17,6 +17,8 @@ interface UniList {
   submittedBy: string;
   status: string;
   createdAt: string;
+  lastViewedAt?: string | null;
+  viewCount?: number;
 }
 
 export default function ListasUniversidadesPage() {
@@ -44,6 +46,12 @@ export default function ListasUniversidadesPage() {
   useEffect(() => {
     if (isGod) load();
   }, [isGod]); // eslint-disable-line
+
+  // Marca como vista pela Ordem ao abrir um documento (o reitor passa a saber).
+  const markSeen = (id: string) => {
+    api.post(`/university-lists/admin/${id}/seen`, {}, true).catch(() => {});
+    setLists((prev) => prev && prev.map((l) => (l._id === id ? { ...l, lastViewedAt: new Date().toISOString(), viewCount: (l.viewCount ?? 0) + 1 } : l)));
+  };
 
   return (
     <div className="max-w-3xl">
@@ -82,13 +90,14 @@ export default function ListasUniversidadesPage() {
                     {l.notes && <p className="text-sm text-gray-600 mt-1">{l.notes}</p>}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t">
-                  <a href={l.digitalPdf.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t items-center">
+                  <a href={l.digitalPdf.url} target="_blank" rel="noopener noreferrer" onClick={() => markSeen(l._id)} className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <FileText className="w-3.5 h-3.5" /> Lista digital (PDF)
                   </a>
-                  <a href={l.signedScan.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <a href={l.signedScan.url} target="_blank" rel="noopener noreferrer" onClick={() => markSeen(l._id)} className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <FileSignature className="w-3.5 h-3.5" /> Documento assinado
                   </a>
+                  {l.lastViewedAt && <span className="ml-auto text-xs text-gray-400">vista {l.viewCount ? `${l.viewCount}x` : ""}</span>}
                 </div>
               </div>
             ))}

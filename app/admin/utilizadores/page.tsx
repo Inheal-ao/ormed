@@ -9,6 +9,8 @@ import { ManagedUser } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { PERMISSION_SECTIONS } from "@/lib/permissions";
+import { PasswordInput } from "@/components/admin/password-input";
+import { isStrongPassword } from "@/lib/password";
 
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900 text-sm";
 
@@ -41,7 +43,7 @@ export default function UtilizadoresPage() {
     load();
   }, [tab]); // eslint-disable-line
 
-  const onCreated = (u: ManagedUser) => { setItems((p) => [u, ...p]); setCreating(false); };
+  const onCreated = (u: ManagedUser) => setItems((p) => [u, ...p]);
   const patch = (id: string, p: Partial<ManagedUser>) => setItems((prev) => prev.map((u) => (u._id === id ? { ...u, ...p } : u)));
 
   const block = async (u: ManagedUser) => {
@@ -53,13 +55,8 @@ export default function UtilizadoresPage() {
     await api.delete(`/users/${u._id}`);
     setItems((prev) => prev.filter((x) => x._id !== u._id));
   };
-  const resetPassword = async (u: ManagedUser) => {
-    const pw = prompt(`Nova password para ${u.name} (mín. 8 caracteres):`);
-    if (!pw) return;
-    if (pw.length < 8) { alert("Mínimo 8 caracteres."); return; }
-    await api.post(`/users/${u._id}/password`, { password: pw });
-    alert("Password redefinida.");
-  };
+  const [resetTarget, setResetTarget] = useState<ManagedUser | null>(null);
+  const resetPassword = (u: ManagedUser) => setResetTarget(u);
   const genCodes = async (u: ManagedUser) => {
     const res = await api.post<{ codes: string[] }>("/access-codes/generate", { targetUserId: u._id, count: 50 }, true);
     setCodesModal({ name: u.universityName || u.name, codes: res.codes });
@@ -88,7 +85,7 @@ export default function UtilizadoresPage() {
         </button>
       </div>
 
-      {creating && <CreateForm role={tab} onCreated={onCreated} onCodes={(name, codes) => setCodesModal({ name, codes })} />}
+      {creating && <CreateForm role={tab} onCreated={onCreated} onClose={() => setCreating(false)} />}
 
       {loading ? (
         <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-angola-gold" /></div>
@@ -104,33 +101,91 @@ export default function UtilizadoresPage() {
       )}
 
       {codesModal && <CodesModal name={codesModal.name} codes={codesModal.codes} onClose={() => setCodesModal(null)} />}
+      {resetTarget && <ResetPasswordModal user={resetTarget} onClose={() => setResetTarget(null)} />}
     </div>
   );
 }
 
-function CreateForm({ role, onCreated, onCodes }: { role: string; onCreated: (u: ManagedUser) => void; onCodes: (name: string, codes: string[]) => void }) {
+function ResetPasswordModal({ user, onClose }: { user: ManagedUser; onClose: () => void }) {
+  const [pw, setPw] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const save = async () => {
+    setError(null);
+    if (!isStrongPassword(pw)) {
+      setError("A password não cumpre os requisitos (mín. 8, maiúscula, minúscula, número e símbolo).");
+      return;
+    }
+    setSaving(true);
+    try {
+      await api.post(`/users/${user._id}/password`, { password: pw });
+      setDone(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Repor password</h3>
+        <p className="text-sm text-gray-500 mb-4">{user.universityName || user.name} ({user.email})</p>
+        {done ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <p className="text-sm text-gray-800 mb-2">✓ Password redefinida. Entregue ao utilizador:</p>
+            <p className="font-mono text-sm bg-white border rounded px-2 py-1.5">{pw}</p>
+            <button type="button" onClick={onClose} className="mt-3 w-full bg-angola-navy text-white py-2 rounded-lg text-sm">Concluir</button>
+          </div>
+        ) : (
+          <>
+            <PasswordInput value={pw} onChange={setPw} />
+            {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
+            <div className="flex gap-2 mt-4">
+              <button type="button" onClick={onClose} className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">Cancelar</button>
+              <button type="button" onClick={save} disabled={saving} className="flex-1 bg-angola-navy text-white py-2 rounded-lg text-sm disabled:opacity-60">
+                {saving ? "A guardar..." : "Repor password"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u: ManagedUser) => void; onClose: () => void }) {
   const [f, setF] = useState({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor" });
   const [permissions, setPermissions] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [created, setCreated] = useState<{ email: string; password: string } | null>(null);
+  const [copied, setCopied] = useState(false);
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
   const togglePerm = (k: string) => setPermissions((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!isStrongPassword(f.password)) {
+      setError("A password não cumpre os requisitos (mín. 8, maiúscula, minúscula, número e símbolo).");
+      return;
+    }
     setSaving(true);
     try {
+      let u: ManagedUser;
       if (role === "bastonaria") {
-        const u = await api.post<ManagedUser>("/users/bastonaria", { name: f.name, email: f.email, password: f.password, phone: f.phone }, true);
-        onCreated(u);
+        u = await api.post<ManagedUser>("/users/bastonaria", { name: f.name, email: f.email, password: f.password, phone: f.phone }, true);
       } else if (role === "funcionario") {
-        const u = await api.post<ManagedUser>("/users/funcionario", { name: f.name, email: f.email, password: f.password, phone: f.phone, permissions }, true);
-        onCreated(u);
+        u = await api.post<ManagedUser>("/users/funcionario", { name: f.name, email: f.email, password: f.password, phone: f.phone, permissions }, true);
       } else {
-        const u = await api.post<ManagedUser>("/users/universidade", { name: f.name, email: f.email, password: f.password, phone: f.phone, universityName: f.universityName, responsibleType: f.responsibleType }, true);
-        onCreated(u);
+        u = await api.post<ManagedUser>("/users/universidade", { name: f.name, email: f.email, password: f.password, phone: f.phone, universityName: f.universityName, responsibleType: f.responsibleType }, true);
       }
+      onCreated(u);
+      setCreated({ email: f.email, password: f.password });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar.");
     } finally {
@@ -138,13 +193,37 @@ function CreateForm({ role, onCreated, onCodes }: { role: string; onCreated: (u:
     }
   };
 
+  // Ecrã de confirmação com as credenciais
+  if (created) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-5">
+        <p className="font-semibold text-gray-900 mb-1">✓ Utilizador criado com sucesso</p>
+        <p className="text-sm text-gray-600 mb-3">Entregue estas credenciais ao utilizador. A password não voltará a ser mostrada.</p>
+        <div className="bg-white border border-gray-200 rounded-lg p-3 text-sm font-mono space-y-1">
+          <p><span className="text-gray-400">Email:</span> {created.email}</p>
+          <p><span className="text-gray-400">Password:</span> {created.password}</p>
+        </div>
+        <div className="flex gap-2 mt-3">
+          <button type="button" onClick={() => { navigator.clipboard.writeText(`Email: ${created.email}\nPassword: ${created.password}`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
+            {copied ? "Copiado!" : "Copiar credenciais"}
+          </button>
+          <button type="button" onClick={() => { setCreated(null); setF({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor" }); setPermissions([]); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Criar outro</button>
+          <button type="button" onClick={onClose} className="text-xs px-3 py-1.5 bg-angola-navy text-white rounded-lg ml-auto">Concluir</button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={submit} className="bg-white border border-angola-gold/40 rounded-xl p-5 space-y-4 mb-5">
       <div className="grid sm:grid-cols-2 gap-3">
         <input className={inputClass} placeholder="Nome completo" value={f.name} onChange={(e) => set("name", e.target.value)} required />
         <input type="email" className={inputClass} placeholder="Email" value={f.email} onChange={(e) => set("email", e.target.value)} required />
-        <input type="password" className={inputClass} placeholder="Password (mín. 8)" value={f.password} onChange={(e) => set("password", e.target.value)} required />
         <input className={inputClass} placeholder="Telefone (opcional)" value={f.phone} onChange={(e) => set("phone", e.target.value)} />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+        <PasswordInput value={f.password} onChange={(v) => set("password", v)} />
       </div>
 
       {role === "universidade" && (
@@ -280,7 +359,7 @@ function CodesModal({ name, codes, onClose }: { name: string; codes: string[]; o
             <h3 className="text-lg font-bold text-gray-900">Códigos de acesso gerados</h3>
             <p className="text-sm text-gray-500">{name}</p>
           </div>
-          <button type="button" onClick={onClose} className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
+          <button type="button" onClick={onClose} aria-label="Fechar" className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
         </div>
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 mb-3">
           ⚠️ Guarde/entregue estes códigos agora. Cada um é de <strong>uso único</strong> e <strong>não voltarão a ser mostrados</strong>.

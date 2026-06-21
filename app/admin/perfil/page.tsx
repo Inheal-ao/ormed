@@ -5,6 +5,8 @@ import { Loader2, KeyRound, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
+import { PasswordInput } from "@/components/admin/password-input";
+import { isStrongPassword } from "@/lib/password";
 
 const ROLE_LABEL: Record<string, string> = {
   super_admin: "Administrador (Sistema)",
@@ -28,8 +30,8 @@ export default function PerfilPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback(null);
-    if (next.length < 8) {
-      setFeedback({ ok: false, text: "A nova password deve ter pelo menos 8 caracteres." });
+    if (!isStrongPassword(next)) {
+      setFeedback({ ok: false, text: "A nova password deve ter mín. 8 caracteres, com maiúscula, minúscula, número e símbolo." });
       return;
     }
     if (next !== confirm) {
@@ -64,15 +66,15 @@ export default function PerfilPage() {
         <h3 className="font-semibold text-gray-900 flex items-center gap-2"><KeyRound className="w-4 h-4" /> Alterar password</h3>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Password atual</label>
-          <input type="password" className={inputClass} value={current} onChange={(e) => setCurrent(e.target.value)} required />
+          <input type="password" aria-label="Password atual" placeholder="Password atual" className={inputClass} value={current} onChange={(e) => setCurrent(e.target.value)} required />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Nova password</label>
-          <input type="password" className={inputClass} value={next} onChange={(e) => setNext(e.target.value)} required />
+          <PasswordInput value={next} onChange={setNext} placeholder="Nova password" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Confirmar nova password</label>
-          <input type="password" className={inputClass} value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+          <input type="password" aria-label="Confirmar nova password" placeholder="Repita a nova password" className={inputClass} value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
         </div>
         {feedback && (
           <p className={`text-sm flex items-center gap-1.5 ${feedback.ok ? "text-green-600" : "text-red-600"}`}>

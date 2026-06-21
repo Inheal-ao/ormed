@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import {
   Loader2, Download, Paperclip, Upload, Save, CreditCard, FileCheck,
-  ChevronDown, ChevronUp, History, Clock,
+  ChevronDown, ChevronUp, History, Clock, Printer,
 } from "lucide-react";
 import { api, tokenStore, API_URL } from "@/lib/api";
 import { Asset } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { ServiceStepper } from "@/components/service-stepper";
 import { SERVICE_LABEL, STATUS_META, ALL_STATUSES, NAO_VALIDADO_REASONS, HistoryEntry } from "@/lib/service-requests";
+import { printTable } from "@/lib/print";
 
 interface ServiceRequest {
   _id: string;
@@ -93,6 +94,15 @@ export function ServiceRequestsConsole({
               <option value="">Todos os tipos</option>
               {PAID_TYPES.map((t) => <option key={t} value={t}>{SERVICE_LABEL[t]}</option>)}
             </select>
+          )}
+          {shown.length > 0 && (
+            <button type="button" onClick={() => printTable(
+              title, `Total: ${shown.length}`,
+              ["Código", "Tipo", "Solicitante", "Proprietário", "Estado", "Data"],
+              shown.map((r) => [r.serviceCode, SERVICE_LABEL[r.serviceType] ?? r.serviceType, r.requesterName, r.ownerName, STATUS_META[r.status]?.label ?? r.status, new Date(r.createdAt).toLocaleDateString("pt-PT")]),
+            )} className="inline-flex items-center gap-2 border border-gray-300 text-gray-700 font-semibold px-4 py-2 rounded-lg hover:bg-gray-50">
+              <Printer className="w-4 h-4" /> Imprimir
+            </button>
           )}
           {items.length > 0 && (
             <button type="button" onClick={exportCsv} className="inline-flex items-center gap-2 bg-angola-navy text-white font-semibold px-4 py-2 rounded-lg hover:brightness-110">

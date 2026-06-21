@@ -242,15 +242,13 @@ export function Header() {
                 </Button>
               )}
 
-              {/* Member Area */}
-              <Button
-                variant="angola"
-                size="sm"
-                className="hidden md:flex items-center gap-2"
-              >
-                <User className="w-4 h-4" />
-                <span>Área do Membro</span>
-              </Button>
+              {/* Entrar (portal admin) */}
+              <Link href="/admin/login" className="hidden md:block">
+                <Button variant="angola" size="sm" className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  <span>Entrar</span>
+                </Button>
+              </Link>
 
               {/* Mobile Menu Toggle */}
               <Button
@@ -321,10 +319,12 @@ export function Header() {
                 </div>
               ))}
                 <div className="pt-4 border-t dark:border-gray-800">
-                  <Button variant="angola" className="w-full">
-                    <User className="w-4 h-4 mr-2" />
-                    Área do Membro
-                  </Button>
+                  <Link href="/admin/login" className="block">
+                    <Button variant="angola" className="w-full">
+                      <User className="w-4 h-4 mr-2" />
+                      Entrar
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </motion.div>
