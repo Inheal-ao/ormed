@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { usePublicData } from "@/lib/use-public-data";
 import { BastonarioItem } from "@/lib/admin-types";
 import { optImg } from "@/lib/img";
-import { CoverImage } from "@/components/cover-image";
 
 export function BastonariaSection() {
   const { data, loading } = usePublicData<BastonarioItem[]>("/bastonarios");
@@ -70,7 +69,10 @@ export function BastonariaSection() {
             <div className="relative">
               <div className="aspect-[3/4] max-w-md mx-auto rounded-2xl overflow-hidden relative flex items-center justify-center bg-gray-800">
                 {current.photo?.url && (
-                  <CoverImage src={current.photo.url} alt={current.name} width={600} className="absolute inset-0 w-full h-full" />
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${optImg(current.photo.url, 600)})` }}
+                  />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-angola-navy via-transparent to-transparent" />
                 <div className="relative z-10 text-center p-8 mt-auto self-end">

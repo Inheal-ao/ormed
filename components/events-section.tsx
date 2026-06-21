@@ -9,7 +9,6 @@ import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, EventItem } from "@/lib/admin-types";
 import { formatCurrency } from "@/lib/utils";
 import { optImg } from "@/lib/img";
-import { CoverImage } from "@/components/cover-image";
 
 export function EventsSection() {
   const { data, loading } = usePublicData<Paginated<EventItem>>("/events?limit=4");
@@ -70,7 +69,7 @@ export function EventsSection() {
 
                   {event.coverImage?.url && (
                     <div className="sm:w-48 shrink-0">
-                      <CoverImage src={event.coverImage.url} alt={event.title} width={500} className="h-40 sm:h-full" />
+                      <div className="h-40 sm:h-full bg-cover bg-center" style={{ backgroundImage: `url(${optImg(event.coverImage.url, 500)})` }} />
                     </div>
                   )}
 

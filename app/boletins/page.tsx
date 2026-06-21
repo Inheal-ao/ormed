@@ -7,7 +7,6 @@ import { Paginated, BulletinItem, Asset } from "@/lib/admin-types";
 import { downloadUrl } from "@/lib/cloudinary-download";
 import { youtubeId } from "@/lib/youtube";
 import { optImg } from "@/lib/img";
-import { CoverImage } from "@/components/cover-image";
 
 function imagesOf(b: BulletinItem): Asset[] {
   return [...(b.coverImage?.url ? [b.coverImage] : []), ...(b.images ?? [])];
@@ -74,7 +73,8 @@ export default function BoletinsPage() {
                 >
                   <div className="aspect-[3/4] bg-angola-navy relative overflow-hidden">
                     {cover ? (
-                      <CoverImage src={cover} alt={b.title} width={400} className="w-full h-full group-hover:scale-105 transition-transform" />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={optImg(cover, 400)} alt={b.title} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                     ) : vId ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={`https://img.youtube.com/vi/${vId}/hqdefault.jpg`} alt={b.title} className="w-full h-full object-cover" />
