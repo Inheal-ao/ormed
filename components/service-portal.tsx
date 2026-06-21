@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, Check, Upload, Send, Search, FileText, Copy, Download, CreditCard, KeyRound } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { ServiceType, ServiceTrack, SERVICE_LABEL, STATUS_META } from "@/lib/service-requests";
+import { ServiceStepper } from "@/components/service-stepper";
 
 const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-angola-gold outline-none text-gray-900";
 
@@ -287,6 +288,10 @@ function TrackResult({ data, paid, onRefresh }: { data: ServiceTrack; paid: bool
           <p className="text-sm text-gray-500">{SERVICE_LABEL[data.serviceType]}</p>
         </div>
         <span className={`text-sm px-3 py-1 rounded-full font-medium shrink-0 ${meta.className}`}>{meta.label}</span>
+      </div>
+
+      <div className="bg-gray-50 rounded-lg p-4">
+        <ServiceStepper isPaid={data.isPaid} status={data.status} />
       </div>
 
       <div className="text-sm text-gray-600">

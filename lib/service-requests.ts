@@ -41,6 +41,19 @@ export const NAO_VALIDADO_REASONS = [
   "Documento falso",
 ];
 
+export interface HistoryEntry {
+  at: string;
+  by: string;
+  action: string;
+  status: string;
+}
+
+export interface TimelineEntry {
+  at: string;
+  action: string;
+  status: string;
+}
+
 export interface ServiceTrack {
   serviceCode: string;
   serviceType: ServiceType;
@@ -54,4 +67,43 @@ export interface ServiceTrack {
   receiptUrl: string | null;
   canSubmitProof: boolean;
   createdAt: string;
+  timeline: TimelineEntry[];
+}
+
+// Etapas dos fluxos (para o gráfico de progresso)
+export const FLOW_VALIDACAO = ["recebido", "em-analise", "resultado"];
+export const FLOW_PAGO = [
+  "recebido", "em-analise", "validado", "aguarda-pagamento",
+  "pagamento-em-analise", "pago", "recibo-emitido", "concluido",
+];
+export const STEP_LABEL: Record<string, string> = {
+  ...Object.fromEntries(Object.entries(STATUS_META).map(([k, v]) => [k, v.label])),
+  resultado: "Resultado",
+};
+export const NEGATIVE_STATUSES = ["rejeitado", "nao-validado"];
+
+export type StepState = "done" | "current" | "todo" | "error";
+
+/** Calcula o estado de cada etapa do fluxo para o estado atual. */
+export function computeSteps(isPaid: boolean, status: string): { key: string; label: string; state: StepState }[] {
+  const flow = isPaid ? FLOW_PAGO : FLOW_VALIDACAO;
+  const negative = NEGATIVE_STATUSES.includes(status);
+  // Índice atingido no fluxo
+  let reached: number;
+  if (!isPaid) {
+    reached = status === "recebido" ? 0 : status === "em-analise" ? 1 : 2;
+  } else if (negative || status === "rejeitado") {
+    reached = 2; // parou na fase de validação
+  } else {
+    const i = flow.indexOf(status);
+    reached = i < 0 ? 0 : i;
+  }
+  return flow.map((key, i) => {
+    let state: StepState = "todo";
+    if (i < reached) state = "done";
+    else if (i === reached) state = negative ? "error" : "current";
+    // marca como done quando concluído
+    if (key === flow[flow.length - 1] && (status === "concluido" || status === "validado" && !isPaid)) state = "done";
+    return { key, label: STEP_LABEL[key] ?? key, state };
+  });
 }
