@@ -30,6 +30,7 @@ import {
   ShieldAlert,
   Mail,
   FileCheck,
+  MessageSquare,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
@@ -54,6 +55,7 @@ const navLinks = [
   { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox },
   { href: "/admin/solicitacoes", label: "Solicitações", icon: FileCheck },
   { href: "/admin/denuncias", label: "Denúncias", icon: ShieldAlert },
+  { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
   { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote },

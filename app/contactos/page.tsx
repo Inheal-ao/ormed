@@ -14,6 +14,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { siteConfig } from "@/lib/data";
+import { API_URL } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,11 +26,30 @@ export default function ContactosPage() {
     subject: "",
     message: "",
   });
+  const [sending, setSending] = useState(false);
+  const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert("Mensagem enviada com sucesso!");
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setSending(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(`${API_URL}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(Array.isArray(err.message) ? err.message.join(", ") : err.message || "Falha ao enviar.");
+      }
+      setFeedback({ ok: true, text: "Mensagem enviada com sucesso! Entraremos em contacto em breve." });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (err) {
+      setFeedback({ ok: false, text: err instanceof Error ? err.message : "Erro ao enviar a mensagem." });
+    } finally {
+      setSending(false);
+    }
   };
 
   const contactInfo = [
@@ -182,11 +202,15 @@ export default function ContactosPage() {
                 </div>
                 <Button
                   type="submit"
-                  className="bg-angola-navy hover:bg-angola-blue text-white w-full sm:w-auto"
+                  disabled={sending}
+                  className="bg-angola-navy hover:bg-angola-blue text-white w-full sm:w-auto disabled:opacity-60"
                 >
                   <Send className="w-4 h-4 mr-2" />
-                  Enviar Mensagem
+                  {sending ? "A enviar..." : "Enviar Mensagem"}
                 </Button>
+                {feedback && (
+                  <p className={`text-sm mt-1 ${feedback.ok ? "text-green-600" : "text-red-600"}`}>{feedback.text}</p>
+                )}
               </form>
             </div>
 

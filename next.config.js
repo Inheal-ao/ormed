@@ -9,7 +9,8 @@ const csp = [
   "frame-ancestors 'self'",
   "form-action 'self'",
   // Next.js precisa de inline/eval para hidratação; libs (framer/recharts) idem
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  // googletagmanager/google-analytics para as estatísticas de visitas
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",

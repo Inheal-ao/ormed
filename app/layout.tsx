@@ -4,6 +4,9 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ConditionalChrome } from "@/components/conditional-chrome";
 import { Toaster } from "@/components/ui/toaster";
+import { Analytics } from "@/components/analytics";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://ormed-qx3s.vercel.app";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,13 +18,16 @@ const playfair = Playfair_Display({
   variable: "--font-playfair",
 });
 
+const SITE_DESCRIPTION =
+  "A Ordem dos Médicos de Angola é a instituição de utilidade pública que regula o exercício da profissão médica em Angola desde 1991. Pela Dignidade Médica Rumo à Excelência.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Ordem dos Médicos de Angola | ORMED",
     template: "%s | ORMED",
   },
-  description:
-    "A Ordem dos Médicos de Angola é a instituição de utilidade pública que regula o exercício da profissão médica em Angola desde 1991. Pela Dignidade Médica Rumo à Excelência.",
+  description: SITE_DESCRIPTION,
   keywords: [
     "Ordem dos Médicos Angola",
     "ORMED",
@@ -31,6 +37,28 @@ export const metadata: Metadata = {
     "ética médica",
     "saúde Angola",
   ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "pt_AO",
+    url: SITE_URL,
+    siteName: "Ordem dos Médicos de Angola",
+    title: "Ordem dos Médicos de Angola | ORMED",
+    description: SITE_DESCRIPTION,
+    images: [{ url: "/images/hero-1.jpg", width: 1200, height: 630, alt: "Ordem dos Médicos de Angola" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ordem dos Médicos de Angola | ORMED",
+    description: SITE_DESCRIPTION,
+    images: ["/images/hero-1.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large" },
+  },
+  icons: { icon: "/images/logo.svg" },
 };
 
 export default function RootLayout({
@@ -45,6 +73,7 @@ export default function RootLayout({
           <ConditionalChrome>{children}</ConditionalChrome>
           <Toaster />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
