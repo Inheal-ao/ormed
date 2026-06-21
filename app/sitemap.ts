@@ -44,10 +44,11 @@ const routes = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
+  // Apenas a data (sem hora) para não revelar o momento exato dos deploys.
+  const lastModified = new Date().toISOString().slice(0, 10);
   return routes.map((path) => ({
     url: `${SITE_URL}/${path}`.replace(/\/$/, "") + "/",
-    lastModified: now,
+    lastModified,
     changeFrequency: path === "" ? "daily" : "weekly",
     priority: path === "" ? 1 : 0.7,
   }));
