@@ -98,6 +98,16 @@ const navLinks: NavLink[] = [
   { href: "/admin/minhas-listas", label: "Listas de Finalistas", icon: School, uni: true },
 ];
 
+/** Determina se o utilizador pode aceder a um caminho do painel. */
+function isPathAllowed(role: string, permissions: string[], path: string): boolean {
+  if (role === "super_admin" || role === "admin" || role === "bastonaria") return true;
+  if (role === "universidade") return path.startsWith("/admin/minhas-listas") || path === "/admin/perfil";
+  // funcionário / editor
+  if (path === "/admin" || path === "/admin/perfil") return true;
+  const allowed = visibleLinks(role, permissions).map((l) => l.href);
+  return allowed.some((href) => href !== "/admin" && path.startsWith(href));
+}
+
 function visibleLinks(role: string, permissions: string[]): NavLink[] {
   if (role === "universidade") {
     return navLinks.filter((l) => l.uni);
@@ -140,14 +150,10 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   // Funcionário só pode abrir páginas a que tem permissão (bloqueia acesso direto por URL)
   useEffect(() => {
     if (loading || !user || isLoginPage) return;
-    const role = user.role;
-    if (role === "super_admin" || role === "admin" || role === "bastonaria" || role === "universidade") return;
-    const allowed = visibleLinks(role, user.permissions ?? []).map((l) => l.href);
-    const ok =
-      normalizedPath === "/admin" ||
-      normalizedPath === "/admin/perfil" ||
-      allowed.some((href) => href !== "/admin" && normalizedPath.startsWith(href));
-    if (!ok) router.replace("/admin");
+    if (user.role === "universidade") return; // tratado acima
+    if (!isPathAllowed(user.role, user.permissions ?? [], normalizedPath)) {
+      router.replace("/admin");
+    }
   }, [loading, user, isLoginPage, normalizedPath, router]);
 
   // A página de login renderiza sem o shell
@@ -227,7 +233,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <LogOut className="w-5 h-5" />
           </button>
         </header>
-        <main className="p-4 md:p-8 max-w-6xl mx-auto">{children}</main>
+        <main className="p-4 md:p-8 max-w-6xl mx-auto">
+          {isPathAllowed(user.role, user.permissions ?? [], normalizedPath) ? (
+            children
+          ) : (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <Loader2 className="w-6 h-6 animate-spin text-angola-gold mb-3" />
+              <p className="text-gray-500 text-sm">Não tem permissão para esta secção. A redirecionar...</p>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
