@@ -31,6 +31,7 @@ import {
   Mail,
   FileCheck,
   MessageSquare,
+  Building2,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
@@ -49,6 +50,7 @@ const navLinks = [
   { href: "/admin/podcast", label: "Podcast", icon: Mic },
   { href: "/admin/galeria", label: "Galeria", icon: Images },
   { href: "/admin/bastonarios", label: "Bastonários", icon: Users },
+  { href: "/admin/orgaos", label: "Órgãos", icon: Building2 },
   { href: "/admin/parceiros", label: "Parceiros", icon: Handshake },
   { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3 },
   { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope },

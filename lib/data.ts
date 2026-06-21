@@ -21,9 +21,9 @@ export const navItems = [
       { label: "Sobre Nós", href: "/sobre/" },
       { label: "História", href: "/historia/" },
       { label: "Estatutos", href: "/estatutos/" },
-      { label: "Órgãos Sociais", href: "/orgaos-sociais/" },
+      { label: "Órgãos Nacionais", href: "/orgaos-nacionais/" },
+      { label: "Órgãos Regionais", href: "/orgaos-regionais/" },
       { label: "Bastonários", href: "/bastonarios/" },
-      { label: "Comissões", href: "/comissoes/" },
     ],
   },
   {

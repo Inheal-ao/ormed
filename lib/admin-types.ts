@@ -109,6 +109,22 @@ export interface CourseItem {
   createdAt: string;
 }
 
+export interface OrgaoMember {
+  name: string;
+  role?: string;
+}
+
+export interface OrgaoItem {
+  _id: string;
+  name: string;
+  scope: "nacional" | "regional";
+  region: "" | "norte" | "centro" | "sul";
+  description: string;
+  members: OrgaoMember[];
+  order: number;
+  isPublished: boolean;
+}
+
 export interface EventRegistration {
   _id: string;
   event: string;
