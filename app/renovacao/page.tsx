@@ -1,18 +1,15 @@
+import { ServicePortal } from "@/components/service-portal";
+
+export const metadata = { title: "Renovação de Inscrição" };
+
 export default function RenovacaoPage() {
   return (
-    <div className="pt-28 pb-16 min-h-screen">
-      <section className="bg-slate-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold">Renovação de Inscrição</h1>
-          <p className="text-gray-300 text-lg mt-4">Renove a sua inscrição na ORMED</p>
-        </div>
-      </section>
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="bg-gray-50 rounded-2xl p-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Em desenvolvimento</h2>
-          <p className="text-gray-600">Esta página está a ser desenvolvida. Volte em breve.</p>
-        </div>
-      </div>
-    </div>
+    <ServicePortal
+      serviceType="renovacao-inscricao"
+      title="Renovação de Inscrição"
+      description="Renove a sua inscrição na ORMED à distância. Submeta o pedido, acompanhe pelo código e efetue o pagamento online."
+      paid
+      intro="Submeta o pedido e os documentos necessários. Após análise, receberá as coordenadas de pagamento no separador de consulta, onde poderá enviar o comprovativo e descarregar o recibo."
+    />
   );
 }

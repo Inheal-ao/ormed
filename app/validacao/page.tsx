@@ -1,18 +1,14 @@
+import { ServicePortal } from "@/components/service-portal";
+
+export const metadata = { title: "Validação de Documentos" };
+
 export default function ValidacaoPage() {
   return (
-    <div className="pt-28 pb-16 min-h-screen">
-      <section className="bg-slate-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-4xl md:text-5xl font-bold">Validação de Documentos</h1>
-          <p className="text-gray-300 text-lg mt-4">Valide certidões e documentos emitidos pela ORMED</p>
-        </div>
-      </section>
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="bg-gray-50 rounded-2xl p-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Em desenvolvimento</h2>
-          <p className="text-gray-600">Esta página está a ser desenvolvida. Volte em breve.</p>
-        </div>
-      </div>
-    </div>
+    <ServicePortal
+      serviceType="validacao-documentos"
+      title="Validação de Documentos"
+      description="Valide à distância se um documento foi emitido pela Ordem e se o médico está em situação regular — sem precisar de se deslocar."
+      intro="Preencha o formulário e anexe o documento. Receberá um código de serviço para acompanhar o estado da validação. Não é necessário deslocar-se com documentos físicos."
+    />
   );
 }
