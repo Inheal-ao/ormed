@@ -163,7 +163,7 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
   );
 }
 
-function ConsultPanel({ paid }: { paid: boolean }) {
+export function ConsultPanel({ paid }: { paid: boolean }) {
   const [code, setCode] = useState("");
   const [data, setData] = useState<ServiceTrack | null>(null);
   const [loading, setLoading] = useState(false);

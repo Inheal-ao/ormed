@@ -21,6 +21,7 @@ interface ServiceRequest {
   email: string;
   phone: string;
   attachments: Asset[];
+  details: string;
   isPaid: boolean;
   status: string;
   statusDetail: string;
@@ -205,6 +206,14 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
         {r.email && <p><span className="text-gray-400">Email:</span> {r.email}</p>}
         <p><span className="text-gray-400">Telefone:</span> {r.phone}</p>
       </div>
+
+      {/* Dados do formulário (ex.: inscrição) */}
+      {r.details && (
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+          <p className="text-xs font-medium text-gray-500 mb-1">Dados do formulário</p>
+          <p className="text-sm text-gray-700 whitespace-pre-line">{r.details}</p>
+        </div>
+      )}
 
       {/* 3. Documentos */}
       {r.attachments.length > 0 && (
