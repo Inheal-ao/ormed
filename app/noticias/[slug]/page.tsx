@@ -17,6 +17,7 @@ import { formatDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { usePublicData } from "@/lib/use-public-data";
 import { NewsItem } from "@/lib/admin-types";
+import { CoverImage } from "@/components/cover-image";
 
 export default function NoticiaDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -93,12 +94,7 @@ export default function NoticiaDetailPage() {
         {/* Carrossel de fotos */}
         {current?.url && (
           <div className="relative mb-8">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={current.url}
-              alt={item.title}
-              className="w-full rounded-2xl object-cover max-h-[460px]"
-            />
+            <CoverImage src={current.url} alt={item.title} width={1000} lazy={false} className="w-full h-[300px] sm:h-[460px] rounded-2xl" />
             {photos.length > 1 && (
               <>
                 <button

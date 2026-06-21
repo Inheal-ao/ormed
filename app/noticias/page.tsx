@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, NewsItem } from "@/lib/admin-types";
 import { optImg } from "@/lib/img";
+import { CoverImage } from "@/components/cover-image";
 
 export default function NoticiasPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -108,13 +109,7 @@ export default function NoticiasPage() {
                   <Link href={`/noticias/${item.slug}/`}>
                     <div className="aspect-video relative overflow-hidden bg-angola-navy flex items-center justify-center">
                       {item.coverImage?.url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={optImg(item.coverImage.url, 600)}
-                          alt={item.title}
-                          loading="lazy"
-                          className="absolute inset-0 h-full w-full object-cover"
-                        />
+                        <CoverImage src={item.coverImage.url} alt={item.title} width={600} className="absolute inset-0 h-full w-full" />
                       ) : (
                         <Tag className="w-10 h-10 text-white/30" />
                       )}

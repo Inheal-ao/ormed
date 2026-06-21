@@ -5,9 +5,69 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid,
   PieChart, Pie, Cell, Legend, AreaChart, Area,
 } from "recharts";
-import { Loader2, FileText, Eye, EyeOff, Layers } from "lucide-react";
+import Link from "next/link";
+import { Loader2, FileText, Eye, EyeOff, Layers, Bell, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAdminAuth } from "@/components/admin/auth-context";
+import { useNotifications } from "@/components/admin/notifications-context";
+
+const NOTIF_META: { key: string; label: string; link: string }[] = [
+  { key: "validacoes", label: "Validações", link: "/admin/validacoes" },
+  { key: "solicitacoes", label: "Documentos da Ordem", link: "/admin/solicitacoes" },
+  { key: "denuncias", label: "Denúncias", link: "/admin/denuncias" },
+  { key: "mensagens", label: "Mensagens", link: "/admin/mensagens" },
+  { key: "inscricoes", label: "Inscrições", link: "/admin/eventos" },
+  { key: "apoioPesquisa", label: "Apoio à Pesquisa", link: "/admin/apoio-pesquisa" },
+  { key: "listas", label: "Listas de finalistas", link: "/admin/listas-universidades" },
+];
+
+function NotificationsPanel() {
+  const { summary } = useNotifications();
+  if (!summary) return null;
+  const counts = summary.counts as Record<string, number>;
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-8">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="relative">
+          <Bell className="w-5 h-5 text-angola-navy" />
+          {summary.total > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />}
+        </div>
+        <h2 className="font-bold text-gray-900">Notificações</h2>
+        <span className="text-sm text-gray-400">{summary.total} pendente(s)</span>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-5">
+        {NOTIF_META.map((m) => {
+          const n = counts[m.key] ?? 0;
+          return (
+            <Link key={m.key} href={m.link} className={`rounded-xl p-3 text-center border transition ${n > 0 ? "border-angola-gold/40 bg-angola-cream/40 hover:bg-angola-cream" : "border-gray-100 bg-gray-50"}`}>
+              <p className={`text-2xl font-bold ${n > 0 ? "text-angola-navy" : "text-gray-300"}`}>{n}</p>
+              <p className="text-[11px] text-gray-500 leading-tight mt-0.5">{m.label}</p>
+            </Link>
+          );
+        })}
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Operações em curso</p>
+        {summary.recent.length === 0 ? (
+          <p className="text-sm text-gray-400 py-3">Sem operações pendentes. Tudo em dia! ✅</p>
+        ) : (
+          <div className="divide-y divide-gray-100 max-h-72 overflow-y-auto">
+            {summary.recent.map((r, i) => (
+              <Link key={i} href={r.link} className="flex items-center gap-3 py-2.5 hover:bg-gray-50 -mx-2 px-2 rounded-lg group">
+                <span className="text-[10px] font-medium bg-angola-navy/5 text-angola-navy px-2 py-0.5 rounded-full shrink-0">{r.type}</span>
+                <span className="text-sm text-gray-700 truncate flex-1">{r.label}</span>
+                <span className="text-xs text-gray-400 shrink-0">{new Date(r.at).toLocaleDateString("pt-PT")}</span>
+                <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-angola-navy shrink-0" />
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 interface Source {
   key: string;
@@ -130,6 +190,8 @@ export default function AdminDashboard() {
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Olá, {user?.name?.split(" ")[0]}</h1>
       <p className="text-gray-500 mb-8">Visão geral de toda a plataforma ORMED.</p>
+
+      <NotificationsPanel />
 
       {/* Cartões de resumo */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

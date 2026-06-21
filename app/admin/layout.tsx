@@ -1,4 +1,5 @@
 import { AdminAuthProvider } from "@/components/admin/auth-context";
+import { NotificationsProvider } from "@/components/admin/notifications-context";
 import { AdminShell } from "@/components/admin/admin-shell";
 
 export const metadata = {
@@ -9,7 +10,9 @@ export const metadata = {
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <AdminAuthProvider>
-      <AdminShell>{children}</AdminShell>
+      <NotificationsProvider>
+        <AdminShell>{children}</AdminShell>
+      </NotificationsProvider>
     </AdminAuthProvider>
   );
 }

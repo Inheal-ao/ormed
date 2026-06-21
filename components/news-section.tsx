@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { usePublicData } from "@/lib/use-public-data";
 import { Paginated, NewsItem } from "@/lib/admin-types";
 import { optImg } from "@/lib/img";
+import { CoverImage } from "@/components/cover-image";
 
 export function NewsSection() {
   const { data, loading } = usePublicData<Paginated<NewsItem>>("/news?limit=5");
@@ -67,11 +68,12 @@ export function NewsSection() {
                 >
                   <div className="absolute inset-0 bg-angola-navy">
                     {featured.coverImage?.url && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={optImg(featured.coverImage.url, 800)}
+                      <CoverImage
+                        src={featured.coverImage.url}
                         alt={featured.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        width={900}
+                        lazy={false}
+                        className="w-full h-full group-hover:scale-105 transition-transform duration-700"
                       />
                     )}
                   </div>
@@ -120,12 +122,7 @@ export function NewsSection() {
                   >
                     <div className="w-28 h-24 rounded-xl overflow-hidden shrink-0 bg-gray-100 relative">
                       {item.coverImage?.url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={optImg(item.coverImage.url, 300)}
-                          alt={item.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
+                        <CoverImage src={item.coverImage.url} alt={item.title} width={300} className="w-full h-full" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Newspaper className="w-6 h-6 text-gray-300" />

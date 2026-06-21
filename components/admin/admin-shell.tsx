@@ -37,6 +37,23 @@ import {
   User,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
+import { useNotifications, NotifSummary } from "@/components/admin/notifications-context";
+
+function badgeFor(link: NavLink, summary: NotifSummary | null): number {
+  if (!summary) return 0;
+  if (link.exact) return summary.total; // Painel
+  const c = summary.counts;
+  switch (link.key) {
+    case "validacoes": return c.validacoes;
+    case "solicitacoes": return c.solicitacoes;
+    case "denuncias": return c.denuncias;
+    case "mensagens": return c.mensagens;
+    case "apoio-pesquisa": return c.apoioPesquisa;
+    case "listas-universidades": return c.listas;
+    case "eventos": return c.inscricoes;
+    default: return 0;
+  }
+}
 
 type NavLink = {
   href: string; label: string; icon: any; exact?: boolean;
@@ -98,6 +115,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout } = useAdminAuth();
+  const { summary } = useNotifications();
 
   // Normaliza barras finais (o site usa trailingSlash)
   const normalizedPath = pathname?.replace(/\/+$/, "") || "/admin";
@@ -141,6 +159,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             const active = link.exact
               ? normalizedPath === link.href
               : normalizedPath.startsWith(link.href);
+            const count = badgeFor(link, summary);
             return (
               <Link
                 key={link.href}
@@ -152,7 +171,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                 }`}
               >
                 <link.icon className="w-4 h-4" />
-                {link.label}
+                <span className="flex-1">{link.label}</span>
+                {count > 0 && (
+                  <span className={`text-[11px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center ${active ? "bg-angola-navy text-white" : "bg-angola-gold text-angola-navy"}`}>
+                    {count > 99 ? "99+" : count}
+                  </span>
+                )}
               </Link>
             );
           })}
