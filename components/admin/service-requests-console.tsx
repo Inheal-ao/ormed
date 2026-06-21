@@ -32,7 +32,7 @@ interface ServiceRequest {
   createdAt: string;
 }
 
-const PAID_TYPES = ["renovacao-inscricao", "carteira-profissional", "pagar-cotas", "declaracao"];
+const PAID_TYPES = ["inscricao", "renovacao-inscricao", "carteira-profissional", "pagar-cotas", "declaracao"];
 
 export function ServiceRequestsConsole({
   scope,

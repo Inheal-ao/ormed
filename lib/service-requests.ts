@@ -1,5 +1,6 @@
 export type ServiceType =
   | "validacao-documentos"
+  | "inscricao"
   | "renovacao-inscricao"
   | "carteira-profissional"
   | "pagar-cotas"
@@ -7,6 +8,7 @@ export type ServiceType =
 
 export const SERVICE_LABEL: Record<string, string> = {
   "validacao-documentos": "Validação de Documentos",
+  "inscricao": "Inscrição na Ordem",
   "renovacao-inscricao": "Renovação de Inscrição",
   "carteira-profissional": "Carteira Profissional",
   "pagar-cotas": "Pagamento de Cotas",
