@@ -6,7 +6,7 @@ import { API_URL } from "@/lib/api";
 import { ServiceType, ServiceTrack, SERVICE_LABEL, STATUS_META } from "@/lib/service-requests";
 import { ServiceStepper } from "@/components/service-stepper";
 
-const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-angola-gold outline-none text-gray-900";
+const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-angola-gold outline-none text-gray-900 bg-white dark:bg-white/10 dark:text-white dark:border-white/20 dark:[color-scheme:dark]";
 
 export function ServicePortal({
   serviceType,
@@ -37,13 +37,13 @@ export function ServicePortal({
       </section>
 
       <div className="max-w-2xl mx-auto px-4 py-10">
-        {intro && <p className="text-gray-600 bg-angola-cream/60 border border-angola-gold/20 rounded-xl p-4 text-sm mb-6">{intro}</p>}
+        {intro && <p className="text-gray-600 dark:text-gray-300 bg-angola-cream/60 dark:bg-white/5 border border-angola-gold/20 rounded-xl p-4 text-sm mb-6">{intro}</p>}
 
-        <div className="flex gap-2 mb-6 bg-gray-100 rounded-xl p-1">
-          <button type="button" onClick={() => setTab("solicitar")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "solicitar" ? "bg-white shadow text-angola-navy" : "text-gray-500"}`}>
+        <div className="flex gap-2 mb-6 bg-gray-100 dark:bg-white/5 rounded-xl p-1">
+          <button type="button" onClick={() => setTab("solicitar")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "solicitar" ? "bg-white dark:bg-angola-navy shadow text-angola-navy dark:text-white" : "text-gray-500 dark:text-gray-300"}`}>
             Nova Solicitação
           </button>
-          <button type="button" onClick={() => setTab("consultar")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "consultar" ? "bg-white shadow text-angola-navy" : "text-gray-500"}`}>
+          <button type="button" onClick={() => setTab("consultar")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "consultar" ? "bg-white dark:bg-angola-navy shadow text-angola-navy dark:text-white" : "text-gray-500 dark:text-gray-300"}`}>
             Consultar Estado
           </button>
         </div>
@@ -122,32 +122,32 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
   }
 
   return (
-    <form onSubmit={submit} className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 space-y-5">
+    <form onSubmit={submit} className="bg-white dark:bg-angola-navy/40 border border-gray-200 dark:border-white/10 rounded-2xl p-6 md:p-8 space-y-5">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nome completo do solicitante *</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nome completo do solicitante *</label>
         <input className={inputClass} required value={requesterName} onChange={(e) => setRequesterName(e.target.value)} placeholder="O seu nome" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Instituição (opcional)</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Instituição (opcional)</label>
         <input className={inputClass} value={institution} onChange={(e) => setInstitution(e.target.value)} placeholder="Nome da instituição, se aplicável" />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Nome do proprietário do documento</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Nome do proprietário do documento</label>
         <input className={inputClass} value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="Deixe vazio se for o próprio solicitante" />
         <p className="text-xs text-gray-400 mt-1">Se for uma instituição, indique o nome da pessoa a quem pertence o documento.</p>
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email (opcional)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Email (opcional)</label>
           <input type="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Contacto telefónico *</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Contacto telefónico *</label>
           <input className={inputClass} required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="9XX XXX XXX" />
         </div>
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Documento(s) *</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Documento(s) *</label>
         <label className="flex items-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-angola-gold cursor-pointer">
           <Upload className="w-4 h-4" />
           {files.length > 0 ? `${files.length} ficheiro(s) selecionado(s)` : "Anexar PDF ou imagens (pode anexar vários)"}
@@ -189,8 +189,8 @@ export function ConsultPanel({ paid }: { paid: boolean }) {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={(e) => { e.preventDefault(); track(); }} className="bg-white border border-gray-200 rounded-2xl p-5">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Código de serviço</label>
+      <form onSubmit={(e) => { e.preventDefault(); track(); }} className="bg-white dark:bg-angola-navy/40 border border-gray-200 dark:border-white/10 rounded-2xl p-5">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">Código de serviço</label>
         <div className="flex gap-2">
           <input className={`${inputClass} font-mono uppercase`} value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="ORM-VD-2026-XXXXXX" />
           <button type="submit" disabled={loading} className="px-4 rounded-lg bg-angola-navy text-white flex items-center gap-2 shrink-0 disabled:opacity-60">
@@ -237,8 +237,8 @@ function RecoverBox({ onFound }: { onFound: (code: string) => void }) {
   };
 
   return (
-    <form onSubmit={recover} className="bg-angola-cream/60 border border-angola-gold/30 rounded-2xl p-5 space-y-3">
-      <p className="text-sm font-medium text-gray-700">Recuperar código de serviço</p>
+    <form onSubmit={recover} className="bg-angola-cream/60 dark:bg-white/5 border border-angola-gold/30 rounded-2xl p-5 space-y-3">
+      <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Recuperar código de serviço</p>
       <input className={inputClass} required value={ownerName} onChange={(e) => setOwnerName(e.target.value)} placeholder="Nome do proprietário do documento" />
       <input className={inputClass} required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Contacto telefónico usado" />
       <button type="submit" disabled={loading} className="w-full bg-angola-navy text-white py-2.5 rounded-lg font-medium disabled:opacity-60 flex items-center justify-center gap-2">
@@ -246,7 +246,7 @@ function RecoverBox({ onFound }: { onFound: (code: string) => void }) {
       </button>
       {error && <p className="text-sm text-red-600">{error}</p>}
       {results && results.map((r) => (
-        <button type="button" key={r.serviceCode} onClick={() => onFound(r.serviceCode)} className="w-full text-left bg-white border border-gray-200 rounded-lg px-3 py-2 hover:border-angola-gold">
+        <button type="button" key={r.serviceCode} onClick={() => onFound(r.serviceCode)} className="w-full text-left bg-white dark:bg-angola-navy/40 border border-gray-200 dark:border-white/10 rounded-lg px-3 py-2 hover:border-angola-gold">
           <span className="font-mono font-bold text-angola-navy">{r.serviceCode}</span>
           <span className="text-xs text-gray-500 ml-2">{SERVICE_LABEL[r.serviceType]}</span>
         </button>
@@ -281,7 +281,7 @@ function TrackResult({ data, paid, onRefresh }: { data: ServiceTrack; paid: bool
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-6 space-y-4">
+    <div className="bg-white dark:bg-angola-navy/40 border border-gray-200 dark:border-white/10 rounded-2xl p-6 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-mono font-bold text-angola-navy">{data.serviceCode}</p>
