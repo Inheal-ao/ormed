@@ -4,28 +4,22 @@ import { useState } from "react";
 import { Loader2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { API_URL } from "@/lib/api";
-import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [captchaToken, setCaptchaToken] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
-    if (captchaEnabled && !captchaToken) {
-      setError("Complete a verificação anti-spam.");
-      return;
-    }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`${API_URL}/newsletter`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...captchaHeaders(captchaToken) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
       if (!res.ok) {
@@ -65,7 +59,6 @@ export function NewsletterSignup() {
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Subscrever"}
         </Button>
       </div>
-      <Turnstile onToken={setCaptchaToken} />
       {error && <p className="text-xs text-red-300">{error}</p>}
     </form>
   );

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { FlaskConical, Loader2, Check, Send } from "lucide-react";
 import { API_URL } from "@/lib/api";
-import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
 
 const SUPPORT_TYPES = [
   "Orientação metodológica",
@@ -24,20 +23,15 @@ export default function PesquisaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [captchaToken, setCaptchaToken] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (captchaEnabled && !captchaToken) {
-      setError("Complete a verificação anti-spam.");
-      return;
-    }
     setSubmitting(true);
     setError(null);
     try {
       const res = await fetch(`${API_URL}/research-support`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...captchaHeaders(captchaToken) },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, phone, supportType, message }),
       });
       if (!res.ok) {
@@ -108,7 +102,6 @@ export default function PesquisaPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Descreva o seu pedido</label>
               <textarea className={`${inputClass} min-h-[120px]`} required value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Detalhe a sua pesquisa e o apoio que necessita..." />
             </div>
-            <Turnstile onToken={setCaptchaToken} />
             {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
             <button type="submit" disabled={submitting} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
               {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

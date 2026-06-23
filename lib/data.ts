@@ -79,8 +79,9 @@ export const navItems = [
     label: "Serviços",
     href: "#",
     children: [
-      { label: "Consulta de Médicos", href: "/consulta-medicos/" },
+      { label: "Consultar Estado do Serviço", href: "/consultar/" },
       { label: "Validação de Documentos", href: "/validacao/" },
+      { label: "Consulta de Médicos", href: "/consulta-medicos/" },
       { label: "Apoio à Pesquisa Científica", href: "/pesquisa/" },
       { label: "Biblioteca", href: "/biblioteca/" },
     ],

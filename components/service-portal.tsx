@@ -5,7 +5,7 @@ import { Loader2, Check, Upload, Send, Search, FileText, Copy, Download, CreditC
 import { API_URL } from "@/lib/api";
 import { ServiceType, ServiceTrack, SERVICE_LABEL, STATUS_META } from "@/lib/service-requests";
 import { ServiceStepper } from "@/components/service-stepper";
-import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
+import Link from "next/link";
 
 const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-angola-gold outline-none text-gray-900 bg-white dark:bg-white/10 dark:text-white dark:border-white/20 dark:[color-scheme:dark]";
 
@@ -13,7 +13,6 @@ export function ServicePortal({
   serviceType,
   title,
   description,
-  paid = false,
   intro,
 }: {
   serviceType: ServiceType;
@@ -22,8 +21,6 @@ export function ServicePortal({
   paid?: boolean;
   intro?: string;
 }) {
-  const [tab, setTab] = useState<"solicitar" | "consultar">("solicitar");
-
   return (
     <div className="pt-36 pb-16 min-h-screen">
       <section className="bg-angola-navy text-white py-16">
@@ -40,20 +37,11 @@ export function ServicePortal({
       <div className="max-w-2xl mx-auto px-4 py-10">
         {intro && <p className="text-gray-600 dark:text-gray-300 bg-angola-cream/60 dark:bg-white/5 border border-angola-gold/20 rounded-xl p-4 text-sm mb-6">{intro}</p>}
 
-        <div className="flex gap-2 mb-6 bg-gray-100 dark:bg-white/5 rounded-xl p-1">
-          <button type="button" onClick={() => setTab("solicitar")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "solicitar" ? "bg-white dark:bg-angola-navy shadow text-angola-navy dark:text-white" : "text-gray-500 dark:text-gray-300"}`}>
-            Nova Solicitação
-          </button>
-          <button type="button" onClick={() => setTab("consultar")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "consultar" ? "bg-white dark:bg-angola-navy shadow text-angola-navy dark:text-white" : "text-gray-500 dark:text-gray-300"}`}>
-            Consultar Estado
-          </button>
-        </div>
+        <RequestForm serviceType={serviceType} />
 
-        {tab === "solicitar" ? (
-          <RequestForm serviceType={serviceType} />
-        ) : (
-          <ConsultPanel paid={paid} />
-        )}
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+          Já submeteu? <Link href="/consultar" className="text-angola-blue font-medium hover:underline">Consultar o estado do seu serviço →</Link>
+        </p>
       </div>
     </div>
   );
@@ -70,16 +58,11 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
   const [code, setCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState("");
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (files.length === 0) {
       setError("Anexe pelo menos um documento.");
-      return;
-    }
-    if (captchaEnabled && !captchaToken) {
-      setError("Complete a verificação anti-spam.");
       return;
     }
     setSubmitting(true);
@@ -93,7 +76,7 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
       if (email) form.append("email", email);
       form.append("phone", phone);
       files.forEach((f) => form.append("attachments", f));
-      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: form, headers: captchaHeaders(captchaToken) });
+      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: form });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(Array.isArray(err.message) ? err.message.join(", ") : err.message || "Falha ao enviar.");
@@ -160,7 +143,6 @@ function RequestForm({ serviceType }: { serviceType: ServiceType }) {
           <input type="file" accept="image/*,application/pdf" multiple className="hidden" onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
         </label>
       </div>
-      <Turnstile onToken={setCaptchaToken} />
       {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
       <button type="submit" disabled={submitting} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
         {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}

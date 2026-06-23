@@ -10,8 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { API_URL } from "@/lib/api";
-import { ConsultPanel } from "@/components/service-portal";
-import { Turnstile, captchaEnabled, captchaHeaders } from "@/components/turnstile";
 
 const steps = [
   { id: 1, title: "Dados Pessoais", icon: UserPlus },
@@ -29,7 +27,6 @@ const DOCS = [
 ];
 
 export default function InscricaoPage() {
-  const [tab, setTab] = useState<"inscrever" | "consultar">("inscrever");
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState({
     nome: "", dataNascimento: "", bi: "", nif: "", email: "", telefone: "", morada: "",
@@ -40,7 +37,6 @@ export default function InscricaoPage() {
   const [code, setCode] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState("");
 
   const set = (k: keyof typeof form, v: string) => setForm((p) => ({ ...p, [k]: v }));
   const nextStep = () => setCurrentStep((p) => Math.min(p + 1, 3));
@@ -55,10 +51,6 @@ export default function InscricaoPage() {
     const missing = DOCS.filter((d) => d.required && !docs[d.key]);
     if (missing.length > 0) {
       setError(`Anexe os documentos obrigatórios: ${missing.map((d) => d.label).join(", ")}.`);
-      return;
-    }
-    if (captchaEnabled && !captchaToken) {
-      setError("Complete a verificação anti-spam.");
       return;
     }
     setSubmitting(true);
@@ -90,7 +82,7 @@ export default function InscricaoPage() {
         if (f) fd.append("attachments", f, `${d.label} - ${f.name}`);
       });
 
-      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: fd, headers: captchaHeaders(captchaToken) });
+      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: fd });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(Array.isArray(err.message) ? err.message.join(", ") : err.message || "Falha ao enviar.");
@@ -122,9 +114,9 @@ export default function InscricaoPage() {
               </button>
             </div>
             {copied && <p className="text-xs text-green-600">Código copiado!</p>}
-            <button type="button" onClick={() => { setCode(null); setTab("consultar"); }} className="mt-4 text-sm text-angola-blue hover:underline">
+            <a href="/consultar" className="mt-4 inline-block text-sm text-angola-blue hover:underline">
               Consultar estado da inscrição →
-            </button>
+            </a>
           </div>
         </div>
       </div>
@@ -142,16 +134,7 @@ export default function InscricaoPage() {
           <p className="text-gray-600 dark:text-gray-400">Preencha o formulário para se tornar membro da Ordem dos Médicos de Angola</p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-8 bg-gray-100 rounded-xl p-1 max-w-md mx-auto">
-          <button type="button" onClick={() => setTab("inscrever")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "inscrever" ? "bg-white shadow text-angola-navy" : "text-gray-500"}`}>Nova Inscrição</button>
-          <button type="button" onClick={() => setTab("consultar")} className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition ${tab === "consultar" ? "bg-white shadow text-angola-navy" : "text-gray-500"}`}>Consultar Estado</button>
-        </div>
-
-        {tab === "consultar" ? (
-          <div className="max-w-2xl mx-auto"><ConsultPanel paid /></div>
-        ) : (
-          <>
+        <>
             {/* Progresso */}
             <div className="mb-10">
               <div className="flex items-center justify-between mb-4">
@@ -217,7 +200,6 @@ export default function InscricaoPage() {
                     <p className="text-xs text-gray-500 bg-angola-cream/60 border border-angola-gold/20 rounded-lg p-3">
                       Após enviar, a sua inscrição será <strong>avaliada pela Ordem</strong>. Receberá um código de serviço para acompanhar o estado e, após aprovação, as <strong>coordenadas e o valor a pagar</strong> aparecerão no separador "Consultar Estado".
                     </p>
-                    {currentStep === 3 && <Turnstile onToken={setCaptchaToken} />}
                     {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
                   </div>
                 )}
@@ -240,8 +222,7 @@ export default function InscricaoPage() {
                 </div>
               </CardContent>
             </Card>
-          </>
-        )}
+        </>
       </div>
     </div>
   );
