@@ -208,7 +208,7 @@ export default function InscricaoPage() {
     return (
       <div className="pt-28 pb-16 bg-gray-50 min-h-screen">
         <div className="max-w-xl mx-auto px-4">
-          <div className="bg-teal-50 border border-teal-200 rounded-2xl p-8 text-center">
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
             <div className="w-16 h-16 rounded-full border-4 border-green-500 flex items-center justify-center mx-auto mb-4">
               <Check className="w-8 h-8 text-green-500" />
             </div>
@@ -268,15 +268,15 @@ export default function InscricaoPage() {
           {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-5">{error}</div>}
 
           <div className="flex items-center justify-between mt-8 pt-6 border-t">
-            <button type="button" onClick={prev} disabled={step === 1} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-angola-gold text-angola-navy font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+            <button type="button" onClick={prev} disabled={step === 1} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed">
               <ChevronLeft className="w-4 h-4" /> Voltar
             </button>
             {step < 3 ? (
-              <button type="button" onClick={next} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-gradient-to-r from-teal-400 to-teal-500 text-white font-semibold hover:brightness-105">
+              <button type="button" onClick={next} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-angola-navy text-white font-semibold hover:brightness-110">
                 Próximo <ChevronRight className="w-4 h-4" />
               </button>
             ) : (
-              <button type="button" onClick={submit} disabled={submitting} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-gradient-to-r from-teal-400 to-teal-500 text-white font-semibold hover:brightness-105 disabled:opacity-60">
+              <button type="button" onClick={submit} disabled={submitting} className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-angola-navy text-white font-semibold hover:brightness-110 disabled:opacity-60">
                 {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Finalizar Inscrição
               </button>
             )}
@@ -452,7 +452,7 @@ function StepDocumentos({ model, setModel, docs, setDocs }: { model: string; set
       <p className="text-sm font-medium text-gray-700 mb-3">Escolha um modelo de documentos:</p>
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-5">
         {Object.keys(DOC_MODELS).map((k) => (
-          <button key={k} type="button" onClick={() => setModel(k)} className={`py-2.5 rounded-lg text-sm font-semibold transition ${model === k ? "bg-angola-navy text-white" : "bg-blue-500 text-white hover:brightness-110"}`}>
+          <button key={k} type="button" onClick={() => setModel(k)} className={`py-2.5 rounded-lg text-sm font-semibold transition border ${model === k ? "bg-angola-navy text-white border-angola-navy" : "bg-white text-angola-navy border-gray-200 hover:border-angola-gold hover:bg-angola-cream/40"}`}>
             Modelo {k}
           </button>
         ))}
