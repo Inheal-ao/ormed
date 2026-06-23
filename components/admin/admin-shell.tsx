@@ -36,6 +36,7 @@ import {
   UserCog,
   User,
   Activity,
+  IdCard,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { useNotifications, NotifSummary } from "@/components/admin/notifications-context";
@@ -81,6 +82,7 @@ const navLinks: NavLink[] = [
   { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3, key: "estatisticas" },
   { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope, key: "especialidades" },
   { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa" },
+  { href: "/admin/membros", label: "Membros (Médicos)", icon: IdCard, key: "membros" },
   { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck, key: "validacoes" },
   { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes" },
   { href: "/admin/listas-universidades", label: "Listas das Universidades", icon: School, key: "listas-universidades" },

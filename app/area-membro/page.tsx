@@ -1,341 +1,179 @@
 "use client";
 
 import { useState } from "react";
-import {
-  User,
-  Lock,
-  Eye,
-  EyeOff,
-  Shield,
-  FileText,
-  CreditCard,
-  Bell,
-  Settings,
-  LogOut,
-  ChevronRight,
-  CheckCircle,
-  AlertCircle,
-  Calendar,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard } from "lucide-react";
+import { API_URL } from "@/lib/api";
+
+interface FichaData {
+  _id: string;
+  numeroUtente: string;
+  numeroOrdem: string;
+  name: string;
+  biPassaporte: string;
+  phone: string;
+  email: string;
+  especialidade: string;
+  provincia: string;
+  residencia: string;
+  status: string;
+}
+
+const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900";
 
 export default function AreaMembroPage() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [creds, setCreds] = useState({ numeroUtente: "", biPassaporte: "", phone: "", numeroOrdem: "", code: "" });
+  const [ficha, setFicha] = useState<FichaData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const set = (k: keyof typeof creds, v: string) => setCreds((p) => ({ ...p, [k]: v }));
+
+  const access = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoggedIn(true);
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_URL}/members/access`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(creds),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Dados de acesso inválidos.");
+      }
+      setFicha(await res.json());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao aceder.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (!isLoggedIn) {
-    return (
-      <div className="pt-28 pb-16 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="w-full max-w-md px-4">
-          <Card className="border-0 shadow-xl">
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-angola-navy flex items-center justify-center">
-                  <Shield className="w-8 h-8 text-white" />
-                </div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Área do Membro
-                </h1>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">
-                  Aceda à sua conta ORMED
-                </p>
-              </div>
-
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Número de Membro / Email
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      className="pl-10"
-                      placeholder="ex: ORM-12345"
-                      value={loginData.email}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, email: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    Palavra-passe
-                  </label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      className="pl-10 pr-10"
-                      placeholder="••••••••"
-                      value={loginData.password}
-                      onChange={(e) =>
-                        setLoginData({ ...loginData, password: e.target.value })
-                      }
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                    <span className="text-gray-600 dark:text-gray-400">Lembrar-me</span>
-                  </label>
-                  <a
-                    href="#"
-                    className="text-angola-gold hover:text-red-800 font-medium"
-                  >
-                    Recuperar palavra-passe
-                  </a>
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-angola-navy hover:bg-angola-blue py-6"
-                >
-                  Entrar
-                </Button>
-              </form>
-
-              <div className="mt-6 pt-6 border-t text-center">
-                <p className="text-sm text-gray-500">
-                  Ainda não é membro?{" "}
-                  <a
-                    href="/inscricao/"
-                    className="text-angola-gold font-medium hover:underline"
-                  >
-                    Inscreva-se
-                  </a>
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  const logout = () => { setFicha(null); setCreds({ numeroUtente: "", biPassaporte: "", phone: "", numeroOrdem: "", code: "" }); };
 
   return (
-    <div className="pt-28 pb-16 bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-700 to-red-900 flex items-center justify-center">
-              <User className="w-8 h-8 text-white" />
+    <div className="pt-36 pb-16 min-h-screen">
+      <section className="bg-angola-navy text-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-angola-gold/20 text-angola-gold text-sm font-medium mb-4">
+            <User className="w-4 h-4" /> Médicos
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold">Área do Médico</h1>
+          <p className="text-gray-300 text-lg mt-4 max-w-2xl">
+            Aceda à sua ficha de membro com o seu número de utente e código de acesso. Pode consultar os seus dados e solicitar alterações.
+          </p>
+        </div>
+      </section>
+
+      <div className="max-w-2xl mx-auto px-4 py-10">
+        {!ficha ? (
+          <form onSubmit={access} className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="w-5 h-5 text-angola-gold" />
+              <h2 className="font-bold text-gray-900">Acesso à sua ficha</h2>
             </div>
+            <p className="text-sm text-gray-500">Introduza todos os dados que recebeu da Ordem após a aprovação da sua inscrição.</p>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Bem-vindo, Dr. Silva
-              </h1>
-              <p className="text-gray-500 dark:text-gray-400 text-sm">
-                Membro ORMED · Nº ORM-12345 · Medicina Interna
-              </p>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Número de Utente</label>
+              <input className={`${inputClass} font-mono`} required value={creds.numeroUtente} onChange={(e) => set("numeroUtente", e.target.value.toUpperCase())} placeholder="UT-2026-00000" />
             </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">BI / Passaporte</label>
+                <input className={inputClass} required value={creds.biPassaporte} onChange={(e) => set("biPassaporte", e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contacto telefónico</label>
+                <input className={inputClass} required value={creds.phone} onChange={(e) => set("phone", e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Número de Ordem</label>
+                <input className={inputClass} required value={creds.numeroOrdem} onChange={(e) => set("numeroOrdem", e.target.value)} />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5"><KeyRound className="w-4 h-4 text-angola-gold" /> Código (6 dígitos)</label>
+                <input className={`${inputClass} font-mono text-center`} maxLength={6} required value={creds.code} onChange={(e) => set("code", e.target.value.replace(/\D/g, ""))} placeholder="000000" />
+              </div>
+            </div>
+            {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+            <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <User className="w-4 h-4" />} Aceder à minha ficha
+            </button>
+            <p className="text-xs text-gray-400 text-center">Ainda não é membro? <a href="/inscricao" className="text-angola-blue hover:underline">Inscreva-se aqui</a>.</p>
+          </form>
+        ) : (
+          <Ficha ficha={ficha} code={creds.code} onLogout={logout} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLogout: () => void }) {
+  const [edit, setEdit] = useState({
+    name: ficha.name, phone: ficha.phone, email: ficha.email,
+    especialidade: ficha.especialidade, provincia: ficha.provincia, residencia: ficha.residencia,
+  });
+  const [saving, setSaving] = useState(false);
+  const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
+  const set = (k: keyof typeof edit, v: string) => setEdit((p) => ({ ...p, [k]: v }));
+
+  const submit = async () => {
+    setSaving(true);
+    setFeedback(null);
+    try {
+      const res = await fetch(`${API_URL}/members/change-request`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numeroUtente: ficha.numeroUtente, code, changes: edit }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Falha ao enviar o pedido.");
+      }
+      setFeedback({ ok: true, text: "Pedido de alteração enviado. Será analisado e aprovado pela equipa da Ordem." });
+    } catch (err) {
+      setFeedback({ ok: false, text: err instanceof Error ? err.message : "Erro." });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-angola-navy text-white rounded-2xl p-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><IdCard className="w-4 h-4" /> Ficha de Membro</p>
+            <h2 className="text-2xl font-bold mt-1">{ficha.name}</h2>
+            {ficha.especialidade && <p className="text-gray-300">{ficha.especialidade}</p>}
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="default" className="bg-green-100 text-green-700 hover:bg-green-100">
-              <CheckCircle className="w-3 h-3 mr-1" />
-              Inscrição Ativa
-            </Badge>
-            <Button variant="outline" size="sm">
-              <Settings className="w-4 h-4 mr-1" />
-              Definições
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsLoggedIn(false)}
-            >
-              <LogOut className="w-4 h-4 mr-1" />
-              Sair
-            </Button>
-          </div>
+          <button type="button" onClick={onLogout} className="text-gray-300 hover:text-white text-sm inline-flex items-center gap-1"><LogOut className="w-4 h-4" /> Sair</button>
         </div>
-
-        {/* Dashboard Grid */}
-        <div className="grid lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4">
-            <Card className="border-0 shadow-sm">
-              <CardContent className="p-4 space-y-1">
-                {[
-                  { icon: FileText, label: "Documentos", active: true },
-                  { icon: CreditCard, label: "Pagamentos", active: false },
-                  { icon: Bell, label: "Notificações", active: false, badge: 3 },
-                  { icon: Shield, label: "Certificações", active: false },
-                  { icon: Settings, label: "Definições", active: false },
-                ].map((item) => (
-                  <button
-                    key={item.label}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      item.active
-                        ? "bg-angola-cream text-angola-gold"
-                        : "text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4" />
-                    {item.label}
-                    {item.badge && (
-                      <span className="ml-auto bg-angola-navy text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Quick Stats */}
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Resumo da Conta</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-500 dark:text-gray-400">Quota Anual</span>
-                    <span className="font-medium">Paga</span>
-                  </div>
-                  <Progress value={100} className="h-1.5" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-500 dark:text-gray-400">Formação</span>
-                    <span className="font-medium">32/50h</span>
-                  </div>
-                  <Progress value={64} className="h-1.5" />
-                </div>
-                <div>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-gray-500 dark:text-gray-400">Validade</span>
-                    <span className="font-medium text-green-600">Até Dez/2025</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <Tabs defaultValue="documentos" className="space-y-6">
-              <TabsList className="bg-white dark:bg-gray-900 border">
-                <TabsTrigger value="documentos">Documentos</TabsTrigger>
-                <TabsTrigger value="eventos">Meus Eventos</TabsTrigger>
-                <TabsTrigger value="certificados">Certificados</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="documentos" className="space-y-4">
-                <Card className="border-0 shadow-sm">
-                  <CardHeader>
-                    <CardTitle>Documentos do Membro</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {[
-                      { name: "Carteira Profissional", status: "Válida", date: "12/2024" },
-                      { name: "Certificado de Inscrição", status: "Válido", date: "12/2024" },
-                      { name: "Comprovativo de Quotas 2025", status: "Pago", date: "01/2025" },
-                      { name: "Certificado de Especialidade", status: "Válido", date: "06/2023" },
-                    ].map((doc) => (
-                      <div
-                        key={doc.name}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-gray-400" />
-                          <div>
-                            <p className="font-medium text-sm">{doc.name}</p>
-                            <p className="text-xs text-gray-500">
-                              Atualizado em {doc.date}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Badge
-                            variant={
-                              doc.status === "Pago" || doc.status === "Válida" || doc.status === "Válido"
-                                ? "default"
-                                : "secondary"
-                            }
-                            className="bg-green-100 text-green-700 hover:bg-green-100"
-                          >
-                            {doc.status}
-                          </Badge>
-                          <Button variant="ghost" size="sm">
-                            <ChevronRight className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="eventos" className="space-y-4">
-                <Card className="border-0 shadow-sm">
-                  <CardHeader>
-                    <CardTitle>Eventos Inscritos</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Nenhum evento registado
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400 mb-4">
-                        Explore os próximos eventos e inscreva-se
-                      </p>
-                      <Button className="bg-angola-navy hover:bg-angola-blue">
-                        Ver Eventos
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="certificados" className="space-y-4">
-                <Card className="border-0 shadow-sm">
-                  <CardHeader>
-                    <CardTitle>Certificados de Formação</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-center py-12">
-                      <Shield className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Certificados
-                      </h3>
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Os seus certificados de formação aparecerão aqui
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
+        <div className="grid grid-cols-2 gap-3 mt-5 text-sm">
+          <div><p className="text-gray-400 text-xs">Nº de Utente</p><p className="font-mono font-bold">{ficha.numeroUtente}</p></div>
+          <div><p className="text-gray-400 text-xs">Nº de Ordem</p><p className="font-mono font-bold">{ficha.numeroOrdem}</p></div>
+          <div><p className="text-gray-400 text-xs">BI / Passaporte</p><p>{ficha.biPassaporte}</p></div>
+          <div><p className="text-gray-400 text-xs">Estado</p><p className="capitalize">{ficha.status}</p></div>
         </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <h3 className="font-bold text-gray-900 mb-1">Atualizar os meus dados</h3>
+        <p className="text-sm text-gray-500 mb-4">As alterações só ficam ativas após aprovação da equipa da Ordem.</p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Nome</label><input className={inputClass} value={edit.name} onChange={(e) => set("name", e.target.value)} /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label><input className={inputClass} value={edit.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" className={inputClass} value={edit.email} onChange={(e) => set("email", e.target.value)} /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label><input className={inputClass} value={edit.especialidade} onChange={(e) => set("especialidade", e.target.value)} /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Província</label><input className={inputClass} value={edit.provincia} onChange={(e) => set("provincia", e.target.value)} /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Residência</label><input className={inputClass} value={edit.residencia} onChange={(e) => set("residencia", e.target.value)} /></div>
+        </div>
+        {feedback && <p className={`text-sm mt-3 flex items-center gap-1.5 ${feedback.ok ? "text-green-600" : "text-red-600"}`}>{feedback.ok && <Check className="w-4 h-4" />}{feedback.text}</p>}
+        <button type="button" onClick={submit} disabled={saving} className="mt-4 inline-flex items-center gap-2 bg-angola-navy text-white font-semibold px-5 py-2.5 rounded-lg disabled:opacity-60">
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Solicitar alteração
+        </button>
       </div>
     </div>
   );

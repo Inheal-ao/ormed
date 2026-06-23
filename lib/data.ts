@@ -30,13 +30,15 @@ export const navItems = [
     label: "Médicos",
     href: "#",
     children: [
-      { label: "Inscrição", href: "/inscricao/" },
+      { label: "Área do Médico (a minha ficha)", href: "/area-membro/" },
+      { label: "Inscrição na Ordem", href: "/inscricao/" },
       { label: "Renovação de Inscrição", href: "/renovacao/" },
-      { label: "Carteira Profissional", href: "/carteira/" },
+      { label: "Carteira Profissional / 2ª Via", href: "/carteira/" },
+      { label: "Pagar Cotas", href: "/pagar-cotas/" },
+      { label: "Declaração da Ordem", href: "/declaracao/" },
       { label: "Especialidades", href: "/especialidades/" },
       { label: "Formação Contínua", href: "/formacao-continua/" },
       { label: "Vagas de Emprego", href: "/vagas/" },
-      { label: "Área do Membro", href: "/area-membro/" },
     ],
   },
   {
