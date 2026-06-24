@@ -10,7 +10,8 @@ import { PageHeader } from "@/components/admin/admin-ui";
 interface Member {
   _id: string; numeroUtente: string; numeroOrdem: string; name: string; biPassaporte: string;
   phone: string; email: string; especialidade: string; provincia: string; residencia: string;
-  notes?: string; status: string; createdAt: string;
+  notes?: string; status: string; situacao?: string; situacaoMotivo?: string;
+  categorias?: string[]; collegeId?: string; simulado?: boolean; createdAt: string;
 }
 interface ChangeReq {
   _id: string; numeroUtente: string; memberName: string; changes: Record<string, string>;
@@ -20,12 +21,25 @@ interface ChangeReq {
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900 text-sm";
 const FIELD_LABEL: Record<string, string> = { name: "Nome", phone: "Telefone", email: "Email", especialidade: "Especialidade", provincia: "Província", residencia: "Residência" };
 
+const SITUACAO_LABEL: Record<string, string> = { vigor: "Em Vigor", suspensa: "Suspensa", cancelada: "Cancelada" };
+const SITUACAO_STYLE: Record<string, string> = {
+  vigor: "bg-green-100 text-green-700", suspensa: "bg-amber-100 text-amber-700", cancelada: "bg-red-100 text-red-700",
+};
+const CATEGORIA_LABEL: Record<string, string> = { clinico_geral: "Clínico Geral", interno: "Interno", especialista: "Especialista", orientador: "Orientador" };
+const CATEGORIA_STYLE: Record<string, string> = {
+  clinico_geral: "bg-gray-100 text-gray-600", interno: "bg-blue-100 text-blue-700",
+  especialista: "bg-indigo-100 text-indigo-700", orientador: "bg-angola-gold/20 text-angola-navy",
+};
+const ALL_CATEGORIAS = ["clinico_geral", "interno", "especialista", "orientador"];
+
 export default function MembrosPage() {
   const [tab, setTab] = useState<"membros" | "pedidos">("membros");
   const [items, setItems] = useState<Member[]>([]);
   const [reqs, setReqs] = useState<ChangeReq[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [fSituacao, setFSituacao] = useState("");
+  const [fCategoria, setFCategoria] = useState("");
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
   const [creds, setCreds] = useState<{ numeroUtente: string; accessCode: string; name: string } | null>(null);
@@ -33,8 +47,13 @@ export default function MembrosPage() {
   const load = async () => {
     setLoading(true);
     try {
+      const q = new URLSearchParams();
+      if (search) q.set("search", search);
+      if (fSituacao) q.set("situacao", fSituacao);
+      if (fCategoria) q.set("categoria", fCategoria);
+      const qs = q.toString();
       const [m, r] = await Promise.all([
-        api.get<Member[]>(`/members${search ? `?search=${encodeURIComponent(search)}` : ""}`, true),
+        api.get<Member[]>(`/members${qs ? `?${qs}` : ""}`, true),
         api.get<ChangeReq[]>("/members/change-requests/all", true),
       ]);
       setItems(m); setReqs(r);
@@ -75,14 +94,24 @@ export default function MembrosPage() {
 
       {tab === "membros" ? (
         <>
-          <div className="flex gap-2 mb-5">
-            <form onSubmit={(e) => { e.preventDefault(); load(); }} className="flex-1 flex gap-2">
+          <div className="flex gap-2 mb-3 flex-wrap">
+            <form onSubmit={(e) => { e.preventDefault(); load(); }} className="flex-1 flex gap-2 min-w-[260px]">
               <input className={inputClass} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Procurar por nome, nº utente, nº ordem, BI..." />
               <button type="submit" className="px-3 rounded-lg bg-gray-100 text-gray-600"><Search className="w-4 h-4" /></button>
             </form>
             <button type="button" onClick={() => setCreating(true)} className="inline-flex items-center gap-1.5 bg-angola-gold text-angola-navy font-semibold px-4 py-2 rounded-lg hover:brightness-95 shrink-0">
               <Plus className="w-4 h-4" /> Novo membro
             </button>
+          </div>
+          <div className="flex gap-2 mb-5 flex-wrap">
+            <select className={`${inputClass} max-w-[170px]`} value={fSituacao} onChange={(e) => { setFSituacao(e.target.value); setTimeout(load, 0); }} aria-label="Filtrar por situação">
+              <option value="">Todas as situações</option>
+              <option value="vigor">Em Vigor</option><option value="suspensa">Suspensa</option><option value="cancelada">Cancelada</option>
+            </select>
+            <select className={`${inputClass} max-w-[170px]`} value={fCategoria} onChange={(e) => { setFCategoria(e.target.value); setTimeout(load, 0); }} aria-label="Filtrar por categoria">
+              <option value="">Todas as categorias</option>
+              {ALL_CATEGORIAS.map((c) => <option key={c} value={c}>{CATEGORIA_LABEL[c]}</option>)}
+            </select>
           </div>
 
           {loading ? (
@@ -95,10 +124,16 @@ export default function MembrosPage() {
                 <div key={m._id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 flex-wrap">
                   <div className="w-10 h-10 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><IdCard className="w-5 h-5" /></div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-gray-900">{m.name}</p>
+                    <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
+                      {m.name}
+                      {(m.categorias ?? []).map((c) => (
+                        <span key={c} className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${CATEGORIA_STYLE[c] ?? "bg-gray-100 text-gray-600"}`}>{CATEGORIA_LABEL[c] ?? c}</span>
+                      ))}
+                      {m.simulado && <span className="text-[10px] text-gray-400 italic">simulado</span>}
+                    </p>
                     <p className="text-xs text-gray-500 font-mono">{m.numeroUtente} · Ordem {m.numeroOrdem}{m.especialidade ? ` · ${m.especialidade}` : ""}</p>
                   </div>
-                  {m.status !== "ativo" && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{m.status}</span>}
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${SITUACAO_STYLE[m.situacao ?? "vigor"]}`}>{SITUACAO_LABEL[m.situacao ?? "vigor"]}</span>
                   <div className="flex gap-1">
                     <button type="button" onClick={() => setEditing(m)} className="p-2 text-gray-400 hover:text-angola-navy hover:bg-gray-50 rounded-lg" title="Editar"><Pencil className="w-4 h-4" /></button>
                     <button type="button" onClick={() => regen(m)} className="p-2 text-gray-400 hover:text-angola-navy hover:bg-gray-50 rounded-lg" title="Novo código"><KeyRound className="w-4 h-4" /></button>
@@ -161,10 +196,14 @@ function MemberForm({ member, onClose, onCreated, onUpdated }: {
     name: member?.name ?? "", numeroOrdem: member?.numeroOrdem ?? "", biPassaporte: member?.biPassaporte ?? "",
     phone: member?.phone ?? "", email: member?.email ?? "", especialidade: member?.especialidade ?? "",
     provincia: member?.provincia ?? "", residencia: member?.residencia ?? "", status: member?.status ?? "ativo",
+    situacao: member?.situacao ?? "vigor", situacaoMotivo: member?.situacaoMotivo ?? "",
   });
+  const [categorias, setCategorias] = useState<string[]>(member?.categorias ?? ["clinico_geral"]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
+  const toggleCat = (c: string) =>
+    setCategorias((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev.filter((x) => x !== "clinico_geral" || c === "clinico_geral"), c]));
 
   const submit = async () => {
     setError(null);
@@ -172,7 +211,7 @@ function MemberForm({ member, onClose, onCreated, onUpdated }: {
     setSaving(true);
     try {
       if (member) {
-        const m = await api.patch<Member>(`/members/${member._id}`, f);
+        const m = await api.patch<Member>(`/members/${member._id}`, { ...f, categorias: categorias.length ? categorias : ["clinico_geral"] });
         onUpdated?.(m);
       } else {
         const res = await api.post<{ member: Member; numeroUtente: string; accessCode: string }>("/members", f, true);
@@ -201,13 +240,35 @@ function MemberForm({ member, onClose, onCreated, onUpdated }: {
           <input className={inputClass} placeholder="Especialidade" value={f.especialidade} onChange={(e) => set("especialidade", e.target.value)} />
           <input className={inputClass} placeholder="Província" value={f.provincia} onChange={(e) => set("provincia", e.target.value)} />
           <input className={inputClass} placeholder="Residência" value={f.residencia} onChange={(e) => set("residencia", e.target.value)} />
-          {member && (
-            <select className={inputClass} value={f.status} onChange={(e) => set("status", e.target.value)} aria-label="Estado">
-              <option value="ativo">Ativo</option>
-              <option value="suspenso">Suspenso</option>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Situação da inscrição</label>
+            <select className={inputClass} value={f.situacao} onChange={(e) => set("situacao", e.target.value)} aria-label="Situação da inscrição">
+              <option value="vigor">Em Vigor</option>
+              <option value="suspensa">Suspensa</option>
+              <option value="cancelada">Cancelada</option>
             </select>
+          </div>
+          {f.situacao !== "vigor" && (
+            <input className={inputClass} placeholder="Motivo (quotas, disciplinar, a pedido...)" value={f.situacaoMotivo} onChange={(e) => set("situacaoMotivo", e.target.value)} />
           )}
         </div>
+        {member && (
+          <div className="mt-3">
+            <label className="block text-xs font-medium text-gray-500 mb-1.5">Categorias</label>
+            <div className="flex flex-wrap gap-2">
+              {ALL_CATEGORIAS.map((c) => {
+                const active = categorias.includes(c);
+                return (
+                  <button key={c} type="button" onClick={() => toggleCat(c)}
+                    className={`text-xs font-medium px-3 py-1.5 rounded-full border ${active ? "bg-angola-navy text-white border-angola-navy" : "bg-white text-gray-600 border-gray-300"}`}>
+                    {CATEGORIA_LABEL[c]}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1.5">Orientador só se aplica a especialistas. As atribuições feitas pelo Coordenador do Colégio carecem de aprovação da Bastonária.</p>
+          </div>
+        )}
         {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
         <div className="flex gap-2 mt-5">
           <button type="button" onClick={onClose} className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">Cancelar</button>
