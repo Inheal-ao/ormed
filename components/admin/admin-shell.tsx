@@ -31,6 +31,7 @@ import {
   Inbox,
   ShieldAlert,
   ShieldCheck,
+  Coins,
   Mail,
   FileCheck,
   MessageSquare,
@@ -110,6 +111,7 @@ const navLinks: NavLink[] = [
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail, key: "newsletter", group: "Comunicação" },
 
   { href: "/admin/aprovacoes", label: "Aprovações", icon: ShieldCheck, key: "aprovacoes", manager: true, group: "Gestão" },
+  { href: "/admin/cotas", label: "Cotas", icon: Coins, manager: true, group: "Gestão" },
   { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true, group: "Gestão" },
   { href: "/admin/relatorios", label: "Relatórios", icon: Activity, manager: true, group: "Gestão" },
   { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true, group: "Gestão" },

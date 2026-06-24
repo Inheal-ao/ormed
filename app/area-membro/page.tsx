@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard, GraduationCap, FileText, BookOpen } from "lucide-react";
+import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard, GraduationCap, FileText, BookOpen, QrCode, Wallet, Receipt } from "lucide-react";
 import { API_URL } from "@/lib/api";
+import { MedicoQr } from "@/components/medico-qr";
+import { printRecibo, mesLabel, kz } from "@/lib/recibo";
 
 interface FichaData {
   _id: string;
@@ -177,6 +179,14 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
         </div>
       </div>
 
+      <CotasSection numeroUtente={ficha.numeroUtente} numeroOrdem={ficha.numeroOrdem} name={ficha.name} code={code} />
+
+      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><QrCode className="w-5 h-5 text-angola-navy" /> O meu QR de verificação</h3>
+        <p className="text-sm text-gray-500 mb-4">Para receitas eletrónicas — ao ser lido, mostra o seu nome, especialidade e situação na Ordem.</p>
+        <MedicoQr numeroOrdem={ficha.numeroOrdem} name={ficha.name} especialidade={ficha.especialidade} size={180} />
+      </div>
+
       {(ficha.categorias ?? []).includes("interno") && <InternatoSection numeroUtente={ficha.numeroUtente} code={code} />}
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6">
@@ -279,6 +289,68 @@ function InternatoSection({ numeroUtente, code }: { numeroUtente: string; code: 
               </div>
             </div>
           )}
+        </>
+      )}
+    </div>
+  );
+}
+
+interface CotaStatus { cotaMensal: number; multaMensal: number; mesesEmFalta: string[]; divida: number; emDia: boolean }
+
+function CotasSection({ numeroUtente, numeroOrdem, name, code }: { numeroUtente: string; numeroOrdem: string; name: string; code: string }) {
+  const [status, setStatus] = useState<CotaStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = async () => {
+    try {
+      const res = await fetch(`${API_URL}/quotas/portal/status`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numeroUtente, code }),
+      });
+      if (res.ok) setStatus(await res.json());
+    } finally { setLoading(false); }
+  };
+  useEffect(() => { load(); }, [numeroUtente, code]); // eslint-disable-line
+
+  const pay = async () => {
+    if (!confirm(`Confirmar o pagamento de ${status?.mesesEmFalta.length} mês(es) — ${kz(status?.divida ?? 0)}?`)) return;
+    setPaying(true); setError(null);
+    try {
+      const res = await fetch(`${API_URL}/quotas/portal/pay`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numeroUtente, code }),
+      });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Falha ao pagar."); }
+      const data = await res.json() as { recibo: string; payment: { meses: string[]; total: number }; status: CotaStatus };
+      printRecibo({ recibo: data.recibo, memberName: name, numeroOrdem, meses: data.payment.meses, cotaMensal: data.status.cotaMensal, multaMensal: data.status.multaMensal, total: data.payment.total });
+      setStatus(data.status);
+    } catch (err) { setError(err instanceof Error ? err.message : "Erro."); } finally { setPaying(false); }
+  };
+
+  if (loading) return <div className="bg-white border border-gray-200 rounded-2xl p-6 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-angola-gold" /></div>;
+  if (!status) return null;
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+      <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><Wallet className="w-5 h-5 text-angola-navy" /> As minhas cotas</h3>
+      <p className="text-sm text-gray-500 mb-4">Cota mensal: {kz(status.cotaMensal)}{status.multaMensal ? ` · Multa/mês em atraso: ${kz(status.multaMensal)}` : ""}</p>
+      {status.emDia ? (
+        <div className="rounded-xl bg-green-50 text-green-700 px-4 py-3 flex items-center gap-2 font-semibold"><Check className="w-5 h-5" /> As suas cotas estão em dia.</div>
+      ) : (
+        <>
+          <div className="rounded-xl bg-amber-50 px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+            <span className="text-sm text-gray-600">Dívida atual ({status.mesesEmFalta.length} mês/es)</span>
+            <span className="text-xl font-bold text-amber-700">{kz(status.divida)}</span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {status.mesesEmFalta.map((m) => <span key={m} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{mesLabel(m)}</span>)}
+          </div>
+          {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+          <button type="button" onClick={pay} disabled={paying} className="mt-4 inline-flex items-center gap-2 bg-angola-navy text-white font-semibold px-5 py-2.5 rounded-lg hover:brightness-110 disabled:opacity-60">
+            {paying ? <Loader2 className="w-4 h-4 animate-spin" /> : <Receipt className="w-4 h-4" />} Pagar e imprimir recibo
+          </button>
         </>
       )}
     </div>

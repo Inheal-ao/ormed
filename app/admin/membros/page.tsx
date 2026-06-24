@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import {
-  Loader2, Plus, Search, KeyRound, Trash2, Pencil, X, Copy, Printer, IdCard, Check, Inbox, Upload,
+  Loader2, Plus, Search, KeyRound, Trash2, Pencil, X, Copy, Printer, IdCard, Check, Inbox, Upload, QrCode,
 } from "lucide-react";
 import { api, API_URL, tokenStore } from "@/lib/api";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { CountrySelect } from "@/components/country-select";
+import { MedicoQr } from "@/components/medico-qr";
 import { provinces } from "@/lib/data";
 
 interface Member {
@@ -46,6 +47,7 @@ export default function MembrosPage() {
   const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
   const [creds, setCreds] = useState<{ numeroUtente: string; accessCode: string; name: string } | null>(null);
+  const [qrMember, setQrMember] = useState<Member | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -140,6 +142,7 @@ export default function MembrosPage() {
                   </div>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${SITUACAO_STYLE[m.situacao ?? "vigor"]}`}>{SITUACAO_LABEL[m.situacao ?? "vigor"]}</span>
                   <div className="flex gap-1">
+                    <button type="button" onClick={() => setQrMember(m)} className="p-2 text-gray-400 hover:text-angola-navy hover:bg-gray-50 rounded-lg" title="QR de verificação"><QrCode className="w-4 h-4" /></button>
                     <button type="button" onClick={() => setEditing(m)} className="p-2 text-gray-400 hover:text-angola-navy hover:bg-gray-50 rounded-lg" title="Editar"><Pencil className="w-4 h-4" /></button>
                     <button type="button" onClick={() => regen(m)} className="p-2 text-gray-400 hover:text-angola-navy hover:bg-gray-50 rounded-lg" title="Novo código"><KeyRound className="w-4 h-4" /></button>
                     <button type="button" onClick={() => remove(m)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="Eliminar"><Trash2 className="w-4 h-4" /></button>
@@ -156,6 +159,19 @@ export default function MembrosPage() {
       {creating && <MemberForm onClose={() => setCreating(false)} onCreated={(m, c) => { setItems((p) => [m, ...p]); setCreds(c); setCreating(false); }} />}
       {editing && <MemberForm member={editing} onClose={() => setEditing(null)} onUpdated={(m) => { setItems((p) => p.map((x) => (x._id === m._id ? m : x))); setEditing(null); }} />}
       {creds && <CredsModal creds={creds} onClose={() => setCreds(null)} />}
+      {qrMember && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={() => setQrMember(null)}>
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-1">
+              <h3 className="text-lg font-bold text-gray-900">QR de verificação</h3>
+              <button type="button" onClick={() => setQrMember(null)} aria-label="Fechar" className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
+            </div>
+            <p className="text-sm text-gray-500 mb-4">{qrMember.name} · {qrMember.especialidade || "Médico"}</p>
+            <MedicoQr numeroOrdem={qrMember.numeroOrdem} name={qrMember.name} especialidade={qrMember.especialidade} />
+            <p className="text-[11px] text-gray-400 mt-4 text-center">Para receitas eletrónicas: ao ser lido, mostra nome, especialidade e situação do médico.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

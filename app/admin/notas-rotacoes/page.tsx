@@ -7,6 +7,7 @@ import { College, Interno, Rotation, Competencia, BankMember } from "@/lib/admin
 import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { MemberPicker } from "@/components/admin/member-picker";
+import { templateFor } from "@/lib/competencias";
 
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900 text-sm";
 const esc = (s: string) => (s || "").replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c] as string));
@@ -166,7 +167,8 @@ export default function NotasRotacoesPage() {
 
       {editing && interno && (
         <RotationForm rotation={editing === "new" ? undefined : editing} interno={interno} isColegio={isColegio}
-          college={college || interno.college} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); loadRotations(interno); }} />
+          college={college || interno.college} especialidade={colleges.find((c) => c._id === (college || interno.college))?.especialidade ?? ""}
+          onClose={() => setEditing(null)} onSaved={() => { setEditing(null); loadRotations(interno); }} />
       )}
     </div>
   );
@@ -197,16 +199,17 @@ function SignButton({ rotation, onSigned }: { rotation: Rotation; onSigned: (r: 
 
 const emptyComp = (): Competencia => ({ competencia: "", totalMinimo: 0, observador: 0, ajudante: 0, executor: 0, totalRealizado: 0 });
 
-function RotationForm({ rotation, interno, isColegio, college, onClose, onSaved }: {
-  rotation?: Rotation; interno: Interno; isColegio: boolean; college: string; onClose: () => void; onSaved: () => void;
+function RotationForm({ rotation, interno, isColegio, college, especialidade, onClose, onSaved }: {
+  rotation?: Rotation; interno: Interno; isColegio: boolean; college: string; especialidade?: string; onClose: () => void; onSaved: () => void;
 }) {
+  const template = templateFor(especialidade).map((t) => ({ ...emptyComp(), competencia: t.competencia, totalMinimo: t.totalMinimo }));
   const [f, setF] = useState({
     rotationName: rotation?.rotationName ?? "", periodoInicio: rotation?.periodoInicio ?? "", periodoFim: rotation?.periodoFim ?? "",
     anoInternato: rotation?.anoInternato ?? interno.anoInternato ?? "", provincia: rotation?.provincia ?? "",
     municipio: rotation?.municipio ?? "", hospital: rotation?.hospital ?? interno.hospital ?? "",
     instituicaoResponsavel: rotation?.instituicaoResponsavel ?? interno.hospital ?? "", observacoes: rotation?.observacoes ?? "",
   });
-  const [comps, setComps] = useState<Competencia[]>(rotation?.competencias?.length ? rotation.competencias : [emptyComp(), emptyComp(), emptyComp()]);
+  const [comps, setComps] = useState<Competencia[]>(rotation?.competencias?.length ? rotation.competencias : (template.length ? template : [emptyComp(), emptyComp(), emptyComp()]));
   const [orientador, setOrientador] = useState<{ id: string; name: string } | null>(
     rotation?.evaluatorId ? { id: rotation.evaluatorId, name: rotation.evaluator } : null,
   );
