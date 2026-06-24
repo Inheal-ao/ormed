@@ -20,11 +20,12 @@ interface FichaData {
   categorias?: string[];
 }
 
+interface Comp { competencia: string; totalMinimo: number; observador: number; ajudante: number; executor: number; totalRealizado: number }
 interface Dossier {
   isInterno: boolean;
   college?: { name: string; especialidade: string } | null;
   interno?: { anoInternato: string; hospital: string; orientador: string; status: string } | null;
-  rotations?: { _id: string; rotationName: string; period: string; grade: number; maxGrade: number; evaluator: string; signedDocument: { url: string } | null }[];
+  rotations?: { _id: string; rotationName: string; periodoInicio: string; periodoFim: string; evaluator: string; competencias: Comp[]; signedDocument: { url: string } | null }[];
   programas?: { _id: string; tipo: string; title: string; ano: string; document: { url: string } | null }[];
 }
 
@@ -214,7 +215,11 @@ function InternatoSection({ numeroUtente, code }: { numeroUtente: string; code: 
 
   const rotations = data.rotations ?? [];
   const programas = data.programas ?? [];
-  const media = rotations.length ? (rotations.reduce((a, r) => a + (r.maxGrade ? (r.grade / r.maxGrade) * 20 : 0), 0) / rotations.length) : null;
+  const pct = (comps: Comp[]) => {
+    const min = (comps ?? []).reduce((a, c) => a + (c.totalMinimo || 0), 0);
+    const done = (comps ?? []).reduce((a, c) => a + (c.totalRealizado || 0), 0);
+    return min ? Math.round((done / min) * 100) : null;
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-6">
@@ -230,26 +235,26 @@ function InternatoSection({ numeroUtente, code }: { numeroUtente: string; code: 
             <div><p className="text-gray-400 text-xs">Orientador</p><p className="font-medium text-gray-900">{data.interno.orientador || "—"}</p></div>
           </div>
 
-          {/* Notas finais */}
+          {/* Mapas de avaliação das rotações (finais/assinados) */}
           <div className="mt-5">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-gray-800 text-sm">Notas das rotações</h4>
-              {media !== null && <span className="text-xs text-gray-500">Média global: <strong className="text-angola-navy">{media.toFixed(1)}/20</strong></span>}
-            </div>
+            <h4 className="font-semibold text-gray-800 text-sm mb-2">Avaliações das rotações</h4>
             {rotations.length === 0 ? (
-              <p className="text-sm text-gray-400">Ainda não há notas finais publicadas.</p>
+              <p className="text-sm text-gray-400">Ainda não há avaliações finais publicadas.</p>
             ) : (
               <div className="border border-gray-200 rounded-xl divide-y">
-                {rotations.map((r) => (
-                  <div key={r._id} className="flex items-center gap-3 px-4 py-2.5">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{r.rotationName}</p>
-                      <p className="text-xs text-gray-500">{r.period}{r.evaluator ? ` · ${r.evaluator}` : ""}</p>
+                {rotations.map((r) => {
+                  const p = pct(r.competencias);
+                  return (
+                    <div key={r._id} className="flex items-center gap-3 px-4 py-2.5">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{r.rotationName}</p>
+                        <p className="text-xs text-gray-500">{r.periodoInicio && `${r.periodoInicio} a ${r.periodoFim}`}{r.evaluator ? ` · ${r.evaluator}` : ""} · {(r.competencias ?? []).length} competência(s)</p>
+                      </div>
+                      {p !== null && <span className="text-xs font-semibold text-angola-navy">{p}% realizado</span>}
+                      {r.signedDocument && <a href={r.signedDocument.url} target="_blank" rel="noopener noreferrer" className="text-angola-blue hover:underline inline-flex items-center gap-1 text-xs"><FileText className="w-3.5 h-3.5" /> Mapa</a>}
                     </div>
-                    {r.signedDocument && <a href={r.signedDocument.url} target="_blank" rel="noopener noreferrer" className="text-angola-blue hover:underline inline-flex items-center gap-1 text-xs"><FileText className="w-3.5 h-3.5" /> PDF</a>}
-                    <span className={`text-base font-bold ${r.grade >= r.maxGrade * 0.5 ? "text-green-600" : "text-red-600"}`}>{r.grade}<span className="text-xs text-gray-400">/{r.maxGrade}</span></span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

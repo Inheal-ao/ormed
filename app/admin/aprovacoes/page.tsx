@@ -18,7 +18,7 @@ interface ChangeReq {
 
 const CATEGORIA_LABEL: Record<string, string> = { interno: "Interno", especialista: "Especialista", orientador: "Orientador" };
 const FIELD_LABEL: Record<string, string> = { name: "Nome", phone: "Telefone", email: "Email", especialidade: "Especialidade", provincia: "Província", residencia: "Residência" };
-const ROLE_LABEL: Record<string, string> = { colegio: "Coordenador do Colégio", bastonaria: "Bastonária", super_admin: "Administrador" };
+const ROLE_LABEL: Record<string, string> = { colegio: "Presidente do Colégio", bastonaria: "Bastonária", super_admin: "Administrador" };
 
 export default function AprovacoesPage() {
   const { refresh } = useNotifications();

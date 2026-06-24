@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2, Pencil, X, Stethoscope } from "lucide-react";
 import { api } from "@/lib/api";
-import { College } from "@/lib/admin-types";
+import { College, BankMember } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
+import { MemberPicker } from "@/components/admin/member-picker";
 
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900 text-sm";
 
@@ -50,7 +51,7 @@ export default function ColegiosPage() {
               <div className="w-10 h-10 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><Stethoscope className="w-5 h-5" /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900">{c.name}</p>
-                <p className="text-xs text-gray-500">{c.especialidade}{c.coordinator ? ` · Coordenador: ${c.coordinator}` : ""}</p>
+                <p className="text-xs text-gray-500">{c.especialidade}{c.coordinator ? ` · Presidente: ${c.coordinator}` : ""}</p>
               </div>
               {c.status !== "ativo" && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{c.status}</span>}
               {isManager && (
@@ -70,7 +71,10 @@ export default function ColegiosPage() {
 }
 
 function CollegeForm({ college, onClose, onSaved }: { college?: College; onClose: () => void; onSaved: () => void }) {
-  const [f, setF] = useState({ name: college?.name ?? "", especialidade: college?.especialidade ?? "", coordinator: college?.coordinator ?? "", description: college?.description ?? "", status: college?.status ?? "ativo" });
+  const [f, setF] = useState({ name: college?.name ?? "", especialidade: college?.especialidade ?? "", description: college?.description ?? "", status: college?.status ?? "ativo" });
+  const [president, setPresident] = useState<{ id: string; name: string } | null>(
+    college?.presidentId ? { id: college.presidentId, name: college.coordinator } : null,
+  );
   const [specialties, setSpecialties] = useState<{ _id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
@@ -92,8 +96,9 @@ function CollegeForm({ college, onClose, onSaved }: { college?: College; onClose
     if (!f.name.trim() || !f.especialidade.trim()) return;
     setSaving(true);
     try {
-      if (college) await api.patch(`/colleges/${college._id}`, f);
-      else await api.post("/colleges", f, true);
+      const body = { ...f, presidentId: president?.id ?? "" };
+      if (college) await api.patch(`/colleges/${college._id}`, body);
+      else await api.post("/colleges", body, true);
       onSaved();
     } finally { setSaving(false); }
   };
@@ -113,7 +118,9 @@ function CollegeForm({ college, onClose, onSaved }: { college?: College; onClose
             </select>
           </div>
           <input className={inputClass} placeholder="Nome do colégio *" value={f.name} onChange={(e) => set("name", e.target.value)} />
-          <input className={inputClass} placeholder="Coordenador do Colégio" value={f.coordinator} onChange={(e) => set("coordinator", e.target.value)} />
+          <MemberPicker label="Presidente do Colégio (médico do banco, em situação regular)" allowClear
+            placeholder="Procurar médico no banco (nome, nº ordem, nº utente)..."
+            selected={president} onSelect={(m: BankMember | null) => setPresident(m ? { id: m._id, name: m.name } : null)} />
           <textarea className={`${inputClass} min-h-[80px]`} placeholder="Descrição" value={f.description} onChange={(e) => set("description", e.target.value)} />
           {college && (
             <select className={inputClass} value={f.status} onChange={(e) => set("status", e.target.value)} aria-label="Estado">

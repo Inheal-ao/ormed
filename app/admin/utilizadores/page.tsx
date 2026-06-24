@@ -18,7 +18,7 @@ const ROLE_TABS = [
   { role: "bastonaria", label: "Bastonárias", godOnly: true },
   { role: "funcionario", label: "Funcionários", godOnly: false },
   { role: "universidade", label: "Universidades / IES / INAAREES", godOnly: false },
-  { role: "colegio", label: "Coordenadores de Colégio", godOnly: false },
+  { role: "colegio", label: "Presidentes de Colégio", godOnly: false },
 ];
 
 const INST_LABEL: Record<string, string> = { universidade: "Universidade", ies: "IES", inaarees: "INAAREES" };
@@ -265,7 +265,7 @@ function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u:
 
       {role === "colegio" && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Colégio que vai coordenar</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Colégio que vai presidir</label>
           <select className={inputClass} value={f.collegeId} onChange={(e) => set("collegeId", e.target.value)} aria-label="Colégio">
             <option value="">Escolha o colégio</option>
             {colleges.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}

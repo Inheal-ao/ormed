@@ -333,7 +333,7 @@ function Card({ title, children, className = "" }: { title: string; children: Re
   );
 }
 
-// ===== Dashboard do Coordenador do Colégio =====
+// ===== Dashboard do Presidente do Colégio =====
 function ColegioDashboard() {
   const { user } = useAdminAuth();
   const [college, setCollege] = useState<College | null>(null);
@@ -363,12 +363,18 @@ function ColegioDashboard() {
   }
 
   const ativos = internos.filter((i) => i.status === "ativo").length;
-  const media = rotations.length ? (rotations.reduce((a, r) => a + (r.maxGrade ? (r.grade / r.maxGrade) * 20 : 0), 0) / rotations.length) : 0;
+  const compPct = (cs: Rotation["competencias"]) => {
+    const min = (cs ?? []).reduce((a, c) => a + (c.totalMinimo || 0), 0);
+    const done = (cs ?? []).reduce((a, c) => a + (c.totalRealizado || 0), 0);
+    return min ? (done / min) * 100 : null;
+  };
+  const pcts = rotations.map((r) => compPct(r.competencias)).filter((p): p is number => p !== null);
+  const realizacao = pcts.length ? Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
 
   return (
     <div>
       <div className="mb-6">
-        <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide">Coordenador do Colégio</p>
+        <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide">Presidente do Colégio</p>
         <h1 className="text-2xl font-bold text-gray-900">{college?.name ?? "O meu colégio"}</h1>
         <p className="text-gray-500">Olá, {user?.name?.split(" ")[0]} — gestão dos internatos e da especialidade.</p>
       </div>
@@ -377,7 +383,7 @@ function ColegioDashboard() {
         <Kpi icon={GraduationCap} label="Internos ativos" value={ativos} color="bg-angola-navy" />
         <Kpi icon={Users} label="Total de internos" value={internos.length} color="bg-emerald-500" />
         <Kpi icon={BookOpen} label="Programas de ensino" value={programas.length} color="bg-indigo-500" />
-        <Kpi icon={ClipboardList} label="Notas lançadas" value={rotations.length} color="bg-amber-500" />
+        <Kpi icon={ClipboardList} label="Mapas de avaliação" value={rotations.length} color="bg-amber-500" />
       </div>
 
       <div className="grid lg:grid-cols-[1fr_330px] gap-6 items-start">
@@ -406,22 +412,25 @@ function ColegioDashboard() {
           {/* Notas recentes */}
           <div className="bg-white border border-gray-200 rounded-2xl p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-900 flex items-center gap-2"><ClipboardList className="w-5 h-5 text-angola-navy" /> Notas recentes das rotações</h2>
+              <h2 className="font-bold text-gray-900 flex items-center gap-2"><ClipboardList className="w-5 h-5 text-angola-navy" /> Mapas de avaliação recentes</h2>
               <Link href="/admin/notas-rotacoes" className="text-xs text-angola-blue hover:underline">Lançar →</Link>
             </div>
             {rotations.length === 0 ? (
-              <p className="text-sm text-gray-400 py-6 text-center">Ainda não há notas lançadas.</p>
+              <p className="text-sm text-gray-400 py-6 text-center">Ainda não há mapas de avaliação.</p>
             ) : (
               <div className="divide-y divide-gray-100">
-                {rotations.slice(0, 6).map((r) => (
-                  <div key={r._id} className="flex items-center gap-3 py-2.5">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-800 truncate">{r.internoName} — {r.rotationName}</p>
-                      <p className="text-[11px] text-gray-400">{r.period}</p>
+                {rotations.slice(0, 6).map((r) => {
+                  const p = compPct(r.competencias);
+                  return (
+                    <div key={r._id} className="flex items-center gap-3 py-2.5">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-800 truncate">{r.internoName} — {r.rotationName}</p>
+                        <p className="text-[11px] text-gray-400">{r.periodoInicio && `${r.periodoInicio} a ${r.periodoFim}`}{r.status === "final" ? " · Final" : " · Rascunho"}</p>
+                      </div>
+                      {p !== null && <span className="text-sm font-bold text-angola-navy">{Math.round(p)}%</span>}
                     </div>
-                    <span className={`text-sm font-bold ${r.grade >= r.maxGrade * 0.5 ? "text-green-600" : "text-red-600"}`}>{r.grade}/{r.maxGrade}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -434,8 +443,8 @@ function ColegioDashboard() {
             <p className="text-lg font-bold mt-1">{college?.name}</p>
             {college?.especialidade && <p className="text-gray-300 text-sm">{college.especialidade}</p>}
             <div className="mt-3 pt-3 border-t border-white/10 text-sm">
-              <p className="text-gray-300">Média global das rotações</p>
-              <p className="text-2xl font-bold">{media.toFixed(1)}<span className="text-sm text-gray-400">/20</span></p>
+              <p className="text-gray-300">Realização global das competências</p>
+              <p className="text-2xl font-bold">{realizacao !== null ? `${realizacao}%` : "—"}</p>
             </div>
           </div>
           <div className="bg-white border border-gray-200 rounded-2xl p-5">

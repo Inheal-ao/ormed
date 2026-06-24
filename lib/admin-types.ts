@@ -8,7 +8,8 @@ export type UserRoleType =
   | "bastonaria" | "funcionario" | "universidade" | "colegio";
 
 export interface College {
-  _id: string; name: string; especialidade: string; description: string; coordinator: string; status: string;
+  _id: string; name: string; especialidade: string; description: string;
+  presidentId: string; coordinator: string; status: string;
 }
 export interface Interno {
   _id: string; college: string; memberId: string; name: string; numeroOrdem: string; biPassaporte: string;
@@ -22,9 +23,15 @@ export interface BankMember {
   _id: string; numeroUtente: string; numeroOrdem: string; name: string;
   especialidade: string; situacao: string; categorias: string[]; collegeId?: string;
 }
+export interface Competencia {
+  competencia: string; totalMinimo: number; observador: number; ajudante: number; executor: number; totalRealizado: number;
+}
 export interface Rotation {
-  _id: string; interno: string; college: string; internoName: string; rotationName: string;
-  period: string; grade: number; maxGrade: number; evaluatorId: string; evaluator: string; notes: string;
+  _id: string; interno: string; college: string; internoName: string; especialidade: string;
+  rotationName: string; periodoInicio: string; periodoFim: string; anoInternato: string;
+  provincia: string; municipio: string; hospital: string; instituicaoResponsavel: string;
+  competencias: Competencia[]; observacoes: string;
+  evaluatorId: string; evaluator: string;
   status: string; signedDocument: Asset | null; createdAt: string;
 }
 
