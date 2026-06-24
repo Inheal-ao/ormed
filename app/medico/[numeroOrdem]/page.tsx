@@ -40,7 +40,7 @@ export default function VerificarMedicoPage() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
         <div className="bg-angola-navy text-white p-5 flex items-center gap-3">
-          <img src="/images/logo-real.png" alt="ORMED" className="h-10 w-10 object-contain" />
+          <img src="/images/logo.svg" alt="ORMED" className="h-10 w-10 object-contain" />
           <div>
             <p className="text-angola-gold text-[11px] font-semibold uppercase tracking-wide">Ordem dos Médicos de Angola</p>
             <p className="text-sm font-medium">Verificação de Médico</p>

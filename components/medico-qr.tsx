@@ -20,7 +20,7 @@ export function MedicoQr({ numeroOrdem, name, especialidade, size = 200 }: {
   const print = () => {
     const w = window.open("", "_blank", "width=480,height=620");
     if (!w) return;
-    const logo = `${window.location.origin}/images/logo-real.png`;
+    const logo = `${window.location.origin}/images/logo.svg`;
     w.document.write(`<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>QR — ${name}</title>
     <style>body{font-family:Arial,Helvetica,sans-serif;text-align:center;color:#111;margin:24px}
     img.logo{height:48px;margin-bottom:6px}.org{font-size:12px;color:#002147;font-weight:bold}

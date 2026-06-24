@@ -16,7 +16,7 @@ export function kz(v: number): string {
 export function printRecibo(d: ReciboData) {
   const w = window.open("", "_blank", "width=620,height=760");
   if (!w) return;
-  const logo = `${window.location.origin}/images/logo-real.png`;
+  const logo = `${window.location.origin}/images/logo.svg`;
   const esc = (s: string) => (s || "").replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;" }[c] as string));
   const linhas = d.meses.map((m) => `<tr><td>${esc(mesLabel(m))}</td><td style="text-align:right">${kz(d.cotaMensal)}</td><td style="text-align:right">${kz(d.multaMensal)}</td><td style="text-align:right">${kz(d.cotaMensal + d.multaMensal)}</td></tr>`).join("");
   w.document.write(`<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Recibo ${esc(d.recibo)}</title>

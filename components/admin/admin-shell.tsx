@@ -100,6 +100,8 @@ const navLinks: NavLink[] = [
   { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes", group: "Serviços & Membros" },
   { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa", group: "Serviços & Membros" },
   { href: "/admin/listas-universidades", label: "Universidades", icon: School, key: "listas-universidades", group: "Gestão" },
+  { href: "/admin/listas-universidades?tipo=ies", label: "IES", icon: Building2, key: "listas-universidades", group: "Gestão" },
+  { href: "/admin/listas-universidades?tipo=inaarees", label: "INAAREES", icon: Building2, key: "listas-universidades", group: "Gestão" },
 
   { href: "/admin/colegios", label: "Colégios", icon: Stethoscope, key: "colegios", group: "Colégios de Especialidades" },
   { href: "/admin/internos", label: "Internos", icon: GraduationCap, key: "internos", group: "Colégios de Especialidades" },

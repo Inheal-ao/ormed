@@ -16,7 +16,7 @@ const esc = (s: string) => (s || "").replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">
 function printMapa(r: Rotation, collegeName: string) {
   const w = window.open("", "_blank", "width=1000,height=900");
   if (!w) return;
-  const logo = `${window.location.origin}/images/logo-real.png`;
+  const logo = `${window.location.origin}/images/logo.svg`;
   const rows = (r.competencias ?? []).map((c) => `<tr>
     <td class="comp">${esc(c.competencia)}</td>
     <td>${c.totalMinimo || ""}</td><td>${c.observador || ""}</td><td>${c.ajudante || ""}</td>

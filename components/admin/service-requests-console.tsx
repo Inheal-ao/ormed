@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import {
   Loader2, Download, Paperclip, Upload, Save, CreditCard, FileCheck,
-  ChevronDown, ChevronUp, History, Clock, Printer,
+  ChevronDown, ChevronUp, History, Clock, Printer, UserPlus, X, Check, Copy,
 } from "lucide-react";
 import { api, tokenStore, API_URL } from "@/lib/api";
 import { Asset } from "@/lib/admin-types";
@@ -11,6 +11,8 @@ import { PageHeader } from "@/components/admin/admin-ui";
 import { ServiceStepper } from "@/components/service-stepper";
 import { SERVICE_LABEL, STATUS_META, ALL_STATUSES, NAO_VALIDADO_REASONS, HistoryEntry } from "@/lib/service-requests";
 import { printTable } from "@/lib/print";
+import { provinces } from "@/lib/data";
+import { CountrySelect } from "@/components/country-select";
 
 interface ServiceRequest {
   _id: string;
@@ -159,6 +161,7 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
   const [savingPay, setSavingPay] = useState(false);
   const [receipt, setReceipt] = useState<File | null>(null);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
+  const [registar, setRegistar] = useState(false);
 
   const saveStatus = async () => {
     setSavingStatus(true);
@@ -224,6 +227,18 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
           <p className="text-sm text-gray-700 whitespace-pre-line">{r.details}</p>
         </div>
       )}
+
+      {/* Registar médico a partir da inscrição (único modo de criar um membro) */}
+      {r.serviceType === "inscricao" && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+          <p className="text-sm font-semibold text-gray-700 mb-1">Aprovar e registar médico</p>
+          <p className="text-xs text-gray-500 mb-2">Após validar os documentos, registe o médico no banco da Ordem (gera nº de utente e código de acesso).</p>
+          <button type="button" onClick={() => setRegistar(true)} className="inline-flex items-center gap-1.5 text-sm px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            <UserPlus className="w-4 h-4" /> Registar médico
+          </button>
+        </div>
+      )}
+      {registar && <RegistarMedicoModal req={r} onClose={() => setRegistar(false)} />}
 
       {/* 3. Documentos */}
       {r.attachments.length > 0 && (
@@ -316,6 +331,82 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
           ))}
           {(!r.history || r.history.length === 0) && <li className="ml-4 text-sm text-gray-400">Sem registos.</li>}
         </ol>
+      </div>
+    </div>
+  );
+}
+
+const mInput = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900 text-sm";
+
+function RegistarMedicoModal({ req, onClose }: { req: ServiceRequest; onClose: () => void }) {
+  const [f, setF] = useState({
+    name: req.requesterName ?? "", numeroOrdem: "", biPassaporte: "", phone: req.phone ?? "",
+    email: req.email ?? "", especialidade: "", provincia: "", pais: "Angola",
+  });
+  const [specialties, setSpecialties] = useState<{ _id: string; name: string }[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [creds, setCreds] = useState<{ numeroUtente: string; accessCode: string } | null>(null);
+  const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
+
+  useEffect(() => { api.get<{ _id: string; name: string }[]>("/specialties").then(setSpecialties).catch(() => {}); }, []);
+
+  const submit = async () => {
+    setError(null);
+    if (!f.name || !f.numeroOrdem || !f.biPassaporte || !f.phone) { setError("Preencha nome, nº de ordem, BI/passaporte e telefone."); return; }
+    setSaving(true);
+    try {
+      const res = await api.post<{ numeroUtente: string; accessCode: string }>("/members", f, true);
+      setCreds({ numeroUtente: res.numeroUtente, accessCode: res.accessCode });
+    } catch (err) { setError(err instanceof Error ? err.message : "Erro ao registar."); } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-lg w-full p-6 my-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-1">
+          <h3 className="text-lg font-bold text-gray-900">Registar médico (inscrição {req.serviceCode})</h3>
+          <button type="button" onClick={onClose} aria-label="Fechar" className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
+        </div>
+        {creds ? (
+          <div className="text-center py-3">
+            <div className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto mb-3"><Check className="w-6 h-6" /></div>
+            <p className="text-sm text-gray-600 mb-3">Médico registado. Entregue estas credenciais (o código não volta a aparecer):</p>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono text-sm space-y-1 mb-3">
+              <p><span className="text-gray-400">Nº Utente:</span> {creds.numeroUtente}</p>
+              <p><span className="text-gray-400">Código:</span> {creds.accessCode}</p>
+            </div>
+            <button type="button" onClick={() => { navigator.clipboard.writeText(`Nº de Utente: ${creds.numeroUtente}\nCódigo: ${creds.accessCode}`); }} className="inline-flex items-center gap-1.5 text-sm px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50"><Copy className="w-4 h-4" /> Copiar</button>
+            <button type="button" onClick={onClose} className="ml-2 text-sm px-4 py-2 bg-angola-navy text-white rounded-lg">Concluir</button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500 mb-4">Confirme os dados e atribua o número de ordem.</p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input className={mInput} placeholder="Nome completo *" value={f.name} onChange={(e) => set("name", e.target.value)} />
+              <input className={mInput} placeholder="Nº de Ordem (atribuído) *" value={f.numeroOrdem} onChange={(e) => set("numeroOrdem", e.target.value)} />
+              <input className={mInput} placeholder="BI / Passaporte *" value={f.biPassaporte} onChange={(e) => set("biPassaporte", e.target.value)} />
+              <input className={mInput} placeholder="Telefone *" value={f.phone} onChange={(e) => set("phone", e.target.value)} />
+              <input className={mInput} placeholder="Email" value={f.email} onChange={(e) => set("email", e.target.value)} />
+              <select className={mInput} value={f.especialidade} onChange={(e) => set("especialidade", e.target.value)} aria-label="Especialidade">
+                <option value="">— Especialidade —</option>
+                {specialties.map((s) => <option key={s._id} value={s.name}>{s.name}</option>)}
+              </select>
+              <select className={mInput} value={f.provincia} onChange={(e) => set("provincia", e.target.value)} aria-label="Província">
+                <option value="">— Província —</option>
+                {provinces.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+              <CountrySelect value={f.pais} onChange={(v) => set("pais", v)} className={mInput} />
+            </div>
+            {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+            <div className="flex gap-2 mt-5">
+              <button type="button" onClick={onClose} className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">Cancelar</button>
+              <button type="button" onClick={submit} disabled={saving} className="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm disabled:opacity-60 inline-flex items-center justify-center gap-2">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />} Registar médico
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

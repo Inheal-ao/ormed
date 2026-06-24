@@ -3,7 +3,7 @@ export function printTable(title: string, subtitle: string, columns: string[], r
   const esc = (v: unknown) => String(v ?? "").replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] || c));
   const head = columns.map((c) => `<th>${esc(c)}</th>`).join("");
   const body = rows.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("");
-  const logo = `${window.location.origin}/images/logo-real.png`;
+  const logo = `${window.location.origin}/images/logo.svg`;
   const html = `<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>${esc(title)}</title>
   <style>
     *{font-family:Arial,Helvetica,sans-serif;}

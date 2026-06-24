@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Loader2, FileText, FileSignature, School, KeyRound, ShieldCheck } from "lucide-react";
 import { api } from "@/lib/api";
 import { Asset } from "@/lib/admin-types";
@@ -8,6 +9,11 @@ import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
 const INST_LABEL: Record<string, string> = { universidade: "Universidade", ies: "IES", inaarees: "INAAREES" };
+const TIPO_TITLE: Record<string, { title: string; desc: string }> = {
+  ies: { title: "IES — Instituto de Especialização em Saúde", desc: "Listas de formações/títulos de especialistas reconhecidos, enviadas pelo IES." },
+  inaarees: { title: "INAAREES", desc: "Listas de médicos com diplomas reconhecidos, enviadas pelo INAAREES." },
+  "": { title: "Universidades", desc: "Listas de finalistas enviadas pelas universidades, por ano académico." },
+};
 const INST_STYLE: Record<string, string> = {
   universidade: "bg-blue-100 text-blue-700", ies: "bg-teal-100 text-teal-700", inaarees: "bg-purple-100 text-purple-700",
 };
@@ -28,7 +34,13 @@ interface UniList {
 }
 
 export default function ListasUniversidadesPage() {
+  return <Suspense fallback={<div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-angola-gold" /></div>}><ListasInner /></Suspense>;
+}
+
+function ListasInner() {
   const { user } = useAdminAuth();
+  const searchParams = useSearchParams();
+  const tipo = searchParams.get("tipo") ?? "";
   const isGod = user?.role === "super_admin" || user?.role === "admin";
   const [lists, setLists] = useState<UniList[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,9 +71,12 @@ export default function ListasUniversidadesPage() {
     setLists((prev) => prev && prev.map((l) => (l._id === id ? { ...l, lastViewedAt: new Date().toISOString(), viewCount: (l.viewCount ?? 0) + 1 } : l)));
   };
 
+  const meta = TIPO_TITLE[tipo] ?? TIPO_TITLE[""];
+  const shown = lists === null ? null : lists.filter((l) => !tipo || (l.institutionType ?? "universidade") === tipo);
+
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Universidades, IES e INAAREES" description="Canal de comunicação com as instituições — listas enviadas (finalistas, títulos de especialista, diplomas reconhecidos)." />
+      <PageHeader title={meta.title} description={meta.desc} />
 
       {/* Bastonária: desbloquear com código */}
       {!isGod && lists === null && (
@@ -81,12 +96,12 @@ export default function ListasUniversidadesPage() {
       {loading && isGod && <div className="flex justify-center py-16"><Loader2 className="w-6 h-6 animate-spin text-angola-gold" /></div>}
       {error && isGod && <p className="text-red-600">{error}</p>}
 
-      {lists !== null && (
-        lists.length === 0 ? (
-          <p className="text-gray-500 text-center py-12">Ainda não há listas enviadas.</p>
+      {shown !== null && (
+        shown.length === 0 ? (
+          <p className="text-gray-500 text-center py-12">Ainda não há listas enviadas{tipo ? ` por ${INST_LABEL[tipo] ?? tipo}` : ""}.</p>
         ) : (
           <div className="space-y-3">
-            {lists.map((l) => (
+            {shown.map((l) => (
               <div key={l._id} className="bg-white border border-gray-200 rounded-xl p-4">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><School className="w-5 h-5" /></div>

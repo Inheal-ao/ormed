@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  Loader2, Plus, Search, KeyRound, Trash2, Pencil, X, Copy, Printer, IdCard, Check, Inbox, Upload, QrCode,
+  Loader2, Search, KeyRound, Trash2, Pencil, X, Copy, Printer, IdCard, Check, Inbox, Upload, QrCode,
 } from "lucide-react";
 import { api, API_URL, tokenStore } from "@/lib/api";
 import { PageHeader } from "@/components/admin/admin-ui";
@@ -44,7 +44,6 @@ export default function MembrosPage() {
   const [search, setSearch] = useState("");
   const [fSituacao, setFSituacao] = useState("");
   const [fCategoria, setFCategoria] = useState("");
-  const [creating, setCreating] = useState(false);
   const [editing, setEditing] = useState<Member | null>(null);
   const [creds, setCreds] = useState<{ numeroUtente: string; accessCode: string; name: string } | null>(null);
   const [qrMember, setQrMember] = useState<Member | null>(null);
@@ -99,14 +98,14 @@ export default function MembrosPage() {
 
       {tab === "membros" ? (
         <>
+          <div className="bg-blue-50 border border-blue-200 text-blue-800 text-xs rounded-lg px-3 py-2 mb-3">
+            Os médicos <strong>não são criados manualmente</strong>. São registados automaticamente ao aprovar uma <a href="/admin/solicitacoes" className="underline font-medium">inscrição</a>. Aqui pode consultar, editar a situação/categorias, foto, código de acesso e QR.
+          </div>
           <div className="flex gap-2 mb-3 flex-wrap">
             <form onSubmit={(e) => { e.preventDefault(); load(); }} className="flex-1 flex gap-2 min-w-[260px]">
               <input className={inputClass} value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Procurar por nome, nº utente, nº ordem, BI..." />
               <button type="submit" className="px-3 rounded-lg bg-gray-100 text-gray-600"><Search className="w-4 h-4" /></button>
             </form>
-            <button type="button" onClick={() => setCreating(true)} className="inline-flex items-center gap-1.5 bg-angola-gold text-angola-navy font-semibold px-4 py-2 rounded-lg hover:brightness-95 shrink-0">
-              <Plus className="w-4 h-4" /> Novo membro
-            </button>
           </div>
           <div className="flex gap-2 mb-5 flex-wrap">
             <select className={`${inputClass} max-w-[170px]`} value={fSituacao} onChange={(e) => { setFSituacao(e.target.value); setTimeout(load, 0); }} aria-label="Filtrar por situação">
@@ -156,7 +155,6 @@ export default function MembrosPage() {
         <ChangeRequests reqs={reqs} onResolve={resolve} />
       )}
 
-      {creating && <MemberForm onClose={() => setCreating(false)} onCreated={(m, c) => { setItems((p) => [m, ...p]); setCreds(c); setCreating(false); }} />}
       {editing && <MemberForm member={editing} onClose={() => setEditing(null)} onUpdated={(m) => { setItems((p) => p.map((x) => (x._id === m._id ? m : x))); setEditing(null); }} />}
       {creds && <CredsModal creds={creds} onClose={() => setCreds(null)} />}
       {qrMember && (
