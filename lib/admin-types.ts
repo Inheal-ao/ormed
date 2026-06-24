@@ -24,7 +24,8 @@ export interface BankMember {
 }
 export interface Rotation {
   _id: string; interno: string; college: string; internoName: string; rotationName: string;
-  period: string; grade: number; maxGrade: number; evaluator: string; notes: string; createdAt: string;
+  period: string; grade: number; maxGrade: number; evaluatorId: string; evaluator: string; notes: string;
+  status: string; signedDocument: Asset | null; createdAt: string;
 }
 
 export interface AdminUser {
