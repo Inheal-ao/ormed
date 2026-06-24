@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Trash2, Pencil, X, GraduationCap } from "lucide-react";
 import { api } from "@/lib/api";
-import { College, Interno } from "@/lib/admin-types";
+import { College, Interno, BankMember } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
+import { MemberPicker } from "@/components/admin/member-picker";
 
 const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900 text-sm";
 const ANOS = ["1º ano", "2º ano", "3º ano", "4º ano", "5º ano", "6º ano"];
@@ -62,8 +63,8 @@ export default function InternosPage() {
             <div key={i._id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><GraduationCap className="w-5 h-5" /></div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-900">{i.name}</p>
-                <p className="text-xs text-gray-500">{collegeName(i.college)}{i.anoInternato ? ` · ${i.anoInternato}` : ""}{i.hospital ? ` · ${i.hospital}` : ""}</p>
+                <p className="font-semibold text-gray-900">{i.name} {i.numeroOrdem && <span className="text-xs text-gray-400 font-mono font-normal">· {i.numeroOrdem}</span>}</p>
+                <p className="text-xs text-gray-500">{collegeName(i.college)}{i.anoInternato ? ` · ${i.anoInternato}` : ""}{i.hospital ? ` · ${i.hospital}` : ""}{i.orientador ? ` · Orientador: ${i.orientador}` : ""}</p>
               </div>
               {i.status !== "ativo" && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{i.status}</span>}
               <div className="flex gap-1">
@@ -83,20 +84,28 @@ export default function InternosPage() {
 function InternoForm({ interno, colleges, isColegio, defaultCollege, onClose, onSaved }: {
   interno?: Interno; colleges: College[]; isColegio: boolean; defaultCollege: string; onClose: () => void; onSaved: () => void;
 }) {
-  const [f, setF] = useState({
-    college: interno?.college ?? defaultCollege ?? "", name: interno?.name ?? "", numeroOrdem: interno?.numeroOrdem ?? "",
-    biPassaporte: interno?.biPassaporte ?? "", phone: interno?.phone ?? "", email: interno?.email ?? "",
-    anoInternato: interno?.anoInternato ?? "1º ano", hospital: interno?.hospital ?? "", orientador: interno?.orientador ?? "", status: interno?.status ?? "ativo",
-  });
+  const [college, setCollege] = useState(interno?.college ?? defaultCollege ?? "");
+  const [member, setMember] = useState<{ id: string; name: string; meta?: string } | null>(
+    interno ? { id: interno.memberId, name: interno.name, meta: interno.numeroOrdem } : null,
+  );
+  const [orientador, setOrientador] = useState<{ id: string; name: string } | null>(
+    interno?.orientadorId ? { id: interno.orientadorId, name: interno.orientador } : null,
+  );
+  const [anoInternato, setAnoInternato] = useState(interno?.anoInternato ?? "1º ano");
+  const [hospital, setHospital] = useState(interno?.hospital ?? "");
+  const [status, setStatus] = useState(interno?.status ?? "ativo");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
+
   const submit = async () => {
     setError(null);
-    if (!f.name.trim() || (!isColegio && !f.college)) { setError("Preencha o nome e o colégio."); return; }
+    if (!isColegio && !college) { setError("Selecione o colégio."); return; }
+    if (!interno && !member) { setError("Selecione o médico no banco da Ordem."); return; }
     setSaving(true);
     try {
-      const body = isColegio ? { ...f, college: undefined } : f;
+      const body: Record<string, unknown> = { anoInternato, hospital, status, orientadorId: orientador?.id ?? "" };
+      if (!isColegio) body.college = college;
+      if (!interno) body.memberId = member?.id;
       if (interno) await api.patch(`/colleges/internos/${interno._id}`, body);
       else await api.post("/colleges/internos", body, true);
       onSaved();
@@ -109,25 +118,34 @@ function InternoForm({ interno, colleges, isColegio, defaultCollege, onClose, on
           <h3 className="text-lg font-bold text-gray-900">{interno ? "Editar interno" : "Novo interno"}</h3>
           <button type="button" onClick={onClose} aria-label="Fechar" className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
         </div>
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="space-y-3">
           {!isColegio && (
-            <select className={`${inputClass} sm:col-span-2`} value={f.college} onChange={(e) => set("college", e.target.value)} aria-label="Colégio">
+            <select className={inputClass} value={college} onChange={(e) => setCollege(e.target.value)} aria-label="Colégio">
               <option value="">Colégio *</option>
               {colleges.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
             </select>
           )}
-          <input className={inputClass} placeholder="Nome completo *" value={f.name} onChange={(e) => set("name", e.target.value)} />
-          <input className={inputClass} placeholder="Nº de Ordem" value={f.numeroOrdem} onChange={(e) => set("numeroOrdem", e.target.value)} />
-          <input className={inputClass} placeholder="BI / Passaporte" value={f.biPassaporte} onChange={(e) => set("biPassaporte", e.target.value)} />
-          <input className={inputClass} placeholder="Telefone" value={f.phone} onChange={(e) => set("phone", e.target.value)} />
-          <input className={inputClass} placeholder="Email" value={f.email} onChange={(e) => set("email", e.target.value)} />
-          <select className={inputClass} value={f.anoInternato} onChange={(e) => set("anoInternato", e.target.value)} aria-label="Ano do internato">
-            {ANOS.map((a) => <option key={a}>{a}</option>)}
-          </select>
-          <input className={inputClass} placeholder="Hospital / Instituição" value={f.hospital} onChange={(e) => set("hospital", e.target.value)} />
-          <input className={inputClass} placeholder="Orientador" value={f.orientador} onChange={(e) => set("orientador", e.target.value)} />
+          {interno ? (
+            <div className="border border-gray-200 rounded-lg px-3 py-2 bg-gray-50">
+              <p className="text-sm font-medium text-gray-900">{interno.name}</p>
+              <p className="text-[11px] text-gray-500 font-mono">{interno.numeroOrdem}{interno.biPassaporte ? ` · ${interno.biPassaporte}` : ""}</p>
+            </div>
+          ) : (
+            <MemberPicker label="Médico (do banco da Ordem) *" placeholder="Procurar por nome, nº ordem, nº utente..."
+              selected={member} onSelect={(m: BankMember | null) => setMember(m ? { id: m._id, name: m.name, meta: m.numeroOrdem } : null)} />
+          )}
+          <div className="grid sm:grid-cols-2 gap-3">
+            <select className={inputClass} value={anoInternato} onChange={(e) => setAnoInternato(e.target.value)} aria-label="Ano do internato">
+              {ANOS.map((a) => <option key={a}>{a}</option>)}
+            </select>
+            <input className={inputClass} placeholder="Hospital / Instituição" value={hospital} onChange={(e) => setHospital(e.target.value)} />
+          </div>
+          <MemberPicker label="Orientador (especialista com categoria de orientador)" categoria="orientador" allowClear
+            placeholder="Procurar orientador no banco..."
+            selected={orientador ? { id: orientador.id, name: orientador.name } : null}
+            onSelect={(m: BankMember | null) => setOrientador(m ? { id: m._id, name: m.name } : null)} />
           {interno && (
-            <select className={inputClass} value={f.status} onChange={(e) => set("status", e.target.value)} aria-label="Estado">
+            <select className={inputClass} value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Estado">
               <option value="ativo">Ativo</option><option value="concluido">Concluído</option><option value="suspenso">Suspenso</option>
             </select>
           )}

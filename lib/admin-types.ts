@@ -11,11 +11,16 @@ export interface College {
   _id: string; name: string; especialidade: string; description: string; coordinator: string; status: string;
 }
 export interface Interno {
-  _id: string; college: string; name: string; numeroOrdem: string; biPassaporte: string;
-  phone: string; email: string; anoInternato: string; hospital: string; orientador: string; status: string; createdAt: string;
+  _id: string; college: string; memberId: string; name: string; numeroOrdem: string; biPassaporte: string;
+  phone: string; email: string; anoInternato: string; hospital: string;
+  orientadorId: string; orientador: string; status: string; createdAt: string;
 }
 export interface Programa {
-  _id: string; college: string; title: string; ano: string; description: string; document: Asset | null; createdAt: string;
+  _id: string; college: string; tipo: string; title: string; ano: string; description: string; document: Asset | null; createdAt: string;
+}
+export interface BankMember {
+  _id: string; numeroUtente: string; numeroOrdem: string; name: string;
+  especialidade: string; situacao: string; categorias: string[]; collegeId?: string;
 }
 export interface Rotation {
   _id: string; interno: string; college: string; internoName: string; rotationName: string;
