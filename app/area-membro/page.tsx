@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard, GraduationCap, FileText, BookOpen } from "lucide-react";
 import { API_URL } from "@/lib/api";
 
 interface FichaData {
@@ -16,7 +16,19 @@ interface FichaData {
   provincia: string;
   residencia: string;
   status: string;
+  situacao?: string;
+  categorias?: string[];
 }
+
+interface Dossier {
+  isInterno: boolean;
+  college?: { name: string; especialidade: string } | null;
+  interno?: { anoInternato: string; hospital: string; orientador: string; status: string } | null;
+  rotations?: { _id: string; rotationName: string; period: string; grade: number; maxGrade: number; evaluator: string; signedDocument: { url: string } | null }[];
+  programas?: { _id: string; tipo: string; title: string; ano: string; document: { url: string } | null }[];
+}
+
+const TIPO_LABEL: Record<string, string> = { programa: "Programa de Ensino", mapa_rotacoes: "Mapa de Rotações", comunicado: "Comunicado", outro: "Documento" };
 
 const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900";
 
@@ -159,6 +171,8 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
         </div>
       </div>
 
+      {(ficha.categorias ?? []).includes("interno") && <InternatoSection numeroUtente={ficha.numeroUtente} code={code} />}
+
       <div className="bg-white border border-gray-200 rounded-2xl p-6">
         <h3 className="font-bold text-gray-900 mb-1">Atualizar os meus dados</h3>
         <p className="text-sm text-gray-500 mb-4">As alterações só ficam ativas após aprovação da equipa da Ordem.</p>
@@ -175,6 +189,88 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Solicitar alteração
         </button>
       </div>
+    </div>
+  );
+}
+
+function InternatoSection({ numeroUtente, code }: { numeroUtente: string; code: string }) {
+  const [data, setData] = useState<Dossier | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/colleges/interno-dossier`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numeroUtente, code }),
+        });
+        if (res.ok) setData(await res.json());
+      } finally { setLoading(false); }
+    })();
+  }, [numeroUtente, code]);
+
+  if (loading) return <div className="bg-white border border-gray-200 rounded-2xl p-6 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-angola-gold" /></div>;
+  if (!data || !data.isInterno) return null;
+
+  const rotations = data.rotations ?? [];
+  const programas = data.programas ?? [];
+  const media = rotations.length ? (rotations.reduce((a, r) => a + (r.maxGrade ? (r.grade / r.maxGrade) * 20 : 0), 0) / rotations.length) : null;
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+      <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><GraduationCap className="w-5 h-5 text-angola-navy" /> O meu Internato</h3>
+      {!data.interno ? (
+        <p className="text-sm text-gray-500">Ainda não está associado a um colégio de especialidade. Aguarde a associação pela coordenação.</p>
+      ) : (
+        <>
+          <div className="grid sm:grid-cols-2 gap-3 mt-3 text-sm bg-gray-50 rounded-xl p-4">
+            <div><p className="text-gray-400 text-xs">Colégio</p><p className="font-medium text-gray-900">{data.college?.name ?? "—"}</p></div>
+            <div><p className="text-gray-400 text-xs">Ano do internato</p><p className="font-medium text-gray-900">{data.interno.anoInternato || "—"}</p></div>
+            <div><p className="text-gray-400 text-xs">Hospital / Instituição</p><p className="font-medium text-gray-900">{data.interno.hospital || "—"}</p></div>
+            <div><p className="text-gray-400 text-xs">Orientador</p><p className="font-medium text-gray-900">{data.interno.orientador || "—"}</p></div>
+          </div>
+
+          {/* Notas finais */}
+          <div className="mt-5">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-semibold text-gray-800 text-sm">Notas das rotações</h4>
+              {media !== null && <span className="text-xs text-gray-500">Média global: <strong className="text-angola-navy">{media.toFixed(1)}/20</strong></span>}
+            </div>
+            {rotations.length === 0 ? (
+              <p className="text-sm text-gray-400">Ainda não há notas finais publicadas.</p>
+            ) : (
+              <div className="border border-gray-200 rounded-xl divide-y">
+                {rotations.map((r) => (
+                  <div key={r._id} className="flex items-center gap-3 px-4 py-2.5">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{r.rotationName}</p>
+                      <p className="text-xs text-gray-500">{r.period}{r.evaluator ? ` · ${r.evaluator}` : ""}</p>
+                    </div>
+                    {r.signedDocument && <a href={r.signedDocument.url} target="_blank" rel="noopener noreferrer" className="text-angola-blue hover:underline inline-flex items-center gap-1 text-xs"><FileText className="w-3.5 h-3.5" /> PDF</a>}
+                    <span className={`text-base font-bold ${r.grade >= r.maxGrade * 0.5 ? "text-green-600" : "text-red-600"}`}>{r.grade}<span className="text-xs text-gray-400">/{r.maxGrade}</span></span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Programas e documentos */}
+          {programas.length > 0 && (
+            <div className="mt-5">
+              <h4 className="font-semibold text-gray-800 text-sm mb-2">Programas e documentos do colégio</h4>
+              <div className="space-y-1.5">
+                {programas.map((p) => (
+                  <div key={p._id} className="flex items-center gap-2 text-sm bg-gray-50 rounded-lg px-3 py-2">
+                    <BookOpen className="w-4 h-4 text-gray-400 shrink-0" />
+                    <span className="flex-1 min-w-0 truncate text-gray-800">{p.title} <span className="text-xs text-gray-400">· {TIPO_LABEL[p.tipo] ?? p.tipo}</span></span>
+                    {p.document && <a href={p.document.url} target="_blank" rel="noopener noreferrer" className="text-angola-blue hover:underline inline-flex items-center gap-1 text-xs shrink-0"><FileText className="w-3.5 h-3.5" /> Abrir</a>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

@@ -17,9 +17,15 @@ const inputClass = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-n
 const ROLE_TABS = [
   { role: "bastonaria", label: "Bastonárias", godOnly: true },
   { role: "funcionario", label: "Funcionários", godOnly: false },
-  { role: "universidade", label: "Universidades", godOnly: false },
+  { role: "universidade", label: "Universidades / IES / INAAREES", godOnly: false },
   { role: "colegio", label: "Coordenadores de Colégio", godOnly: false },
 ];
+
+const INST_LABEL: Record<string, string> = { universidade: "Universidade", ies: "IES", inaarees: "INAAREES" };
+const INST_STYLE: Record<string, string> = {
+  universidade: "bg-blue-100 text-blue-700", ies: "bg-teal-100 text-teal-700", inaarees: "bg-purple-100 text-purple-700",
+};
+const RESP_LABEL: Record<string, string> = { reitor: "Reitor(a)", decano: "Decano(a)", diretor: "Diretor(a)", presidente: "Presidente" };
 
 export default function UtilizadoresPage() {
   const { user } = useAdminAuth();
@@ -159,7 +165,7 @@ function ResetPasswordModal({ user, onClose }: { user: ManagedUser; onClose: () 
 }
 
 function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u: ManagedUser) => void; onClose: () => void }) {
-  const [f, setF] = useState({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor", collegeId: "" });
+  const [f, setF] = useState({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor", institutionType: "universidade", collegeId: "" });
   const [permissions, setPermissions] = useState<string[]>([]);
   const [colleges, setColleges] = useState<College[]>([]);
   const [saving, setSaving] = useState(false);
@@ -191,7 +197,7 @@ function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u:
         if (!f.collegeId) { setError("Escolha o colégio."); setSaving(false); return; }
         u = await api.post<ManagedUser>("/users/colegio", { name: f.name, email: f.email, password: f.password, phone: f.phone, collegeId: f.collegeId }, true);
       } else {
-        u = await api.post<ManagedUser>("/users/universidade", { name: f.name, email: f.email, password: f.password, phone: f.phone, universityName: f.universityName, responsibleType: f.responsibleType }, true);
+        u = await api.post<ManagedUser>("/users/universidade", { name: f.name, email: f.email, password: f.password, phone: f.phone, universityName: f.universityName, responsibleType: f.responsibleType, institutionType: f.institutionType }, true);
       }
       onCreated(u);
       setCreated({ email: f.email, password: f.password });
@@ -216,7 +222,7 @@ function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u:
           <button type="button" onClick={() => { navigator.clipboard.writeText(`Email: ${created.email}\nPassword: ${created.password}`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
             {copied ? "Copiado!" : "Copiar credenciais"}
           </button>
-          <button type="button" onClick={() => { setCreated(null); setF({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor", collegeId: "" }); setPermissions([]); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Criar outro</button>
+          <button type="button" onClick={() => { setCreated(null); setF({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor", institutionType: "universidade", collegeId: "" }); setPermissions([]); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Criar outro</button>
           <button type="button" onClick={onClose} className="text-xs px-3 py-1.5 bg-angola-navy text-white rounded-lg ml-auto">Concluir</button>
         </div>
       </div>
@@ -236,12 +242,24 @@ function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u:
       </div>
 
       {role === "universidade" && (
-        <div className="grid sm:grid-cols-2 gap-3">
-          <input className={inputClass} placeholder="Nome da universidade" value={f.universityName} onChange={(e) => set("universityName", e.target.value)} required />
-          <select className={inputClass} value={f.responsibleType} onChange={(e) => set("responsibleType", e.target.value)} aria-label="Cargo">
-            <option value="reitor">Reitor(a)</option>
-            <option value="decano">Decano(a)</option>
-          </select>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de instituição</label>
+            <select className={inputClass} value={f.institutionType} onChange={(e) => set("institutionType", e.target.value)} aria-label="Tipo de instituição">
+              <option value="universidade">Universidade</option>
+              <option value="ies">IES — Instituto de Especialização em Saúde</option>
+              <option value="inaarees">INAAREES — Avaliação/Acreditação de Estudos</option>
+            </select>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input className={inputClass} placeholder={f.institutionType === "universidade" ? "Nome da universidade" : "Nome da instituição"} value={f.universityName} onChange={(e) => set("universityName", e.target.value)} required />
+            <select className={inputClass} value={f.responsibleType} onChange={(e) => set("responsibleType", e.target.value)} aria-label="Cargo">
+              <option value="reitor">Reitor(a)</option>
+              <option value="decano">Decano(a)</option>
+              <option value="diretor">Diretor(a)</option>
+              <option value="presidente">Presidente</option>
+            </select>
+          </div>
         </div>
       )}
 
@@ -294,9 +312,12 @@ function UserCard({ u, onBlock, onRemove, onResetPw, onGenCodes, onSaved }: {
     <div className={`bg-white border rounded-xl p-4 ${u.isBlocked ? "border-red-200 bg-red-50/30" : "border-gray-200"}`}>
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <p className="font-semibold text-gray-900">{u.universityName || u.name}</p>
+          <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
+            {u.universityName || u.name}
+            {u.role === "universidade" && <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${INST_STYLE[u.institutionType ?? "universidade"]}`}>{INST_LABEL[u.institutionType ?? "universidade"]}</span>}
+          </p>
           <p className="text-xs text-gray-500">{u.email}{u.phone ? ` · ${u.phone}` : ""}</p>
-          {u.role === "universidade" && <p className="text-xs text-gray-500">{u.name} · {u.responsibleType === "decano" ? "Decano(a)" : "Reitor(a)"}</p>}
+          {u.role === "universidade" && <p className="text-xs text-gray-500">{u.name} · {RESP_LABEL[u.responsibleType] ?? u.responsibleType}</p>}
           {u.isBlocked && <span className="inline-block mt-1 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Bloqueado</span>}
         </div>
         {showCodes && stats && (

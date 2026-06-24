@@ -47,6 +47,7 @@ export interface ManagedUser {
   permissions: string[];
   universityName: string;
   responsibleType: string;
+  institutionType?: string;
   phone: string;
   collegeId?: string;
   isActive: boolean;

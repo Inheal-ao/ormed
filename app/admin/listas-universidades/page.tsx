@@ -7,9 +7,15 @@ import { Asset } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
 
+const INST_LABEL: Record<string, string> = { universidade: "Universidade", ies: "IES", inaarees: "INAAREES" };
+const INST_STYLE: Record<string, string> = {
+  universidade: "bg-blue-100 text-blue-700", ies: "bg-teal-100 text-teal-700", inaarees: "bg-purple-100 text-purple-700",
+};
+
 interface UniList {
   _id: string;
   universityName: string;
+  institutionType?: string;
   year: string;
   digitalPdf: Asset;
   signedScan: Asset;
@@ -55,7 +61,7 @@ export default function ListasUniversidadesPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Universidades" description="Canal de comunicação com as universidades — listas de finalistas enviadas, por ano académico." />
+      <PageHeader title="Universidades, IES e INAAREES" description="Canal de comunicação com as instituições — listas enviadas (finalistas, títulos de especialista, diplomas reconhecidos)." />
 
       {/* Bastonária: desbloquear com código */}
       {!isGod && lists === null && (
@@ -85,7 +91,10 @@ export default function ListasUniversidadesPage() {
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><School className="w-5 h-5" /></div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900">{l.universityName}</p>
+                    <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
+                      {l.universityName}
+                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${INST_STYLE[l.institutionType ?? "universidade"]}`}>{INST_LABEL[l.institutionType ?? "universidade"]}</span>
+                    </p>
                     <p className="text-xs text-gray-500">Finalistas {l.year} · enviado por {l.submittedBy || "—"} · {new Date(l.createdAt).toLocaleDateString("pt-PT")}</p>
                     {l.notes && <p className="text-sm text-gray-600 mt-1">{l.notes}</p>}
                   </div>
