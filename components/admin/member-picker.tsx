@@ -75,9 +75,14 @@ export function MemberPicker({
               ) : results.map((m) => (
                 <button key={m._id} type="button"
                   onClick={() => { onSelect(m); setOpen(false); setQ(""); }}
-                  className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-50 last:border-0">
-                  <p className="text-sm font-medium text-gray-900">{m.name}</p>
-                  <p className="text-[11px] text-gray-500 font-mono">{m.numeroOrdem}{m.especialidade ? ` · ${m.especialidade}` : ""}</p>
+                  className="w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-50 last:border-0 flex items-center gap-2.5">
+                  {m.photo?.url
+                    ? <img src={m.photo.url} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                    : <span className="w-8 h-8 rounded-full bg-angola-navy/10 text-angola-navy flex items-center justify-center text-xs font-bold shrink-0">{m.name.charAt(0).toUpperCase()}</span>}
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-gray-900 truncate">{m.name}</span>
+                    <span className="block text-[11px] text-gray-500 font-mono truncate">{m.numeroOrdem}{m.especialidade ? ` · ${m.especialidade}` : ""}</span>
+                  </span>
                 </button>
               ))}
             </div>

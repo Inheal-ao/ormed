@@ -22,6 +22,7 @@ export interface Programa {
 export interface BankMember {
   _id: string; numeroUtente: string; numeroOrdem: string; name: string;
   especialidade: string; situacao: string; categorias: string[]; collegeId?: string;
+  photo?: Asset | null;
 }
 export interface Competencia {
   competencia: string; totalMinimo: number; observador: number; ajudante: number; executor: number; totalRealizado: number;

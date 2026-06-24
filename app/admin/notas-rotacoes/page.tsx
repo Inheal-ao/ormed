@@ -15,6 +15,7 @@ const esc = (s: string) => (s || "").replace(/[<>&]/g, (c) => ({ "<": "&lt;", ">
 function printMapa(r: Rotation, collegeName: string) {
   const w = window.open("", "_blank", "width=1000,height=900");
   if (!w) return;
+  const logo = `${window.location.origin}/images/logo-real.png`;
   const rows = (r.competencias ?? []).map((c) => `<tr>
     <td class="comp">${esc(c.competencia)}</td>
     <td>${c.totalMinimo || ""}</td><td>${c.observador || ""}</td><td>${c.ajudante || ""}</td>
@@ -32,8 +33,10 @@ function printMapa(r: Rotation, collegeName: string) {
   .obs{margin-top:14px;font-size:12px}
   .sign{margin-top:60px;display:flex;justify-content:space-around;font-size:12px}
   .line{border-top:1px solid #333;width:240px;text-align:center;padding-top:5px}
+  .logo{height:74px;display:block;margin:0 auto 6px}
   </style></head><body>
   <div class="center">
+    <img class="logo" src="${logo}" alt="ORMED" onerror="this.style.display='none'" />
     <p class="b">ORDEM DOS MÉDICOS DE ANGOLA</p>
     <p class="b">COLÉGIO DE ESPECIALIDADE DE ${esc((r.especialidade || collegeName).toUpperCase())}</p>
     <p class="b">MAPA DE REGISTO DE HABILIDADES DO INTERNO DE ${esc((r.especialidade || "").toUpperCase())}</p>

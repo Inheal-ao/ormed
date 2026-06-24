@@ -413,22 +413,26 @@ export const specialties = [
   "Medicina de Emergência",
 ];
 
+// 21 províncias de Angola (nova gestão administrativa, reforma de 2024).
 export const provinces = [
   "Bengo",
   "Benguela",
   "Bié",
   "Cabinda",
-  "Cuando Cubango",
+  "Cuando",
+  "Cubango",
   "Cuanza Norte",
   "Cuanza Sul",
   "Cunene",
   "Huambo",
   "Huíla",
+  "Icolo e Bengo",
   "Luanda",
   "Lunda Norte",
   "Lunda Sul",
   "Malanje",
   "Moxico",
+  "Moxico Leste",
   "Namibe",
   "Uíge",
   "Zaire",

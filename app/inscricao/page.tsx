@@ -6,6 +6,8 @@ import {
   Loader2, Send, Copy, Check, Upload,
 } from "lucide-react";
 import { API_URL } from "@/lib/api";
+import { provinces } from "@/lib/data";
+import { CountrySelect } from "@/components/country-select";
 
 const STEPS = [
   { id: 1, title: "Dados Pessoais", icon: UserPlus },
@@ -364,17 +366,22 @@ function StepPessoais({ form, set }: { form: any; set: SetFn }) {
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Field label="Nacionalidade" required>
-          <input className={inputClass} value={form.nacionalidade} onChange={(e) => set("nacionalidade", e.target.value)} placeholder="Angola" />
+          <CountrySelect value={form.nacionalidade} onChange={(v) => set("nacionalidade", v)} className={inputClass} />
         </Field>
         <Field label="Nacionalidade Alternativa">
-          <input className={inputClass} value={form.nacionalidadeAlt} onChange={(e) => set("nacionalidadeAlt", e.target.value)} placeholder="outra nacionalidade" />
+          <CountrySelect value={form.nacionalidadeAlt} onChange={(v) => set("nacionalidadeAlt", v)} className={inputClass} />
         </Field>
         <Field label="Local de Residência Actual" required>
           <input className={inputClass} value={form.residencia} onChange={(e) => set("residencia", e.target.value)} placeholder="Rua, bairro, município, província" />
         </Field>
       </div>
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Field label="Província" required><input className={inputClass} value={form.provincia} onChange={(e) => set("provincia", e.target.value)} placeholder="Luanda" /></Field>
+        <Field label="Província" required>
+          <select className={inputClass} value={form.provincia} onChange={(e) => set("provincia", e.target.value)} aria-label="Província">
+            <option value="">— Província —</option>
+            {provinces.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+        </Field>
         <Field label="Município" required><input className={inputClass} value={form.municipio} onChange={(e) => set("municipio", e.target.value)} placeholder="Talatona" /></Field>
         <Field label="Comuna"><input className={inputClass} value={form.comuna} onChange={(e) => set("comuna", e.target.value)} placeholder="Comuna" /></Field>
         <Field label="Distrito Urbano"><input className={inputClass} value={form.distrito} onChange={(e) => set("distrito", e.target.value)} placeholder="Distrito" /></Field>
@@ -396,7 +403,7 @@ function FormacaoBlock({ form, set, prefix, em, emLabel, localLabel }: { form: a
         <Field label={localLabel}><input className={inputClass} value={form[`${prefix}Local`]} onChange={(e) => set(`${prefix}Local`, e.target.value)} placeholder="Universidade/Hospital/Clínica" /></Field>
       </div>
       <div className="grid sm:grid-cols-2 gap-4">
-        <Field label="País de Formação"><input className={inputClass} value={form[`${prefix}Pais`]} onChange={(e) => set(`${prefix}Pais`, e.target.value)} placeholder="digite aqui o país" /></Field>
+        <Field label="País de Formação"><CountrySelect value={form[`${prefix}Pais`]} onChange={(v) => set(`${prefix}Pais`, v)} className={inputClass} /></Field>
         <Field label="Data de Conclusão"><input type="date" className={inputClass} value={form[`${prefix}Data`]} onChange={(e) => set(`${prefix}Data`, e.target.value)} /></Field>
       </div>
     </div>
@@ -411,7 +418,7 @@ function StepProfissionais({ form, set }: { form: any; set: SetFn }) {
         <Field label="Universidade de Formação" required><input className={inputClass} value={form.universidade} onChange={(e) => set("universidade", e.target.value)} placeholder="digite aqui a universidade" /></Field>
       </div>
       <div className="grid sm:grid-cols-2 gap-4 mt-4">
-        <Field label="País de Formação" required><input className={inputClass} value={form.paisFormacao} onChange={(e) => set("paisFormacao", e.target.value)} placeholder="digite aqui o país de formação" /></Field>
+        <Field label="País de Formação" required><CountrySelect value={form.paisFormacao} onChange={(v) => set("paisFormacao", v)} className={inputClass} /></Field>
         <Field label="Data de Conclusão" required><input type="date" className={inputClass} value={form.dataConclusao} onChange={(e) => set("dataConclusao", e.target.value)} /></Field>
       </div>
 

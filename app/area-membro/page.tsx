@@ -18,6 +18,8 @@ interface FichaData {
   status: string;
   situacao?: string;
   categorias?: string[];
+  pais?: string;
+  photo?: { url: string } | null;
 }
 
 interface Comp { competencia: string; totalMinimo: number; observador: number; ajudante: number; executor: number; totalRealizado: number }
@@ -157,10 +159,13 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
     <div className="space-y-6">
       <div className="bg-angola-navy text-white rounded-2xl p-6">
         <div className="flex items-start justify-between">
-          <div>
-            <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><IdCard className="w-4 h-4" /> Ficha de Membro</p>
-            <h2 className="text-2xl font-bold mt-1">{ficha.name}</h2>
-            {ficha.especialidade && <p className="text-gray-300">{ficha.especialidade}</p>}
+          <div className="flex items-center gap-4">
+            {ficha.photo?.url && <img src={ficha.photo.url} alt="" className="w-16 h-16 rounded-full object-cover border-2 border-angola-gold/40" />}
+            <div>
+              <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><IdCard className="w-4 h-4" /> Ficha de Membro</p>
+              <h2 className="text-2xl font-bold mt-1">{ficha.name}</h2>
+              {ficha.especialidade && <p className="text-gray-300">{ficha.especialidade}</p>}
+            </div>
           </div>
           <button type="button" onClick={onLogout} className="text-gray-300 hover:text-white text-sm inline-flex items-center gap-1"><LogOut className="w-4 h-4" /> Sair</button>
         </div>

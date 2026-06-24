@@ -2,16 +2,19 @@
 
 import { useEffect, useState } from "react";
 import {
-  Loader2, Plus, Search, KeyRound, Trash2, Pencil, X, Copy, Printer, IdCard, Check, Inbox,
+  Loader2, Plus, Search, KeyRound, Trash2, Pencil, X, Copy, Printer, IdCard, Check, Inbox, Upload,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import { api, API_URL, tokenStore } from "@/lib/api";
 import { PageHeader } from "@/components/admin/admin-ui";
+import { CountrySelect } from "@/components/country-select";
+import { provinces } from "@/lib/data";
 
 interface Member {
   _id: string; numeroUtente: string; numeroOrdem: string; name: string; biPassaporte: string;
-  phone: string; email: string; especialidade: string; provincia: string; residencia: string;
+  phone: string; email: string; especialidade: string; provincia: string; pais?: string; residencia: string;
   notes?: string; status: string; situacao?: string; situacaoMotivo?: string;
-  categorias?: string[]; collegeId?: string; simulado?: boolean; createdAt: string;
+  categorias?: string[]; collegeId?: string; simulado?: boolean;
+  photo?: { url: string; publicId?: string } | null; createdAt: string;
 }
 interface ChangeReq {
   _id: string; numeroUtente: string; memberName: string; changes: Record<string, string>;
@@ -122,7 +125,9 @@ export default function MembrosPage() {
             <div className="space-y-2">
               {items.map((m) => (
                 <div key={m._id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-4 flex-wrap">
-                  <div className="w-10 h-10 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><IdCard className="w-5 h-5" /></div>
+                  {m.photo?.url
+                    ? <img src={m.photo.url} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                    : <div className="w-10 h-10 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><IdCard className="w-5 h-5" /></div>}
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-900 flex items-center gap-2 flex-wrap">
                       {m.name}
@@ -195,15 +200,35 @@ function MemberForm({ member, onClose, onCreated, onUpdated }: {
   const [f, setF] = useState({
     name: member?.name ?? "", numeroOrdem: member?.numeroOrdem ?? "", biPassaporte: member?.biPassaporte ?? "",
     phone: member?.phone ?? "", email: member?.email ?? "", especialidade: member?.especialidade ?? "",
-    provincia: member?.provincia ?? "", residencia: member?.residencia ?? "", status: member?.status ?? "ativo",
+    provincia: member?.provincia ?? "", pais: member?.pais ?? "Angola", residencia: member?.residencia ?? "", status: member?.status ?? "ativo",
     situacao: member?.situacao ?? "vigor", situacaoMotivo: member?.situacaoMotivo ?? "",
   });
   const [categorias, setCategorias] = useState<string[]>(member?.categorias ?? ["clinico_geral"]);
+  const [specialties, setSpecialties] = useState<{ _id: string; name: string }[]>([]);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(member?.photo?.url ?? null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
   const toggleCat = (c: string) =>
     setCategorias((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev.filter((x) => x !== "clinico_geral" || c === "clinico_geral"), c]));
+
+  useEffect(() => {
+    api.get<{ _id: string; name: string }[]>("/specialties").then(setSpecialties).catch(() => setSpecialties([]));
+  }, []);
+
+  const onPickPhoto = (file: File | null) => {
+    setPhotoFile(file);
+    setPhotoPreview(file ? URL.createObjectURL(file) : (member?.photo?.url ?? null));
+  };
+  const uploadPhoto = async (id: string): Promise<Member["photo"] | undefined> => {
+    if (!photoFile) return undefined;
+    const fd = new FormData();
+    fd.append("photo", photoFile);
+    const res = await fetch(`${API_URL}/members/${id}/photo`, { method: "PATCH", headers: { Authorization: `Bearer ${tokenStore.getAccess()}` }, body: fd });
+    if (!res.ok) throw new Error("Falha ao carregar a foto.");
+    return ((await res.json()) as Member).photo;
+  };
 
   const submit = async () => {
     setError(null);
@@ -212,10 +237,12 @@ function MemberForm({ member, onClose, onCreated, onUpdated }: {
     try {
       if (member) {
         const m = await api.patch<Member>(`/members/${member._id}`, { ...f, categorias: categorias.length ? categorias : ["clinico_geral"] });
-        onUpdated?.(m);
+        const photo = await uploadPhoto(member._id);
+        onUpdated?.({ ...m, photo: photo ?? m.photo });
       } else {
         const res = await api.post<{ member: Member; numeroUtente: string; accessCode: string }>("/members", f, true);
-        onCreated?.(res.member, { numeroUtente: res.numeroUtente, accessCode: res.accessCode, name: res.member.name });
+        const photo = await uploadPhoto(res.member._id);
+        onCreated?.({ ...res.member, photo: photo ?? res.member.photo }, { numeroUtente: res.numeroUtente, accessCode: res.accessCode, name: res.member.name });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao guardar.");
@@ -231,14 +258,31 @@ function MemberForm({ member, onClose, onCreated, onUpdated }: {
           <h3 className="text-lg font-bold text-gray-900">{member ? "Editar membro" : "Novo membro"}</h3>
           <button type="button" onClick={onClose} aria-label="Fechar" className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
         </div>
+        <div className="flex items-center gap-4 mb-4">
+          {photoPreview
+            ? <img src={photoPreview} alt="" className="w-16 h-16 rounded-full object-cover border border-gray-200" />
+            : <div className="w-16 h-16 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center"><IdCard className="w-7 h-7" /></div>}
+          <label className="inline-flex items-center gap-1.5 text-sm px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+            <Upload className="w-4 h-4" /> {photoFile ? "Alterar foto" : "Foto do médico"}
+            <input type="file" accept="image/*" className="hidden" onChange={(e) => onPickPhoto(e.target.files?.[0] ?? null)} />
+          </label>
+        </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <input className={inputClass} placeholder="Nome completo *" value={f.name} onChange={(e) => set("name", e.target.value)} />
           <input className={inputClass} placeholder="Nº de Ordem *" value={f.numeroOrdem} onChange={(e) => set("numeroOrdem", e.target.value)} />
           <input className={inputClass} placeholder="BI / Passaporte *" value={f.biPassaporte} onChange={(e) => set("biPassaporte", e.target.value)} />
           <input className={inputClass} placeholder="Telefone *" value={f.phone} onChange={(e) => set("phone", e.target.value)} />
           <input className={inputClass} placeholder="Email" value={f.email} onChange={(e) => set("email", e.target.value)} />
-          <input className={inputClass} placeholder="Especialidade" value={f.especialidade} onChange={(e) => set("especialidade", e.target.value)} />
-          <input className={inputClass} placeholder="Província" value={f.provincia} onChange={(e) => set("provincia", e.target.value)} />
+          <select className={inputClass} value={f.especialidade} onChange={(e) => set("especialidade", e.target.value)} aria-label="Especialidade">
+            <option value="">— Especialidade —</option>
+            {f.especialidade && !specialties.some((s) => s.name === f.especialidade) && <option value={f.especialidade}>{f.especialidade}</option>}
+            {specialties.map((s) => <option key={s._id} value={s.name}>{s.name}</option>)}
+          </select>
+          <CountrySelect value={f.pais} onChange={(v) => set("pais", v)} className={inputClass} />
+          <select className={inputClass} value={f.provincia} onChange={(e) => set("provincia", e.target.value)} aria-label="Província">
+            <option value="">— Província —</option>
+            {provinces.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
           <input className={inputClass} placeholder="Residência" value={f.residencia} onChange={(e) => set("residencia", e.target.value)} />
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Situação da inscrição</label>
