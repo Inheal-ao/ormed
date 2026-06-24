@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Plus, Trash2, Pencil, X, GraduationCap } from "lucide-react";
+import { Loader2, Plus, Trash2, Pencil, X, GraduationCap, Award, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import { College, Interno, BankMember } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
@@ -19,6 +19,7 @@ export default function InternosPage() {
   const [items, setItems] = useState<Interno[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Interno | "new" | null>(null);
+  const [atribuir, setAtribuir] = useState(false);
 
   useEffect(() => {
     api.get<College[]>("/colleges", true).then((c) => { setColleges(c); if (isColegio && c[0]) setCollege(c[0]._id); }).catch(() => {});
@@ -41,9 +42,14 @@ export default function InternosPage() {
     <div className="max-w-3xl">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <PageHeader title="Internos de Especialidade" description="Médicos internos em formação nos colégios de especialidade." />
-        <button type="button" onClick={() => setEditing("new")} className="inline-flex items-center gap-1.5 bg-angola-gold text-angola-navy font-semibold px-4 py-2 rounded-lg hover:brightness-95 shrink-0">
-          <Plus className="w-4 h-4" /> Novo interno
-        </button>
+        <div className="flex gap-2 shrink-0">
+          <button type="button" onClick={() => setAtribuir(true)} className="inline-flex items-center gap-1.5 border border-angola-navy text-angola-navy font-semibold px-4 py-2 rounded-lg hover:bg-angola-navy/5">
+            <Award className="w-4 h-4" /> Atribuir categoria
+          </button>
+          <button type="button" onClick={() => setEditing("new")} className="inline-flex items-center gap-1.5 bg-angola-gold text-angola-navy font-semibold px-4 py-2 rounded-lg hover:brightness-95">
+            <Plus className="w-4 h-4" /> Novo interno
+          </button>
+        </div>
       </div>
 
       {!isColegio && (
@@ -77,6 +83,81 @@ export default function InternosPage() {
       )}
 
       {editing && <InternoForm interno={editing === "new" ? undefined : editing} colleges={colleges} isColegio={isColegio} defaultCollege={college} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} />}
+      {atribuir && <AtribuirCategoriaModal colleges={colleges} isColegio={isColegio} defaultCollege={college} onClose={() => setAtribuir(false)} />}
+    </div>
+  );
+}
+
+const CATEGORIAS_ATRIB = [
+  { v: "interno", label: "Interno" },
+  { v: "especialista", label: "Especialista" },
+  { v: "orientador", label: "Orientador (só especialistas)" },
+];
+
+function AtribuirCategoriaModal({ colleges, isColegio, defaultCollege, onClose }: {
+  colleges: College[]; isColegio: boolean; defaultCollege: string; onClose: () => void;
+}) {
+  const [member, setMember] = useState<{ id: string; name: string; meta?: string } | null>(null);
+  const [categoria, setCategoria] = useState("interno");
+  const [college, setCollege] = useState(defaultCollege ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+
+  const submit = async () => {
+    setError(null);
+    if (!member) { setError("Selecione o médico no banco da Ordem."); return; }
+    setSaving(true);
+    try {
+      const body: Record<string, unknown> = { memberId: member.id, categoria, action: "add" };
+      if (!isColegio && college) body.collegeId = college;
+      await api.post("/members/category-request", body, true);
+      setDone(true);
+    } catch (err) { setError(err instanceof Error ? err.message : "Erro."); } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-2xl max-w-md w-full p-6 my-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2"><Award className="w-5 h-5 text-angola-navy" /> Atribuir categoria</h3>
+          <button type="button" onClick={onClose} aria-label="Fechar" className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
+        </div>
+        {done ? (
+          <div className="text-center py-4">
+            <div className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto mb-3"><Check className="w-6 h-6" /></div>
+            <p className="text-sm text-gray-700">Pedido enviado para <strong>aprovação da Bastonária</strong>.</p>
+            <button type="button" onClick={onClose} className="mt-4 w-full bg-angola-navy text-white py-2 rounded-lg text-sm">Concluir</button>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {!isColegio && (
+                <select className={inputClass} value={college} onChange={(e) => setCollege(e.target.value)} aria-label="Colégio">
+                  <option value="">Colégio (opcional)</option>
+                  {colleges.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+                </select>
+              )}
+              <MemberPicker label="Médico (do banco da Ordem) *" placeholder="Procurar por nome, nº ordem, nº utente..."
+                selected={member} onSelect={(m: BankMember | null) => setMember(m ? { id: m._id, name: m.name, meta: m.numeroOrdem } : null)} />
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Categoria a atribuir</label>
+                <select className={inputClass} value={categoria} onChange={(e) => setCategoria(e.target.value)} aria-label="Categoria">
+                  {CATEGORIAS_ATRIB.map((c) => <option key={c.v} value={c.v}>{c.label}</option>)}
+                </select>
+              </div>
+              <p className="text-[11px] text-gray-400">O pedido só produz efeito após aprovação da Bastonária. Orientador exige que o médico já seja especialista.</p>
+            </div>
+            {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+            <div className="flex gap-2 mt-5">
+              <button type="button" onClick={onClose} className="flex-1 border border-gray-200 py-2 rounded-lg text-sm">Cancelar</button>
+              <button type="button" onClick={submit} disabled={saving} className="flex-1 bg-angola-navy text-white py-2 rounded-lg text-sm disabled:opacity-60 inline-flex items-center justify-center gap-2">
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null} Enviar para aprovação
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -30,6 +30,7 @@ import {
   Megaphone,
   Inbox,
   ShieldAlert,
+  ShieldCheck,
   Mail,
   FileCheck,
   MessageSquare,
@@ -55,6 +56,7 @@ function badgeFor(link: NavLink, summary: NotifSummary | null): number {
     case "apoio-pesquisa": return c.apoioPesquisa;
     case "listas-universidades": return c.listas;
     case "eventos": return c.inscricoes;
+    case "aprovacoes": return c.aprovacoes;
     default: return 0;
   }
 }
@@ -107,6 +109,7 @@ const navLinks: NavLink[] = [
   { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare, key: "mensagens", group: "Comunicação" },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail, key: "newsletter", group: "Comunicação" },
 
+  { href: "/admin/aprovacoes", label: "Aprovações", icon: ShieldCheck, key: "aprovacoes", manager: true, group: "Gestão" },
   { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true, group: "Gestão" },
   { href: "/admin/relatorios", label: "Relatórios", icon: Activity, manager: true, group: "Gestão" },
   { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true, group: "Gestão" },

@@ -21,6 +21,7 @@ export interface NotifSummary {
     inscricoes: number;
     apoioPesquisa: number;
     listas: number;
+    aprovacoes: number;
   };
   recent: NotifItem[];
 }
