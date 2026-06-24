@@ -21,7 +21,7 @@ export const PERMISSION_SECTIONS: { key: string; label: string }[] = [
   { key: "apoio-pesquisa", label: "Apoio à Pesquisa" },
   { key: "validacoes", label: "Validação de Documentos" },
   { key: "solicitacoes", label: "Documentos da Ordem" },
-  { key: "listas-universidades", label: "Listas das Universidades" },
+  { key: "listas-universidades", label: "Universidades" },
   { key: "membros", label: "Membros (Médicos)" },
   { key: "denuncias", label: "Denúncias" },
   { key: "mensagens", label: "Mensagens" },

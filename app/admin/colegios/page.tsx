@@ -50,7 +50,7 @@ export default function ColegiosPage() {
               <div className="w-10 h-10 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><Stethoscope className="w-5 h-5" /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900">{c.name}</p>
-                <p className="text-xs text-gray-500">{c.especialidade}{c.coordinator ? ` · Presidente: ${c.coordinator}` : ""}</p>
+                <p className="text-xs text-gray-500">{c.especialidade}{c.coordinator ? ` · Coordenador: ${c.coordinator}` : ""}</p>
               </div>
               {c.status !== "ativo" && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{c.status}</span>}
               {isManager && (
@@ -71,10 +71,25 @@ export default function ColegiosPage() {
 
 function CollegeForm({ college, onClose, onSaved }: { college?: College; onClose: () => void; onSaved: () => void }) {
   const [f, setF] = useState({ name: college?.name ?? "", especialidade: college?.especialidade ?? "", coordinator: college?.coordinator ?? "", description: college?.description ?? "", status: college?.status ?? "ativo" });
+  const [specialties, setSpecialties] = useState<{ _id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
+
+  useEffect(() => {
+    api.get<{ _id: string; name: string }[]>("/specialties").then(setSpecialties).catch(() => setSpecialties([]));
+  }, []);
+
+  // Ao escolher a especialidade, sugere o nome do colégio automaticamente.
+  const pickEspecialidade = (esp: string) => {
+    setF((p) => ({
+      ...p,
+      especialidade: esp,
+      name: !p.name.trim() || p.name === `Colégio de ${p.especialidade}` ? `Colégio de ${esp}` : p.name,
+    }));
+  };
+
   const submit = async () => {
-    if (!f.name.trim()) return;
+    if (!f.name.trim() || !f.especialidade.trim()) return;
     setSaving(true);
     try {
       if (college) await api.patch(`/colleges/${college._id}`, f);
@@ -90,9 +105,15 @@ function CollegeForm({ college, onClose, onSaved }: { college?: College; onClose
           <button type="button" onClick={onClose} aria-label="Fechar" className="p-1 text-gray-400 hover:text-gray-700"><X className="w-5 h-5" /></button>
         </div>
         <div className="space-y-3">
-          <input className={inputClass} placeholder="Nome (ex: Colégio de Cardiologia) *" value={f.name} onChange={(e) => set("name", e.target.value)} />
-          <input className={inputClass} placeholder="Especialidade" value={f.especialidade} onChange={(e) => set("especialidade", e.target.value)} />
-          <input className={inputClass} placeholder="Presidente do Colégio" value={f.coordinator} onChange={(e) => set("coordinator", e.target.value)} />
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Especialidade (da base de dados oficial) *</label>
+            <select className={inputClass} value={f.especialidade} onChange={(e) => pickEspecialidade(e.target.value)} aria-label="Especialidade">
+              <option value="">— Selecionar especialidade reconhecida —</option>
+              {specialties.map((s) => <option key={s._id} value={s.name}>{s.name}</option>)}
+            </select>
+          </div>
+          <input className={inputClass} placeholder="Nome do colégio *" value={f.name} onChange={(e) => set("name", e.target.value)} />
+          <input className={inputClass} placeholder="Coordenador do Colégio" value={f.coordinator} onChange={(e) => set("coordinator", e.target.value)} />
           <textarea className={`${inputClass} min-h-[80px]`} placeholder="Descrição" value={f.description} onChange={(e) => set("description", e.target.value)} />
           {college && (
             <select className={inputClass} value={f.status} onChange={(e) => set("status", e.target.value)} aria-label="Estado">

@@ -15,7 +15,7 @@ const ROLE_LABEL: Record<string, string> = {
   bastonaria: "Bastonária",
   funcionario: "Funcionário",
   universidade: "Universidade",
-  colegio: "Presidente do Colégio",
+  colegio: "Coordenador do Colégio",
 };
 
 const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900";

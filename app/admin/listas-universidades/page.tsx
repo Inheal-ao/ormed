@@ -55,7 +55,7 @@ export default function ListasUniversidadesPage() {
 
   return (
     <div className="max-w-3xl">
-      <PageHeader title="Listas das Universidades" description="Listas de finalistas enviadas pelas universidades, por ano académico." />
+      <PageHeader title="Universidades" description="Canal de comunicação com as universidades — listas de finalistas enviadas, por ano académico." />
 
       {/* Bastonária: desbloquear com código */}
       {!isGod && lists === null && (

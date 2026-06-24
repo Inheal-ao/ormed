@@ -333,7 +333,7 @@ function Card({ title, children, className = "" }: { title: string; children: Re
   );
 }
 
-// ===== Dashboard do Presidente do Colégio =====
+// ===== Dashboard do Coordenador do Colégio =====
 function ColegioDashboard() {
   const { user } = useAdminAuth();
   const [college, setCollege] = useState<College | null>(null);
@@ -368,7 +368,7 @@ function ColegioDashboard() {
   return (
     <div>
       <div className="mb-6">
-        <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide">Presidente do Colégio</p>
+        <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide">Coordenador do Colégio</p>
         <h1 className="text-2xl font-bold text-gray-900">{college?.name ?? "O meu colégio"}</h1>
         <p className="text-gray-500">Olá, {user?.name?.split(" ")[0]} — gestão dos internatos e da especialidade.</p>
       </div>
