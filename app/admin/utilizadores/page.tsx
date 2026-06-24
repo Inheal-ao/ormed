@@ -5,7 +5,7 @@ import {
   Loader2, Plus, Trash2, Lock, Unlock, KeyRound, Ticket, X, Copy, Printer, ShieldCheck,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { ManagedUser } from "@/lib/admin-types";
+import { ManagedUser, College } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { PERMISSION_SECTIONS } from "@/lib/permissions";
@@ -18,6 +18,7 @@ const ROLE_TABS = [
   { role: "bastonaria", label: "Bastonárias", godOnly: true },
   { role: "funcionario", label: "Funcionários", godOnly: false },
   { role: "universidade", label: "Universidades", godOnly: false },
+  { role: "colegio", label: "Colégios", godOnly: false },
 ];
 
 export default function UtilizadoresPage() {
@@ -158,14 +159,19 @@ function ResetPasswordModal({ user, onClose }: { user: ManagedUser; onClose: () 
 }
 
 function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u: ManagedUser) => void; onClose: () => void }) {
-  const [f, setF] = useState({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor" });
+  const [f, setF] = useState({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor", collegeId: "" });
   const [permissions, setPermissions] = useState<string[]>([]);
+  const [colleges, setColleges] = useState<College[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<{ email: string; password: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const set = (k: string, v: string) => setF((p) => ({ ...p, [k]: v }));
   const togglePerm = (k: string) => setPermissions((p) => (p.includes(k) ? p.filter((x) => x !== k) : [...p, k]));
+
+  useEffect(() => {
+    if (role === "colegio") api.get<College[]>("/colleges", true).then(setColleges).catch(() => {});
+  }, [role]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,6 +187,9 @@ function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u:
         u = await api.post<ManagedUser>("/users/bastonaria", { name: f.name, email: f.email, password: f.password, phone: f.phone }, true);
       } else if (role === "funcionario") {
         u = await api.post<ManagedUser>("/users/funcionario", { name: f.name, email: f.email, password: f.password, phone: f.phone, permissions }, true);
+      } else if (role === "colegio") {
+        if (!f.collegeId) { setError("Escolha o colégio."); setSaving(false); return; }
+        u = await api.post<ManagedUser>("/users/colegio", { name: f.name, email: f.email, password: f.password, phone: f.phone, collegeId: f.collegeId }, true);
       } else {
         u = await api.post<ManagedUser>("/users/universidade", { name: f.name, email: f.email, password: f.password, phone: f.phone, universityName: f.universityName, responsibleType: f.responsibleType }, true);
       }
@@ -207,7 +216,7 @@ function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u:
           <button type="button" onClick={() => { navigator.clipboard.writeText(`Email: ${created.email}\nPassword: ${created.password}`); setCopied(true); setTimeout(() => setCopied(false), 1500); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">
             {copied ? "Copiado!" : "Copiar credenciais"}
           </button>
-          <button type="button" onClick={() => { setCreated(null); setF({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor" }); setPermissions([]); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Criar outro</button>
+          <button type="button" onClick={() => { setCreated(null); setF({ name: "", email: "", password: "", phone: "", universityName: "", responsibleType: "reitor", collegeId: "" }); setPermissions([]); }} className="text-xs px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50">Criar outro</button>
           <button type="button" onClick={onClose} className="text-xs px-3 py-1.5 bg-angola-navy text-white rounded-lg ml-auto">Concluir</button>
         </div>
       </div>
@@ -233,6 +242,17 @@ function CreateForm({ role, onCreated, onClose }: { role: string; onCreated: (u:
             <option value="reitor">Reitor(a)</option>
             <option value="decano">Decano(a)</option>
           </select>
+        </div>
+      )}
+
+      {role === "colegio" && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Colégio que vai gerir</label>
+          <select className={inputClass} value={f.collegeId} onChange={(e) => set("collegeId", e.target.value)} aria-label="Colégio">
+            <option value="">Escolha o colégio</option>
+            {colleges.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+          </select>
+          {colleges.length === 0 && <p className="text-xs text-amber-600 mt-1">Crie primeiro um colégio em "Colégios".</p>}
         </div>
       )}
 

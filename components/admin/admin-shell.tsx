@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
+  ClipboardList,
+  ChevronDown,
   LayoutDashboard,
   Newspaper,
   CalendarDays,
@@ -59,52 +61,66 @@ function badgeFor(link: NavLink, summary: NotifSummary | null): number {
 
 type NavLink = {
   href: string; label: string; icon: any; exact?: boolean;
-  key?: string; manager?: boolean; uni?: boolean;
+  key?: string; manager?: boolean; uni?: boolean; colegio?: boolean; group?: string;
 };
+
+// Ordem das secções na barra lateral
+const GROUP_ORDER = ["Conteúdo", "Institucional", "Serviços & Membros", "Colégios de Especialidades", "Comunicação", "Gestão"];
 
 const navLinks: NavLink[] = [
   { href: "/admin", label: "Painel", icon: LayoutDashboard, exact: true },
-  { href: "/admin/noticias", label: "Notícias", icon: Newspaper, key: "noticias" },
-  { href: "/admin/comunicados", label: "Comunicados", icon: Megaphone, key: "comunicados" },
-  { href: "/admin/vagas", label: "Vagas de Emprego", icon: Briefcase, key: "vagas" },
-  { href: "/admin/eventos", label: "Eventos", icon: CalendarDays, key: "eventos" },
-  { href: "/admin/cursos", label: "Formação/Cursos", icon: GraduationCap, key: "cursos" },
-  { href: "/admin/revistas", label: "Revistas", icon: BookOpen, key: "revistas" },
-  { href: "/admin/revmed", label: "RevMed", icon: FlaskConical, key: "revmed" },
-  { href: "/admin/documentos", label: "Documentos", icon: FileText, key: "documentos" },
-  { href: "/admin/boletins", label: "Boletins", icon: FileText, key: "boletins" },
-  { href: "/admin/livros", label: "Livros", icon: BookMarked, key: "livros" },
-  { href: "/admin/podcast", label: "Podcast", icon: Mic, key: "podcast" },
-  { href: "/admin/galeria", label: "Galeria", icon: Images, key: "galeria" },
-  { href: "/admin/bastonarios", label: "Bastonários", icon: Users, key: "bastonarios" },
-  { href: "/admin/orgaos", label: "Órgãos", icon: Building2, key: "orgaos" },
-  { href: "/admin/parceiros", label: "Parceiros", icon: Handshake, key: "parceiros" },
-  { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3, key: "estatisticas" },
-  { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope, key: "especialidades" },
-  { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa" },
-  { href: "/admin/membros", label: "Membros (Médicos)", icon: IdCard, key: "membros" },
-  { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck, key: "validacoes" },
-  { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes" },
-  { href: "/admin/listas-universidades", label: "Listas das Universidades", icon: School, key: "listas-universidades" },
-  { href: "/admin/denuncias", label: "Denúncias", icon: ShieldAlert, key: "denuncias" },
-  { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare, key: "mensagens" },
-  { href: "/admin/newsletter", label: "Newsletter", icon: Mail, key: "newsletter" },
-  { href: "/admin/faqs", label: "FAQs", icon: HelpCircle, key: "faqs" },
-  { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote, key: "testemunhos" },
-  { href: "/admin/cronologia", label: "Cronologia", icon: History, key: "cronologia" },
-  // Gestão (apenas Admin/Bastonária)
-  { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true },
-  { href: "/admin/relatorios", label: "Relatórios", icon: Activity, manager: true },
-  { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true },
-  // Portal da universidade
+
+  { href: "/admin/noticias", label: "Notícias", icon: Newspaper, key: "noticias", group: "Conteúdo" },
+  { href: "/admin/comunicados", label: "Comunicados", icon: Megaphone, key: "comunicados", group: "Conteúdo" },
+  { href: "/admin/vagas", label: "Vagas de Emprego", icon: Briefcase, key: "vagas", group: "Conteúdo" },
+  { href: "/admin/eventos", label: "Eventos", icon: CalendarDays, key: "eventos", group: "Conteúdo" },
+  { href: "/admin/cursos", label: "Formação/Cursos", icon: GraduationCap, key: "cursos", group: "Conteúdo" },
+  { href: "/admin/revistas", label: "Revistas", icon: BookOpen, key: "revistas", group: "Conteúdo" },
+  { href: "/admin/revmed", label: "RevMed", icon: FlaskConical, key: "revmed", group: "Conteúdo" },
+  { href: "/admin/documentos", label: "Documentos", icon: FileText, key: "documentos", group: "Conteúdo" },
+  { href: "/admin/boletins", label: "Boletins", icon: FileText, key: "boletins", group: "Conteúdo" },
+  { href: "/admin/livros", label: "Livros", icon: BookMarked, key: "livros", group: "Conteúdo" },
+  { href: "/admin/podcast", label: "Podcast", icon: Mic, key: "podcast", group: "Conteúdo" },
+  { href: "/admin/galeria", label: "Galeria", icon: Images, key: "galeria", group: "Conteúdo" },
+
+  { href: "/admin/bastonarios", label: "Bastonários", icon: Users, key: "bastonarios", group: "Institucional" },
+  { href: "/admin/orgaos", label: "Órgãos", icon: Building2, key: "orgaos", group: "Institucional" },
+  { href: "/admin/parceiros", label: "Parceiros", icon: Handshake, key: "parceiros", group: "Institucional" },
+  { href: "/admin/estatisticas", label: "Estatísticas", icon: BarChart3, key: "estatisticas", group: "Institucional" },
+  { href: "/admin/especialidades", label: "Especialidades", icon: Stethoscope, key: "especialidades", group: "Institucional" },
+  { href: "/admin/faqs", label: "FAQs", icon: HelpCircle, key: "faqs", group: "Institucional" },
+  { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote, key: "testemunhos", group: "Institucional" },
+  { href: "/admin/cronologia", label: "Cronologia", icon: History, key: "cronologia", group: "Institucional" },
+
+  { href: "/admin/membros", label: "Membros (Médicos)", icon: IdCard, key: "membros", group: "Serviços & Membros" },
+  { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck, key: "validacoes", group: "Serviços & Membros" },
+  { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes", group: "Serviços & Membros" },
+  { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa", group: "Serviços & Membros" },
+  { href: "/admin/listas-universidades", label: "Listas das Universidades", icon: School, key: "listas-universidades", group: "Serviços & Membros" },
+
+  { href: "/admin/colegios", label: "Colégios", icon: Stethoscope, key: "colegios", group: "Colégios de Especialidades" },
+  { href: "/admin/internos", label: "Internos", icon: GraduationCap, key: "internos", group: "Colégios de Especialidades" },
+  { href: "/admin/programas-internato", label: "Programas de Ensino", icon: BookOpen, key: "programas-internato", group: "Colégios de Especialidades" },
+  { href: "/admin/notas-rotacoes", label: "Notas das Rotações", icon: ClipboardList, key: "notas-rotacoes", group: "Colégios de Especialidades" },
+
+  { href: "/admin/denuncias", label: "Denúncias", icon: ShieldAlert, key: "denuncias", group: "Comunicação" },
+  { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare, key: "mensagens", group: "Comunicação" },
+  { href: "/admin/newsletter", label: "Newsletter", icon: Mail, key: "newsletter", group: "Comunicação" },
+
+  { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true, group: "Gestão" },
+  { href: "/admin/relatorios", label: "Relatórios", icon: Activity, manager: true, group: "Gestão" },
+  { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true, group: "Gestão" },
+
+  // Portais dedicados (perfis específicos)
   { href: "/admin/minhas-listas", label: "Listas de Finalistas", icon: School, uni: true },
 ];
+
+const COLEGIO_KEYS = ["colegios", "internos", "programas-internato", "notas-rotacoes"];
 
 /** Determina se o utilizador pode aceder a um caminho do painel. */
 function isPathAllowed(role: string, permissions: string[], path: string): boolean {
   if (role === "super_admin" || role === "admin" || role === "bastonaria") return true;
   if (role === "universidade") return path.startsWith("/admin/minhas-listas") || path === "/admin/perfil";
-  // funcionário / editor
   if (path === "/admin" || path === "/admin/perfil") return true;
   const allowed = visibleLinks(role, permissions).map((l) => l.href);
   return allowed.some((href) => href !== "/admin" && path.startsWith(href));
@@ -113,6 +129,10 @@ function isPathAllowed(role: string, permissions: string[], path: string): boole
 function visibleLinks(role: string, permissions: string[]): NavLink[] {
   if (role === "universidade") {
     return navLinks.filter((l) => l.uni);
+  }
+  if (role === "colegio") {
+    // Colégio: só a secção dos colégios de especialidades
+    return navLinks.filter((l) => l.exact || COLEGIO_KEYS.includes(l.key ?? ""));
   }
   const manager = role === "super_admin" || role === "admin" || role === "bastonaria";
   return navLinks.filter((l) => {
@@ -125,11 +145,19 @@ function visibleLinks(role: string, permissions: string[]): NavLink[] {
   });
 }
 
+/** Agrupa os links visíveis por secção, na ordem definida. */
+function groupedNav(links: NavLink[]) {
+  const standalone = links.filter((l) => !l.group);
+  const groups = GROUP_ORDER.map((g) => ({ label: g, links: links.filter((l) => l.group === g) })).filter((g) => g.links.length > 0);
+  return { standalone, groups };
+}
+
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout } = useAdminAuth();
   const { summary } = useNotifications();
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   // Normaliza barras finais (o site usa trailingSlash)
   const normalizedPath = pathname?.replace(/\/+$/, "") || "/admin";
@@ -177,32 +205,56 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <img src="/images/logo.svg" alt="ORMED" className="w-8 h-8 object-contain" />
           <span className="font-semibold">Gestão ORMED</span>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {visibleLinks(user.role, user.permissions ?? []).map((link) => {
-            const active = link.exact
-              ? normalizedPath === link.href
-              : normalizedPath.startsWith(link.href);
-            const count = badgeFor(link, summary);
+        <nav className="flex-1 px-3 py-4 overflow-y-auto">
+          {(() => {
+            const { standalone, groups } = groupedNav(visibleLinks(user.role, user.permissions ?? []));
+            const renderItem = (link: NavLink) => {
+              const active = link.exact ? normalizedPath === link.href : normalizedPath.startsWith(link.href);
+              const count = badgeFor(link, summary);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    active ? "bg-angola-gold text-angola-navy font-medium" : "text-gray-300 hover:bg-white/10"
+                  }`}
+                >
+                  <link.icon className="w-4 h-4 shrink-0" />
+                  <span className="flex-1 truncate">{link.label}</span>
+                  {count > 0 && (
+                    <span className={`text-[11px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center ${active ? "bg-angola-navy text-white" : "bg-angola-gold text-angola-navy"}`}>
+                      {count > 99 ? "99+" : count}
+                    </span>
+                  )}
+                </Link>
+              );
+            };
             return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  active
-                    ? "bg-angola-gold text-angola-navy font-medium"
-                    : "text-gray-300 hover:bg-white/10"
-                }`}
-              >
-                <link.icon className="w-4 h-4" />
-                <span className="flex-1">{link.label}</span>
-                {count > 0 && (
-                  <span className={`text-[11px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center ${active ? "bg-angola-navy text-white" : "bg-angola-gold text-angola-navy"}`}>
-                    {count > 99 ? "99+" : count}
-                  </span>
-                )}
-              </Link>
+              <>
+                <div className="space-y-1 mb-2">{standalone.map(renderItem)}</div>
+                {groups.map((g) => {
+                  const isCollapsed = collapsed[g.label];
+                  const groupTotal = g.links.reduce((a, l) => a + badgeFor(l, summary), 0);
+                  return (
+                    <div key={g.label} className="mb-1">
+                      <button
+                        type="button"
+                        onClick={() => setCollapsed((p) => ({ ...p, [g.label]: !p[g.label] }))}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-200"
+                      >
+                        <span className="flex-1 text-left truncate">{g.label}</span>
+                        {groupTotal > 0 && isCollapsed && (
+                          <span className="text-[10px] font-bold bg-angola-gold text-angola-navy rounded-full px-1.5">{groupTotal}</span>
+                        )}
+                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
+                      </button>
+                      {!isCollapsed && <div className="space-y-1">{g.links.map(renderItem)}</div>}
+                    </div>
+                  );
+                })}
+              </>
             );
-          })}
+          })()}
         </nav>
         <div className="p-3 border-t border-white/10">
           <div className="px-3 py-2 text-xs text-gray-400 truncate">{user.email}</div>
