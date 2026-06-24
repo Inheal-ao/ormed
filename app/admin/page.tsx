@@ -9,9 +9,10 @@ import Link from "next/link";
 import {
   Loader2, Layers, Eye, Bell, ArrowRight, Activity, Users,
   FileCheck, FileText, ShieldAlert, MessageSquare, Inbox, School, CalendarDays,
+  GraduationCap, BookOpen, ClipboardList, Stethoscope,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { ManagedUser } from "@/lib/admin-types";
+import { ManagedUser, College, Interno, Programa, Rotation } from "@/lib/admin-types";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { useNotifications, NotifItem } from "@/components/admin/notifications-context";
 import { isManagerRole } from "@/lib/permissions";
@@ -72,7 +73,13 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString("pt-PT");
 }
 
-export default function AdminDashboard() {
+export default function DashboardPage() {
+  const { user } = useAdminAuth();
+  if (user?.role === "colegio") return <ColegioDashboard />;
+  return <GeneralDashboard />;
+}
+
+function GeneralDashboard() {
   const { user } = useAdminAuth();
   const { summary } = useNotifications();
   const manager = isManagerRole(user?.role);
@@ -322,6 +329,131 @@ function Card({ title, children, className = "" }: { title: string; children: Re
     <div className={`bg-white rounded-2xl border border-gray-200 p-5 ${className}`}>
       <h2 className="font-semibold text-gray-900 mb-4">{title}</h2>
       {children}
+    </div>
+  );
+}
+
+// ===== Dashboard do Presidente do Colégio =====
+function ColegioDashboard() {
+  const { user } = useAdminAuth();
+  const [college, setCollege] = useState<College | null>(null);
+  const [internos, setInternos] = useState<Interno[]>([]);
+  const [programas, setProgramas] = useState<Programa[]>([]);
+  const [rotations, setRotations] = useState<Rotation[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [cs, ins, prog, rot] = await Promise.all([
+          api.get<College[]>("/colleges", true),
+          api.get<Interno[]>("/colleges/internos/list", true),
+          api.get<Programa[]>("/colleges/programas/list", true),
+          api.get<Rotation[]>("/colleges/rotations/list", true),
+        ]);
+        setCollege(cs[0] ?? null);
+        setInternos(ins); setProgramas(prog); setRotations(rot);
+      } finally { setLoading(false); }
+    };
+    load();
+  }, []);
+
+  if (loading) {
+    return <div className="flex justify-center py-24"><Loader2 className="w-8 h-8 animate-spin text-angola-gold" /></div>;
+  }
+
+  const ativos = internos.filter((i) => i.status === "ativo").length;
+  const media = rotations.length ? (rotations.reduce((a, r) => a + (r.maxGrade ? (r.grade / r.maxGrade) * 20 : 0), 0) / rotations.length) : 0;
+
+  return (
+    <div>
+      <div className="mb-6">
+        <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide">Presidente do Colégio</p>
+        <h1 className="text-2xl font-bold text-gray-900">{college?.name ?? "O meu colégio"}</h1>
+        <p className="text-gray-500">Olá, {user?.name?.split(" ")[0]} — gestão dos internatos e da especialidade.</p>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Kpi icon={GraduationCap} label="Internos ativos" value={ativos} color="bg-angola-navy" />
+        <Kpi icon={Users} label="Total de internos" value={internos.length} color="bg-emerald-500" />
+        <Kpi icon={BookOpen} label="Programas de ensino" value={programas.length} color="bg-indigo-500" />
+        <Kpi icon={ClipboardList} label="Notas lançadas" value={rotations.length} color="bg-amber-500" />
+      </div>
+
+      <div className="grid lg:grid-cols-[1fr_330px] gap-6 items-start">
+        <div className="space-y-6">
+          {/* Internos recentes */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-gray-900 flex items-center gap-2"><GraduationCap className="w-5 h-5 text-angola-navy" /> Internos</h2>
+              <Link href="/admin/internos" className="text-xs text-angola-blue hover:underline">Gerir →</Link>
+            </div>
+            {internos.length === 0 ? (
+              <p className="text-sm text-gray-400 py-6 text-center">Ainda não há internos registados.</p>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {internos.slice(0, 6).map((i) => (
+                  <Link key={i._id} href="/admin/internos" className="flex items-center gap-3 py-2.5 hover:bg-gray-50 -mx-2 px-2 rounded-lg">
+                    <div className="w-8 h-8 rounded-full bg-angola-gold/20 text-angola-navy flex items-center justify-center text-xs font-bold shrink-0">{i.name.charAt(0).toUpperCase()}</div>
+                    <span className="text-sm text-gray-800 flex-1 truncate">{i.name}</span>
+                    <span className="text-xs text-gray-400">{i.anoInternato}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Notas recentes */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-bold text-gray-900 flex items-center gap-2"><ClipboardList className="w-5 h-5 text-angola-navy" /> Notas recentes das rotações</h2>
+              <Link href="/admin/notas-rotacoes" className="text-xs text-angola-blue hover:underline">Lançar →</Link>
+            </div>
+            {rotations.length === 0 ? (
+              <p className="text-sm text-gray-400 py-6 text-center">Ainda não há notas lançadas.</p>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {rotations.slice(0, 6).map((r) => (
+                  <div key={r._id} className="flex items-center gap-3 py-2.5">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-800 truncate">{r.internoName} — {r.rotationName}</p>
+                      <p className="text-[11px] text-gray-400">{r.period}</p>
+                    </div>
+                    <span className={`text-sm font-bold ${r.grade >= r.maxGrade * 0.5 ? "text-green-600" : "text-red-600"}`}>{r.grade}/{r.maxGrade}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lateral */}
+        <aside className="space-y-6">
+          <div className="bg-angola-navy text-white rounded-2xl p-5">
+            <p className="text-angola-gold text-xs font-semibold uppercase tracking-wide flex items-center gap-1.5"><Stethoscope className="w-4 h-4" /> Colégio</p>
+            <p className="text-lg font-bold mt-1">{college?.name}</p>
+            {college?.especialidade && <p className="text-gray-300 text-sm">{college.especialidade}</p>}
+            <div className="mt-3 pt-3 border-t border-white/10 text-sm">
+              <p className="text-gray-300">Média global das rotações</p>
+              <p className="text-2xl font-bold">{media.toFixed(1)}<span className="text-sm text-gray-400">/20</span></p>
+            </div>
+          </div>
+          <div className="bg-white border border-gray-200 rounded-2xl p-5">
+            <p className="text-sm font-semibold text-gray-700 mb-3">Acesso rápido</p>
+            <div className="space-y-2">
+              {[
+                { href: "/admin/internos", label: "Internos", icon: GraduationCap },
+                { href: "/admin/programas-internato", label: "Programas de Ensino", icon: BookOpen },
+                { href: "/admin/notas-rotacoes", label: "Notas das Rotações", icon: ClipboardList },
+              ].map((l) => (
+                <Link key={l.href} href={l.href} className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-gray-100 hover:border-angola-gold hover:bg-angola-cream/40 text-sm text-gray-700">
+                  <l.icon className="w-4 h-4 text-angola-navy" /><span className="flex-1">{l.label}</span><ArrowRight className="w-4 h-4 text-gray-300" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

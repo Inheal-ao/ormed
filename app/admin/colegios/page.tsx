@@ -50,7 +50,7 @@ export default function ColegiosPage() {
               <div className="w-10 h-10 rounded-full bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><Stethoscope className="w-5 h-5" /></div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900">{c.name}</p>
-                <p className="text-xs text-gray-500">{c.especialidade}{c.coordinator ? ` · Coord.: ${c.coordinator}` : ""}</p>
+                <p className="text-xs text-gray-500">{c.especialidade}{c.coordinator ? ` · Presidente: ${c.coordinator}` : ""}</p>
               </div>
               {c.status !== "ativo" && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{c.status}</span>}
               {isManager && (
@@ -92,7 +92,7 @@ function CollegeForm({ college, onClose, onSaved }: { college?: College; onClose
         <div className="space-y-3">
           <input className={inputClass} placeholder="Nome (ex: Colégio de Cardiologia) *" value={f.name} onChange={(e) => set("name", e.target.value)} />
           <input className={inputClass} placeholder="Especialidade" value={f.especialidade} onChange={(e) => set("especialidade", e.target.value)} />
-          <input className={inputClass} placeholder="Coordenador" value={f.coordinator} onChange={(e) => set("coordinator", e.target.value)} />
+          <input className={inputClass} placeholder="Presidente do Colégio" value={f.coordinator} onChange={(e) => set("coordinator", e.target.value)} />
           <textarea className={`${inputClass} min-h-[80px]`} placeholder="Descrição" value={f.description} onChange={(e) => set("description", e.target.value)} />
           {college && (
             <select className={inputClass} value={f.status} onChange={(e) => set("status", e.target.value)} aria-label="Estado">

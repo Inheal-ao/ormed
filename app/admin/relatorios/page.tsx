@@ -10,6 +10,7 @@ import { printTable } from "@/lib/print";
 const ROLE_LABEL: Record<string, string> = {
   super_admin: "Administrador", admin: "Administrador", editor: "Editor",
   bastonaria: "Bastonária", funcionario: "Funcionário", universidade: "Universidade",
+  colegio: "Presidente do Colégio",
 };
 
 interface Report {
