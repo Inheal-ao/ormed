@@ -9,7 +9,7 @@ import Link from "next/link";
 import {
   Loader2, Layers, Eye, Bell, ArrowRight, Activity, Users,
   FileCheck, FileText, ShieldAlert, MessageSquare, Inbox, School, CalendarDays,
-  GraduationCap, BookOpen, ClipboardList, Stethoscope,
+  GraduationCap, BookOpen, ClipboardList, Stethoscope, ShieldCheck, Award,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { ManagedUser, College, Interno, Programa, Rotation } from "@/lib/admin-types";
@@ -91,6 +91,10 @@ function GeneralDashboard() {
   const [perMonth, setPerMonth] = useState<{ name: string; total: number }[]>([]);
   const [totals, setTotals] = useState({ all: 0, published: 0, draft: 0 });
   const [team, setTeam] = useState<ManagedUser[]>([]);
+  const [ordem, setOrdem] = useState<{
+    medicos: number; regular: number; irregular: number; internos: number;
+    especialistas: number; solicitacoes: number; eventosRealizados: number;
+  } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -137,11 +141,28 @@ function GeneralDashboard() {
       setPerMonth(months);
       setTotals({ all, published, draft });
 
-      // Equipa (só gestores)
+      // Equipa + visão geral da Ordem (só gestores)
       if (manager) {
         try {
           const users = await api.get<ManagedUser[]>("/users", true);
           setTeam(users.filter((u) => u.role !== "universidade").slice(0, 10));
+        } catch { /* ignora */ }
+        try {
+          const [ms, srs, evs] = await Promise.allSettled([
+            api.get<{ total: number; regular: number; irregular: number; internos: number; especialistas: number }>("/members/stats", true),
+            api.get<unknown[]>("/service-requests/admin/all", true),
+            api.get<{ items?: { startDate?: string }[] } | { startDate?: string }[]>("/events/admin/all?limit=500", true),
+          ]);
+          const m = ms.status === "fulfilled" ? ms.value : { total: 0, regular: 0, irregular: 0, internos: 0, especialistas: 0 };
+          const solicitacoes = srs.status === "fulfilled" ? (srs.value as unknown[]).length : 0;
+          let eventosRealizados = 0;
+          if (evs.status === "fulfilled") {
+            const v = evs.value as { items?: { startDate?: string }[] } | { startDate?: string }[];
+            const items = Array.isArray(v) ? v : v.items ?? [];
+            const nowTs = Date.now();
+            eventosRealizados = items.filter((e) => e.startDate && new Date(e.startDate).getTime() < nowTs).length;
+          }
+          setOrdem({ medicos: m.total, regular: m.regular, irregular: m.irregular, internos: m.internos, especialistas: m.especialistas, solicitacoes, eventosRealizados });
         } catch { /* ignora */ }
       }
       setLoading(false);
@@ -168,6 +189,21 @@ function GeneralDashboard() {
         <h1 className="text-2xl font-bold text-gray-900">Olá, {user?.name?.split(" ")[0]}</h1>
         <p className="text-gray-500">Visão geral da plataforma ORMED.</p>
       </div>
+
+      {ordem && (
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Visão geral da Ordem</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <Kpi icon={Stethoscope} label="Médicos" value={ordem.medicos} color="bg-angola-navy" />
+            <Kpi icon={ShieldCheck} label="Em situação regular" value={ordem.regular} color="bg-emerald-500" />
+            <Kpi icon={ShieldAlert} label="Em situação irregular" value={ordem.irregular} color="bg-red-500" />
+            <Kpi icon={GraduationCap} label="Internos" value={ordem.internos} color="bg-blue-500" />
+            <Kpi icon={Award} label="Especialistas" value={ordem.especialistas} color="bg-indigo-500" />
+            <Kpi icon={Inbox} label="Solicitações" value={ordem.solicitacoes} color="bg-amber-500" />
+            <Kpi icon={CalendarDays} label="Eventos realizados" value={ordem.eventosRealizados} color="bg-teal-500" />
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_330px] gap-6 items-start">
         {/* ===== Coluna principal ===== */}
