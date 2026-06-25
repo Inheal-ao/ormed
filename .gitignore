@@ -4,3 +4,7 @@ dist/
 .cache/
 *.local
 .claude/
+
+# Documentação técnica com credenciais — backup interno, NÃO versionar
+ORMED-Documentacao-Tecnica.docx
+ORMED-Documentacao-Tecnica.pdf
