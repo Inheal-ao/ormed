@@ -5,6 +5,7 @@ import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard, Grad
 import { API_URL } from "@/lib/api";
 import { MedicoQr } from "@/components/medico-qr";
 import { printRecibo, mesLabel, kz } from "@/lib/recibo";
+import { provinces } from "@/lib/data";
 
 interface FichaData {
   _id: string;
@@ -132,9 +133,14 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
     name: ficha.name, phone: ficha.phone, email: ficha.email,
     especialidade: ficha.especialidade, provincia: ficha.provincia, residencia: ficha.residencia,
   });
+  const [specialties, setSpecialties] = useState<{ _id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
   const set = (k: keyof typeof edit, v: string) => setEdit((p) => ({ ...p, [k]: v }));
+
+  useEffect(() => {
+    fetch(`${API_URL}/specialties`).then((r) => r.ok ? r.json() : []).then(setSpecialties).catch(() => {});
+  }, []);
 
   const submit = async () => {
     setSaving(true);
@@ -198,8 +204,21 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Nome</label><input className={inputClass} value={edit.name} onChange={(e) => set("name", e.target.value)} /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label><input className={inputClass} value={edit.phone} onChange={(e) => set("phone", e.target.value)} /></div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" className={inputClass} value={edit.email} onChange={(e) => set("email", e.target.value)} /></div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label><input className={inputClass} value={edit.especialidade} onChange={(e) => set("especialidade", e.target.value)} /></div>
-          <div><label className="block text-sm font-medium text-gray-700 mb-1">Província</label><input className={inputClass} value={edit.provincia} onChange={(e) => set("provincia", e.target.value)} /></div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Especialidade</label>
+            <select className={inputClass} value={edit.especialidade} onChange={(e) => set("especialidade", e.target.value)} aria-label="Especialidade">
+              <option value="">— Especialidade —</option>
+              {edit.especialidade && !specialties.some((s) => s.name === edit.especialidade) && <option value={edit.especialidade}>{edit.especialidade}</option>}
+              {specialties.map((s) => <option key={s._id} value={s.name}>{s.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Província</label>
+            <select className={inputClass} value={edit.provincia} onChange={(e) => set("provincia", e.target.value)} aria-label="Província">
+              <option value="">— Província —</option>
+              {provinces.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
           <div><label className="block text-sm font-medium text-gray-700 mb-1">Residência</label><input className={inputClass} value={edit.residencia} onChange={(e) => set("residencia", e.target.value)} /></div>
         </div>
         {feedback && <p className={`text-sm mt-3 flex items-center gap-1.5 ${feedback.ok ? "text-green-600" : "text-red-600"}`}>{feedback.ok && <Check className="w-4 h-4" />}{feedback.text}</p>}

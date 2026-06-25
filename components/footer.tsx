@@ -13,6 +13,8 @@ import {
   Youtube,
   ArrowUp,
   Heart,
+  IdCard,
+  LogIn,
 } from "lucide-react";
 import { siteConfig } from "@/lib/data";
 import { Button } from "@/components/ui/button";
@@ -185,6 +187,22 @@ export function Footer() {
             </Button>
           </div>
         </div>
+        {/* Acessos: Área do Membro (médicos) e Entrar (administração) */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/area-membro/"
+            className="inline-flex items-center gap-2 bg-angola-gold text-angola-navy font-semibold px-5 py-2.5 rounded-lg hover:brightness-95 transition"
+          >
+            <IdCard className="w-4 h-4" /> Área do Membro
+          </Link>
+          <Link
+            href="/admin/login/"
+            className="inline-flex items-center gap-2 border border-white/30 text-white font-medium px-5 py-2.5 rounded-lg hover:bg-white/10 transition"
+          >
+            <LogIn className="w-4 h-4" /> Entrar
+          </Link>
+        </div>
+
         <div className="mt-4 text-center text-xs text-gray-500">
           desenvolvido pela Nano Digital One
         </div>
