@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard, GraduationCap, FileText, BookOpen, QrCode, Wallet, Receipt } from "lucide-react";
+import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard, GraduationCap, FileText, BookOpen, QrCode, Wallet, Receipt, Ticket, Activity } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { MedicoQr } from "@/components/medico-qr";
 import { printRecibo, mesLabel, kz } from "@/lib/recibo";
@@ -181,6 +181,8 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
 
       <CotasSection numeroUtente={ficha.numeroUtente} numeroOrdem={ficha.numeroOrdem} name={ficha.name} code={code} />
 
+      <AtividadeSection numeroUtente={ficha.numeroUtente} code={code} />
+
       <div className="bg-white border border-gray-200 rounded-2xl p-6">
         <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><QrCode className="w-5 h-5 text-angola-navy" /> O meu QR de verificação</h3>
         <p className="text-sm text-gray-500 mb-4">Para receitas eletrónicas — ao ser lido, mostra o seu nome, especialidade e situação na Ordem.</p>
@@ -353,6 +355,114 @@ function CotasSection({ numeroUtente, numeroOrdem, name, code }: { numeroUtente:
           </button>
         </>
       )}
+    </div>
+  );
+}
+
+const SERVICE_LABEL: Record<string, string> = {
+  "validacao-documentos": "Validação de documentos",
+  "inscricao": "Inscrição",
+  "renovacao-inscricao": "Renovação de inscrição",
+  "carteira-profissional": "Carteira profissional",
+  "pagar-cotas": "Pagamento de cotas",
+  "declaracao": "Declaração",
+};
+const SR_STATUS: Record<string, { label: string; cls: string }> = {
+  "recebido": { label: "Recebido", cls: "bg-gray-100 text-gray-600" },
+  "em-analise": { label: "Em análise", cls: "bg-blue-100 text-blue-700" },
+  "aguarda-pagamento": { label: "Aguarda pagamento", cls: "bg-amber-100 text-amber-700" },
+  "recibo-emitido": { label: "Recibo emitido", cls: "bg-green-100 text-green-700" },
+  "concluido": { label: "Concluído", cls: "bg-green-100 text-green-700" },
+  "validado": { label: "Validado", cls: "bg-green-100 text-green-700" },
+  "nao-validado": { label: "Não validado", cls: "bg-red-100 text-red-700" },
+  "rejeitado": { label: "Rejeitado", cls: "bg-red-100 text-red-700" },
+};
+const REG_STATUS: Record<string, { label: string; cls: string }> = {
+  pending: { label: "Pendente", cls: "bg-amber-100 text-amber-700" },
+  validated: { label: "Confirmada", cls: "bg-green-100 text-green-700" },
+  rejeitada: { label: "Rejeitada", cls: "bg-red-100 text-red-700" },
+  rejected: { label: "Rejeitada", cls: "bg-red-100 text-red-700" },
+};
+
+interface Atividade {
+  eventos: { evento: string; status: string; comprovativo: string | null; data: string }[];
+  servicos: { serviceCode: string; serviceType: string; status: string; recibo: string | null; documento: string | null; data: string }[];
+}
+
+function AtividadeSection({ numeroUtente, code }: { numeroUtente: string; code: string }) {
+  const [data, setData] = useState<Atividade | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_URL}/members/atividade`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ numeroUtente, code }),
+        });
+        if (res.ok) setData(await res.json());
+      } finally { setLoading(false); }
+    })();
+  }, [numeroUtente, code]);
+
+  if (loading) return <div className="bg-white border border-gray-200 rounded-2xl p-6 flex justify-center"><Loader2 className="w-5 h-5 animate-spin text-angola-gold" /></div>;
+  if (!data) return null;
+  const eventos = data.eventos ?? [];
+  const servicos = data.servicos ?? [];
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-2xl p-6">
+      <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><Activity className="w-5 h-5 text-angola-navy" /> A minha atividade</h3>
+      <p className="text-sm text-gray-500 mb-4">Os seus eventos, inscrições, serviços e documentos emitidos pela Ordem.</p>
+
+      {/* Eventos / inscrições */}
+      <div className="mb-5">
+        <h4 className="font-semibold text-gray-800 text-sm mb-2 flex items-center gap-1.5"><Ticket className="w-4 h-4 text-gray-400" /> Eventos e inscrições</h4>
+        {eventos.length === 0 ? (
+          <p className="text-sm text-gray-400">Sem inscrições em eventos.</p>
+        ) : (
+          <div className="border border-gray-200 rounded-xl divide-y">
+            {eventos.map((e, i) => {
+              const st = REG_STATUS[e.status] ?? { label: e.status, cls: "bg-gray-100 text-gray-600" };
+              return (
+                <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{e.evento}</p>
+                    <p className="text-xs text-gray-500">{e.data ? new Date(e.data).toLocaleDateString("pt-PT") : ""}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
+                  {e.comprovativo && <a href={e.comprovativo} target="_blank" rel="noopener noreferrer" className="text-angola-blue hover:underline inline-flex items-center gap-1 text-xs"><FileText className="w-3.5 h-3.5" /> Bilhete</a>}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Serviços / documentos */}
+      <div>
+        <h4 className="font-semibold text-gray-800 text-sm mb-2 flex items-center gap-1.5"><FileText className="w-4 h-4 text-gray-400" /> Serviços e documentos emitidos</h4>
+        {servicos.length === 0 ? (
+          <p className="text-sm text-gray-400">Sem serviços pedidos.</p>
+        ) : (
+          <div className="border border-gray-200 rounded-xl divide-y">
+            {servicos.map((s, i) => {
+              const st = SR_STATUS[s.status] ?? { label: s.status, cls: "bg-gray-100 text-gray-600" };
+              return (
+                <div key={i} className="flex items-center gap-3 px-4 py-2.5 flex-wrap">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900">{SERVICE_LABEL[s.serviceType] ?? s.serviceType}</p>
+                    <p className="text-xs text-gray-500 font-mono">{s.serviceCode}{s.data ? ` · ${new Date(s.data).toLocaleDateString("pt-PT")}` : ""}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
+                  {s.recibo && <a href={s.recibo} target="_blank" rel="noopener noreferrer" className="text-angola-blue hover:underline inline-flex items-center gap-1 text-xs"><Receipt className="w-3.5 h-3.5" /> Recibo</a>}
+                  {s.documento && <a href={s.documento} target="_blank" rel="noopener noreferrer" className="text-angola-blue hover:underline inline-flex items-center gap-1 text-xs"><FileText className="w-3.5 h-3.5" /> Documento</a>}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
