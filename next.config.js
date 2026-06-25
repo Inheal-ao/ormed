@@ -45,6 +45,14 @@ const nextConfig = {
         source: "/:path*",
         headers: securityHeaders,
       },
+      {
+        // O painel nunca deve ser indexado nem seguido por motores de busca.
+        source: "/admin/:path*",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+          { key: "Cache-Control", value: "no-store, max-age=0" },
+        ],
+      },
     ];
   },
 };
