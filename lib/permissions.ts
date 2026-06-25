@@ -17,6 +17,7 @@ export const PERMISSION_SECTIONS: { key: string; label: string }[] = [
   { key: "orgaos", label: "Órgãos" },
   { key: "parceiros", label: "Parceiros" },
   { key: "estatisticas", label: "Estatísticas" },
+  { key: "hero", label: "Hero (Início)" },
   { key: "especialidades", label: "Especialidades" },
   { key: "apoio-pesquisa", label: "Apoio à Pesquisa" },
   { key: "validacoes", label: "Validação de Documentos" },

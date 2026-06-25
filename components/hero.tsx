@@ -7,10 +7,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { usePublicData } from "@/lib/use-public-data";
 import { getStatIcon } from "@/lib/stat-icons";
-import { StatItem } from "@/lib/admin-types";
+import { StatItem, HeroSlide } from "@/lib/admin-types";
 import { AnimatedStatValue } from "@/components/animated-stat-value";
 
-const slides = [
+interface Slide {
+  title: string; subtitle: string; description: string; image: string;
+  cta: { label: string; href: string }; cta2: { label: string; href: string };
+}
+
+const DEFAULT_SLIDES: Slide[] = [
   {
     title: "Pela Dignidade Médica",
     subtitle: "Rumo à Excelência",
@@ -45,6 +50,17 @@ export function Hero() {
   const [direction, setDirection] = useState(0);
   const { data: statsData } = usePublicData<StatItem[]>("/stats");
   const quickStats = (statsData ?? []).slice(0, 4);
+
+  // Slides do painel admin (com fallback para os predefinidos).
+  const { data: heroData } = usePublicData<HeroSlide[]>("/hero");
+  const apiSlides: Slide[] = (heroData ?? [])
+    .filter((s) => s.image?.url)
+    .map((s) => ({
+      title: s.title, subtitle: s.subtitle, description: s.description, image: s.image!.url,
+      cta: { label: s.ctaLabel, href: s.ctaHref }, cta2: { label: s.cta2Label, href: s.cta2Href },
+    }));
+  const slides = apiSlides.length > 0 ? apiSlides : DEFAULT_SLIDES;
+  const safeSlide = slides[currentSlide] ?? slides[0];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -101,7 +117,7 @@ export function Hero() {
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: `url(${slides[currentSlide].image})`,
+              backgroundImage: `url(${safeSlide.image})`,
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-angola-navy/95 via-angola-navy/80 to-angola-navy/40" />
@@ -121,32 +137,32 @@ export function Hero() {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-4 leading-tight">
-                {slides[currentSlide].title}
+                {safeSlide.title}
               </h1>
               <p className="text-xl md:text-2xl text-angola-gold font-display mb-6 drop-shadow-sm">
-                {slides[currentSlide].subtitle}
+                {safeSlide.subtitle}
               </p>
               <p className="text-gray-300 text-lg mb-8 leading-relaxed max-w-xl">
-                {slides[currentSlide].description}
+                {safeSlide.description}
               </p>
 
               <div className="flex flex-wrap gap-4">
-                <Link href={slides[currentSlide].cta.href}>
+                <Link href={safeSlide.cta.href}>
                   <Button
                     size="lg"
                     className="bg-angola-gold hover:bg-angola-gold/90 text-white px-8 py-6 text-base font-semibold shadow-lg shadow-angola-gold/25 hover:shadow-angola-gold/40 transition-all"
                   >
-                    {slides[currentSlide].cta.label}
+                    {safeSlide.cta.label}
                     <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
-                <Link href={slides[currentSlide].cta2.href}>
+                <Link href={safeSlide.cta2.href}>
                   <Button
                     size="lg"
                     variant="outline"
                     className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-base"
                   >
-                    {slides[currentSlide].cta2.label}
+                    {safeSlide.cta2.label}
                   </Button>
                 </Link>
               </div>

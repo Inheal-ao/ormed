@@ -19,6 +19,10 @@ export interface Interno {
 export interface Programa {
   _id: string; college: string; tipo: string; title: string; ano: string; description: string; document: Asset | null; createdAt: string;
 }
+export interface HeroSlide {
+  _id: string; title: string; subtitle: string; description: string; image: Asset | null;
+  ctaLabel: string; ctaHref: string; cta2Label: string; cta2Href: string; order: number; isPublished: boolean;
+}
 export interface BankMember {
   _id: string; numeroUtente: string; numeroOrdem: string; name: string;
   especialidade: string; situacao: string; categorias: string[]; collegeId?: string;
