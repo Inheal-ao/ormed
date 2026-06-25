@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, KeyRound, ShieldCheck, User, Check, Save, LogOut, IdCard, GraduationCap, FileText, BookOpen, QrCode, Wallet, Receipt, Ticket, Activity } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { MedicoQr } from "@/components/medico-qr";
+import { ReceitasSection } from "@/components/receita-medico";
 import { printRecibo, mesLabel, kz } from "@/lib/recibo";
 import { provinces } from "@/lib/data";
 
@@ -188,6 +189,8 @@ function Ficha({ ficha, code, onLogout }: { ficha: FichaData; code: string; onLo
       <CotasSection numeroUtente={ficha.numeroUtente} numeroOrdem={ficha.numeroOrdem} name={ficha.name} code={code} />
 
       <AtividadeSection numeroUtente={ficha.numeroUtente} code={code} />
+
+      <ReceitasSection numeroUtente={ficha.numeroUtente} code={code} medico={{ name: ficha.name, numeroOrdem: ficha.numeroOrdem, especialidade: ficha.especialidade }} />
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6">
         <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><QrCode className="w-5 h-5 text-angola-navy" /> O meu QR de verificação</h3>
