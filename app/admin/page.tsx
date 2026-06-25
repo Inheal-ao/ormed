@@ -185,48 +185,54 @@ function GeneralDashboard() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Olá, {user?.name?.split(" ")[0]}</h1>
-        <p className="text-gray-500">Visão geral da plataforma ORMED.</p>
+      <div className="flex items-end justify-between flex-wrap gap-3 mb-7">
+        <div>
+          <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">Olá, {user?.name?.split(" ")[0]}</h1>
+          <p className="text-sm text-gray-400">Visão geral da plataforma ORMED</p>
+        </div>
+        <p className="text-xs text-gray-400 capitalize">{new Date().toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
       </div>
 
       {ordem && (
         <div className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Visão geral da Ordem</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Kpi icon={Stethoscope} label="Médicos" value={ordem.medicos} color="bg-angola-navy" />
-            <Kpi icon={ShieldCheck} label="Em situação regular" value={ordem.regular} color="bg-emerald-500" />
-            <Kpi icon={ShieldAlert} label="Em situação irregular" value={ordem.irregular} color="bg-red-500" />
-            <Kpi icon={GraduationCap} label="Internos" value={ordem.internos} color="bg-blue-500" />
-            <Kpi icon={Award} label="Especialistas" value={ordem.especialistas} color="bg-indigo-500" />
-            <Kpi icon={Inbox} label="Solicitações" value={ordem.solicitacoes} color="bg-amber-500" />
-            <Kpi icon={CalendarDays} label="Eventos realizados" value={ordem.eventosRealizados} color="bg-teal-500" />
+          <SectionLabel>Visão geral da Ordem</SectionLabel>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <Kpi icon={Stethoscope} label="Médicos" value={ordem.medicos} tone="navy" />
+            <Kpi icon={ShieldCheck} label="Em situação regular" value={ordem.regular} tone="emerald" />
+            <Kpi icon={ShieldAlert} label="Em situação irregular" value={ordem.irregular} tone="red" />
+            <Kpi icon={GraduationCap} label="Internos" value={ordem.internos} tone="blue" />
+            <Kpi icon={Award} label="Especialistas" value={ordem.especialistas} tone="indigo" />
+            <Kpi icon={Inbox} label="Solicitações" value={ordem.solicitacoes} tone="amber" />
+            <Kpi icon={CalendarDays} label="Eventos realizados" value={ordem.eventosRealizados} tone="teal" />
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_330px] gap-6 items-start">
         {/* ===== Coluna principal ===== */}
-        <div className="space-y-6 min-w-0">
-          {/* KPIs */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Kpi icon={Layers} label="Total de registos" value={totals.all} color="bg-angola-navy" />
-            <Kpi icon={Eye} label="Publicados" value={totals.published} color="bg-emerald-500" />
-            <Kpi icon={Bell} label="Pendências" value={pendencias} color="bg-amber-500" highlight={pendencias > 0} />
-            <Kpi icon={FileCheck} label="Solicitações em curso" value={solicitacoes} color="bg-indigo-500" />
+        <div className="space-y-7 min-w-0">
+          {/* KPIs de conteúdo / operação */}
+          <div>
+            <SectionLabel>Conteúdo e operação</SectionLabel>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <Kpi icon={Layers} label="Total de registos" value={totals.all} tone="navy" />
+              <Kpi icon={Eye} label="Publicados" value={totals.published} tone="emerald" />
+              <Kpi icon={Bell} label="Pendências" value={pendencias} tone="amber" highlight={pendencias > 0} />
+              <Kpi icon={FileCheck} label="Solicitações em curso" value={solicitacoes} tone="indigo" />
+            </div>
           </div>
 
           {/* Tiras de pendentes por serviço */}
           {allowedNotif.length > 0 && (
             <div>
-              <p className="text-sm font-semibold text-gray-700 mb-2">Pendentes por serviço</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+              <SectionLabel>Pendentes por serviço</SectionLabel>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
                 {allowedNotif.map((m) => {
                   const n = (summary?.counts as Record<string, number>)?.[m.key] ?? 0;
                   return (
-                    <Link key={m.key} href={m.link} className={`rounded-xl p-3 border transition flex items-center justify-between ${n > 0 ? "border-angola-gold/40 bg-angola-cream/40 hover:bg-angola-cream" : "border-gray-100 bg-gray-50"}`}>
-                      <span className="text-xs text-gray-600 leading-tight">{m.label}</span>
-                      <span className={`text-lg font-bold ${n > 0 ? "text-angola-navy" : "text-gray-300"}`}>{n}</span>
+                    <Link key={m.key} href={m.link} className={`group rounded-xl px-3.5 py-3 border flex items-center justify-between transition-all hover:-translate-y-0.5 ${n > 0 ? "border-angola-gold/50 bg-angola-gold/[0.06] hover:shadow-[0_4px_16px_-8px_rgba(0,33,71,0.3)]" : "border-gray-200/70 bg-white hover:border-gray-300"}`}>
+                      <span className="text-xs text-gray-600 leading-tight font-medium">{m.label}</span>
+                      <span className={`text-base font-bold tabular-nums ${n > 0 ? "text-angola-navy" : "text-gray-300"}`}>{n}</span>
                     </Link>
                   );
                 })}
@@ -235,6 +241,8 @@ function GeneralDashboard() {
           )}
 
           {/* Gráficos */}
+          <div>
+          <SectionLabel>Estatísticas</SectionLabel>
           <div className="grid sm:grid-cols-2 gap-4">
             <Card title="Conteúdo por tipo" className="sm:col-span-2">
               <ResponsiveContainer width="100%" height={300}>
@@ -295,19 +303,20 @@ function GeneralDashboard() {
               </Card>
             )}
           </div>
+          </div>
         </div>
 
         {/* ===== Coluna lateral ===== */}
         <aside className="space-y-6 xl:sticky xl:top-6">
           {/* Centro de notificações */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="relative">
-                <Bell className="w-5 h-5 text-angola-navy" />
-                {pendencias > 0 && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full" />}
-              </div>
-              <h2 className="font-bold text-gray-900">Notificações</h2>
-              {pendencias > 0 && <span className="ml-auto text-xs bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full">{pendencias}</span>}
+          <div className="bg-white border border-gray-200/80 rounded-xl p-5">
+            <div className="flex items-center gap-2.5 mb-4">
+              <span className="w-9 h-9 rounded-lg bg-angola-navy/10 text-angola-navy flex items-center justify-center relative">
+                <Bell className="w-[18px] h-[18px]" />
+                {pendencias > 0 && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full ring-2 ring-white" />}
+              </span>
+              <h2 className="text-sm font-semibold text-gray-900">Notificações</h2>
+              {pendencias > 0 && <span className="ml-auto text-xs bg-red-50 text-red-600 font-semibold px-2 py-0.5 rounded-full tabular-nums">{pendencias}</span>}
             </div>
             {!summary || summary.recent.length === 0 ? (
               <p className="text-sm text-gray-400 py-6 text-center">Sem operações pendentes. Tudo em dia! ✅</p>
@@ -320,11 +329,13 @@ function GeneralDashboard() {
 
           {/* Equipa (gestores) */}
           {manager && team.length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <Users className="w-5 h-5 text-angola-navy" />
-                <h2 className="font-bold text-gray-900">Equipa</h2>
-                <Link href="/admin/utilizadores" className="ml-auto text-xs text-angola-blue hover:underline">Gerir</Link>
+            <div className="bg-white border border-gray-200/80 rounded-xl p-5">
+              <div className="flex items-center gap-2.5 mb-4">
+                <span className="w-9 h-9 rounded-lg bg-angola-navy/10 text-angola-navy flex items-center justify-center">
+                  <Users className="w-[18px] h-[18px]" />
+                </span>
+                <h2 className="text-sm font-semibold text-gray-900">Equipa</h2>
+                <Link href="/admin/utilizadores" className="ml-auto text-xs text-angola-blue hover:underline font-medium">Gerir</Link>
               </div>
               <div className="space-y-3">
                 {team.map((u) => (
@@ -348,25 +359,44 @@ function GeneralDashboard() {
   );
 }
 
-function Kpi({ icon: Icon, label, value, color, highlight }: { icon: typeof Layers; label: string; value: number; color: string; highlight?: boolean }) {
+// Tons subtis (chip do ícone) — aspeto sóbrio e consistente em vez de cores sólidas berrantes.
+const TONES: Record<string, string> = {
+  navy: "bg-angola-navy/10 text-angola-navy",
+  emerald: "bg-emerald-50 text-emerald-600",
+  red: "bg-red-50 text-red-600",
+  blue: "bg-blue-50 text-blue-600",
+  indigo: "bg-indigo-50 text-indigo-600",
+  amber: "bg-amber-50 text-amber-600",
+  teal: "bg-teal-50 text-teal-600",
+  violet: "bg-violet-50 text-violet-600",
+};
+
+function Kpi({ icon: Icon, label, value, tone = "navy", highlight }: { icon: typeof Layers; label: string; value: number; tone?: string; highlight?: boolean }) {
   return (
-    <div className={`bg-white rounded-2xl border p-5 ${highlight ? "border-angola-gold/50" : "border-gray-200"}`}>
-      <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center mb-3`}>
-        <Icon className="w-5 h-5 text-white" />
+    <div className={`group bg-white rounded-xl border p-4 transition-all hover:shadow-[0_4px_20px_-8px_rgba(0,33,71,0.25)] hover:-translate-y-0.5 ${highlight ? "border-angola-gold/60 ring-1 ring-angola-gold/15" : "border-gray-200/80"}`}>
+      <div className="flex items-start justify-between">
+        <span className={`w-9 h-9 rounded-lg flex items-center justify-center ${TONES[tone] ?? TONES.navy}`}>
+          <Icon className="w-[18px] h-[18px]" />
+        </span>
+        {highlight && value > 0 && <span className="w-2 h-2 rounded-full bg-angola-gold mt-1.5 animate-pulse" />}
       </div>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-500">{label}</p>
+      <p className="text-[26px] leading-none font-bold text-gray-900 mt-3.5 tracking-tight tabular-nums">{value}</p>
+      <p className="text-xs text-gray-500 mt-1.5 font-medium">{label}</p>
     </div>
   );
 }
 
 function Card({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl border border-gray-200 p-5 ${className}`}>
-      <h2 className="font-semibold text-gray-900 mb-4">{title}</h2>
+    <div className={`bg-white rounded-xl border border-gray-200/80 p-5 ${className}`}>
+      <h2 className="text-[13px] font-semibold text-gray-400 uppercase tracking-wider mb-4">{title}</h2>
       {children}
     </div>
   );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <h2 className="text-[13px] font-semibold text-gray-400 uppercase tracking-wider mb-3">{children}</h2>;
 }
 
 // ===== Dashboard do Presidente do Colégio =====
@@ -416,10 +446,10 @@ function ColegioDashboard() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Kpi icon={GraduationCap} label="Internos ativos" value={ativos} color="bg-angola-navy" />
-        <Kpi icon={Users} label="Total de internos" value={internos.length} color="bg-emerald-500" />
-        <Kpi icon={BookOpen} label="Programas de ensino" value={programas.length} color="bg-indigo-500" />
-        <Kpi icon={ClipboardList} label="Mapas de avaliação" value={rotations.length} color="bg-amber-500" />
+        <Kpi icon={GraduationCap} label="Internos ativos" value={ativos} tone="navy" />
+        <Kpi icon={Users} label="Total de internos" value={internos.length} tone="emerald" />
+        <Kpi icon={BookOpen} label="Programas de ensino" value={programas.length} tone="indigo" />
+        <Kpi icon={ClipboardList} label="Mapas de avaliação" value={rotations.length} tone="amber" />
       </div>
 
       <div className="grid lg:grid-cols-[1fr_330px] gap-6 items-start">
