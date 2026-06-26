@@ -42,6 +42,10 @@ import {
   User,
   Activity,
   IdCard,
+  Menu,
+  Search,
+  Bell,
+  X,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { useNotifications, NotifSummary } from "@/components/admin/notifications-context";
@@ -69,7 +73,7 @@ type NavLink = {
 };
 
 // Ordem das secções na barra lateral
-const GROUP_ORDER = ["Conteúdo", "Institucional", "Serviços & Membros", "Colégios de Especialidades", "Comunicação", "Gestão"];
+const GROUP_ORDER = ["Conteúdo", "Institucional", "Médicos & Serviços", "Colégios & Internatos", "Instituições de Ensino", "Comunicação", "Administração"];
 
 const navLinks: NavLink[] = [
   { href: "/admin", label: "Painel", icon: LayoutDashboard, exact: true },
@@ -97,28 +101,28 @@ const navLinks: NavLink[] = [
   { href: "/admin/testemunhos", label: "Testemunhos", icon: Quote, key: "testemunhos", group: "Institucional" },
   { href: "/admin/cronologia", label: "Cronologia", icon: History, key: "cronologia", group: "Institucional" },
 
-  { href: "/admin/membros", label: "Membros (Médicos)", icon: IdCard, key: "membros", group: "Serviços & Membros" },
-  { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck, key: "validacoes", group: "Serviços & Membros" },
-  { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes", group: "Serviços & Membros" },
-  { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa", group: "Serviços & Membros" },
-  { href: "/admin/listas-universidades", label: "Universidades", icon: School, key: "listas-universidades", group: "Gestão" },
-  { href: "/admin/listas-universidades?tipo=ies", label: "IES", icon: Building2, key: "listas-universidades", group: "Gestão" },
-  { href: "/admin/listas-universidades?tipo=inaarees", label: "INAAREES", icon: Building2, key: "listas-universidades", group: "Gestão" },
+  { href: "/admin/membros", label: "Membros (Médicos)", icon: IdCard, key: "membros", group: "Médicos & Serviços" },
+  { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck, key: "validacoes", group: "Médicos & Serviços" },
+  { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes", group: "Médicos & Serviços" },
+  { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa", group: "Médicos & Serviços" },
+  { href: "/admin/listas-universidades", label: "Universidades", icon: School, key: "listas-universidades", group: "Instituições de Ensino" },
+  { href: "/admin/listas-universidades?tipo=ies", label: "IES", icon: Building2, key: "listas-universidades", group: "Instituições de Ensino" },
+  { href: "/admin/listas-universidades?tipo=inaarees", label: "INAAREES", icon: Building2, key: "listas-universidades", group: "Instituições de Ensino" },
 
-  { href: "/admin/colegios", label: "Colégios", icon: Stethoscope, key: "colegios", group: "Colégios de Especialidades" },
-  { href: "/admin/internos", label: "Internos", icon: GraduationCap, key: "internos", group: "Colégios de Especialidades" },
-  { href: "/admin/programas-internato", label: "Programas de Ensino", icon: BookOpen, key: "programas-internato", group: "Colégios de Especialidades" },
-  { href: "/admin/notas-rotacoes", label: "Notas das Rotações", icon: ClipboardList, key: "notas-rotacoes", group: "Colégios de Especialidades" },
+  { href: "/admin/colegios", label: "Colégios", icon: Stethoscope, key: "colegios", group: "Colégios & Internatos" },
+  { href: "/admin/internos", label: "Internos", icon: GraduationCap, key: "internos", group: "Colégios & Internatos" },
+  { href: "/admin/programas-internato", label: "Programas de Ensino", icon: BookOpen, key: "programas-internato", group: "Colégios & Internatos" },
+  { href: "/admin/notas-rotacoes", label: "Notas das Rotações", icon: ClipboardList, key: "notas-rotacoes", group: "Colégios & Internatos" },
 
   { href: "/admin/denuncias", label: "Denúncias", icon: ShieldAlert, key: "denuncias", group: "Comunicação" },
   { href: "/admin/mensagens", label: "Mensagens", icon: MessageSquare, key: "mensagens", group: "Comunicação" },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail, key: "newsletter", group: "Comunicação" },
 
-  { href: "/admin/aprovacoes", label: "Aprovações", icon: ShieldCheck, key: "aprovacoes", manager: true, group: "Gestão" },
-  { href: "/admin/cotas", label: "Cotas", icon: Coins, manager: true, group: "Gestão" },
-  { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true, group: "Gestão" },
-  { href: "/admin/relatorios", label: "Relatórios", icon: Activity, manager: true, group: "Gestão" },
-  { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true, group: "Gestão" },
+  { href: "/admin/aprovacoes", label: "Aprovações", icon: ShieldCheck, key: "aprovacoes", manager: true, group: "Administração" },
+  { href: "/admin/cotas", label: "Cotas", icon: Coins, manager: true, group: "Administração" },
+  { href: "/admin/utilizadores", label: "Utilizadores", icon: UserCog, manager: true, group: "Administração" },
+  { href: "/admin/relatorios", label: "Relatórios", icon: Activity, manager: true, group: "Administração" },
+  { href: "/admin/definicoes", label: "Definições", icon: Settings, manager: true, group: "Administração" },
 
   // Portais dedicados (perfis específicos)
   { href: "/admin/minhas-listas", label: "Listas de Finalistas", icon: School, uni: true },
@@ -161,16 +165,31 @@ function groupedNav(links: NavLink[]) {
   return { standalone, groups };
 }
 
+function pageTitleFor(path: string): string {
+  if (path === "/admin") return "Painel";
+  if (path === "/admin/perfil") return "O meu perfil";
+  const match = navLinks
+    .filter((l) => !l.exact && path.startsWith(l.href.split("?")[0]))
+    .sort((a, b) => b.href.split("?")[0].length - a.href.split("?")[0].length)[0];
+  return match?.label ?? "Painel";
+}
+
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout } = useAdminAuth();
   const { summary } = useNotifications();
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [navQuery, setNavQuery] = useState("");
+  const [userMenu, setUserMenu] = useState(false);
 
   // Normaliza barras finais (o site usa trailingSlash)
   const normalizedPath = pathname?.replace(/\/+$/, "") || "/admin";
   const isLoginPage = normalizedPath === "/admin/login";
+
+  // Fecha o drawer/menus ao mudar de página
+  useEffect(() => { setMobileOpen(false); setUserMenu(false); }, [normalizedPath]);
 
   // Redireciona para login se não autenticado (exceto na própria página de login)
   useEffect(() => {
@@ -206,100 +225,170 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return (
-    <div className="min-h-screen flex bg-gray-50 text-gray-900">
-      {/* Sidebar */}
-      <aside className="hidden md:flex w-64 flex-col bg-angola-navy text-white fixed inset-y-0">
-        <div className="h-16 flex items-center gap-2 px-6 border-b border-white/10">
-          <img src="/images/logo.svg" alt="ORMED" className="w-8 h-8 object-contain" />
-          <span className="font-semibold">Gestão ORMED</span>
-        </div>
-        <nav className="flex-1 px-3 py-4 overflow-y-auto">
-          {(() => {
-            const { standalone, groups } = groupedNav(visibleLinks(user.role, user.permissions ?? []));
-            const renderItem = (link: NavLink) => {
-              const active = link.exact ? normalizedPath === link.href : normalizedPath.startsWith(link.href);
-              const count = badgeFor(link, summary);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                    active ? "bg-angola-gold text-angola-navy font-medium" : "text-gray-300 hover:bg-white/10"
-                  }`}
-                >
-                  <link.icon className="w-4 h-4 shrink-0" />
-                  <span className="flex-1 truncate">{link.label}</span>
-                  {count > 0 && (
-                    <span className={`text-[11px] font-bold rounded-full min-w-[20px] h-5 px-1.5 flex items-center justify-center ${active ? "bg-angola-navy text-white" : "bg-angola-gold text-angola-navy"}`}>
-                      {count > 99 ? "99+" : count}
-                    </span>
-                  )}
-                </Link>
-              );
-            };
-            return (
-              <>
-                <div className="space-y-1 mb-2">{standalone.map(renderItem)}</div>
-                {groups.map((g) => {
-                  const isCollapsed = collapsed[g.label];
-                  const groupTotal = g.links.reduce((a, l) => a + badgeFor(l, summary), 0);
-                  return (
-                    <div key={g.label} className="mb-1">
-                      <button
-                        type="button"
-                        onClick={() => setCollapsed((p) => ({ ...p, [g.label]: !p[g.label] }))}
-                        className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-200"
-                      >
-                        <span className="flex-1 text-left truncate">{g.label}</span>
-                        {groupTotal > 0 && isCollapsed && (
-                          <span className="text-[10px] font-bold bg-angola-gold text-angola-navy rounded-full px-1.5">{groupTotal}</span>
-                        )}
-                        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
-                      </button>
-                      {!isCollapsed && <div className="space-y-1">{g.links.map(renderItem)}</div>}
-                    </div>
-                  );
-                })}
-              </>
-            );
-          })()}
-        </nav>
-        <div className="p-3 border-t border-white/10">
-          <div className="px-3 py-2 text-xs text-gray-400 truncate">{user.email}</div>
-          <Link
-            href="/admin/perfil"
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-              normalizedPath === "/admin/perfil" ? "bg-angola-gold text-angola-navy font-medium" : "text-gray-300 hover:bg-white/10"
-            }`}
-          >
-            <User className="w-4 h-4" />
-            O meu perfil
-          </Link>
-          <button
-            type="button"
-            onClick={() => logout()}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-white/10 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Terminar sessão
-          </button>
-        </div>
-      </aside>
+  const links = visibleLinks(user.role, user.permissions ?? []);
+  const q = navQuery.trim().toLowerCase();
+  const filtered = q ? links.filter((l) => l.label.toLowerCase().includes(q)) : null;
+  const pageTitle = pageTitleFor(normalizedPath);
+  const allowed = isPathAllowed(user.role, user.permissions ?? [], normalizedPath);
+  const initial = (user.name || user.email || "?").charAt(0).toUpperCase();
 
-      {/* Conteúdo */}
-      <div className="flex-1 md:ml-64">
-        {/* Topbar mobile */}
-        <header className="md:hidden h-14 bg-angola-navy text-white flex items-center justify-between px-4 sticky top-0 z-10">
-          <span className="font-semibold">Gestão ORMED</span>
-          <button type="button" onClick={() => logout()} aria-label="Terminar sessão">
-            <LogOut className="w-5 h-5" />
+  const renderItem = (link: NavLink) => {
+    const active = link.exact ? normalizedPath === link.href : normalizedPath.startsWith(link.href);
+    const count = badgeFor(link, summary);
+    return (
+      <Link
+        key={link.href}
+        href={link.href}
+        className={`group relative flex items-center gap-3 pl-3.5 pr-2 py-2 rounded-lg text-[13.5px] transition-colors ${
+          active
+            ? "bg-white/[0.07] text-white font-medium before:absolute before:left-0 before:inset-y-1.5 before:w-[3px] before:rounded-r-full before:bg-angola-gold"
+            : "text-slate-400 hover:bg-white/[0.05] hover:text-slate-100"
+        }`}
+      >
+        <link.icon className={`w-[18px] h-[18px] shrink-0 ${active ? "text-angola-gold" : "text-slate-500 group-hover:text-slate-300"}`} />
+        <span className="flex-1 truncate">{link.label}</span>
+        {count > 0 && (
+          <span className="text-[10.5px] font-bold rounded-full min-w-[18px] h-[18px] px-1.5 flex items-center justify-center bg-angola-gold text-angola-navy">
+            {count > 99 ? "99+" : count}
+          </span>
+        )}
+      </Link>
+    );
+  };
+
+  // Função (não componente) para preservar o foco da pesquisa entre teclas.
+  const sidebar = () => {
+    const { standalone, groups } = groupedNav(links);
+    return (
+      <div className="flex flex-col h-full bg-angola-navy text-white">
+        <div className="h-16 flex items-center gap-2.5 px-5 border-b border-white/10 shrink-0">
+          <img src="/images/logo.svg" alt="ORMED" className="w-8 h-8 object-contain" />
+          <div className="leading-tight">
+            <p className="font-semibold text-sm">ORMED</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-[0.15em]">Gestão</p>
+          </div>
+          <button type="button" onClick={() => setMobileOpen(false)} className="ml-auto md:hidden text-slate-300 hover:text-white" aria-label="Fechar">
+            <X className="w-5 h-5" />
           </button>
-        </header>
-        <main className="p-4 md:p-8 max-w-6xl mx-auto">
-          {isPathAllowed(user.role, user.permissions ?? [], normalizedPath) ? (
-            children
+        </div>
+
+        <div className="px-3 pt-3 pb-1">
+          <div className="flex items-center gap-2 bg-white/[0.06] rounded-lg px-2.5">
+            <Search className="w-4 h-4 text-slate-400 shrink-0" />
+            <input
+              value={navQuery}
+              onChange={(e) => setNavQuery(e.target.value)}
+              placeholder="Procurar secção..."
+              className="flex-1 bg-transparent py-2 text-[13px] text-white placeholder:text-slate-500 outline-none"
+            />
+            {navQuery && <button type="button" onClick={() => setNavQuery("")} aria-label="Limpar" className="text-slate-400 hover:text-white"><X className="w-3.5 h-3.5" /></button>}
+          </div>
+        </div>
+
+        <nav className="flex-1 px-3 pb-4 overflow-y-auto">
+          {filtered ? (
+            <div className="space-y-0.5 pt-1">
+              {filtered.length === 0 ? <p className="text-xs text-slate-500 px-3 py-4">Nada encontrado.</p> : filtered.map(renderItem)}
+            </div>
           ) : (
+            <>
+              <div className="space-y-0.5 mb-1.5 pt-1">{standalone.map(renderItem)}</div>
+              {groups.map((g) => {
+                const isCollapsed = collapsed[g.label];
+                const groupTotal = g.links.reduce((a, l) => a + badgeFor(l, summary), 0);
+                return (
+                  <div key={g.label} className="mb-1">
+                    <button
+                      type="button"
+                      onClick={() => setCollapsed((p) => ({ ...p, [g.label]: !p[g.label] }))}
+                      className="w-full flex items-center gap-2 px-3 pt-3 pb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slate-500 hover:text-slate-300"
+                    >
+                      <span className="flex-1 text-left truncate">{g.label}</span>
+                      {groupTotal > 0 && isCollapsed && (
+                        <span className="text-[9px] font-bold bg-angola-gold text-angola-navy rounded-full px-1.5 py-0.5">{groupTotal}</span>
+                      )}
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isCollapsed ? "-rotate-90" : ""}`} />
+                    </button>
+                    {!isCollapsed && <div className="space-y-0.5">{g.links.map(renderItem)}</div>}
+                  </div>
+                );
+              })}
+            </>
+          )}
+        </nav>
+
+        <Link href="/admin/perfil" className="flex items-center gap-3 px-4 py-3 border-t border-white/10 hover:bg-white/[0.04] shrink-0">
+          <span className="w-8 h-8 rounded-full bg-angola-gold/20 text-angola-gold flex items-center justify-center text-xs font-bold shrink-0">{initial}</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-medium text-white truncate">{user.name}</p>
+            <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+          </div>
+        </Link>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      {/* Sidebar desktop */}
+      <aside className="hidden md:block w-64 fixed inset-y-0 left-0 z-30">{sidebar()}</aside>
+
+      {/* Drawer mobile */}
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
+          <div className="absolute inset-y-0 left-0 w-72 max-w-[82%] shadow-2xl">{sidebar()}</div>
+        </div>
+      )}
+
+      <div className="md:ml-64 min-h-screen flex flex-col">
+        {/* Top bar */}
+        <header className="sticky top-0 z-20 h-16 bg-white/85 backdrop-blur border-b border-gray-200 flex items-center gap-3 px-4 md:px-7">
+          <button type="button" onClick={() => setMobileOpen(true)} className="md:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900" aria-label="Abrir menu">
+            <Menu className="w-5 h-5" />
+          </button>
+          <h1 className="text-base md:text-lg font-semibold text-gray-900 truncate">{pageTitle}</h1>
+
+          <div className="ml-auto flex items-center gap-1">
+            {user.role !== "universidade" && (
+              <Link href="/admin" className="relative p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors" aria-label="Notificações">
+                <Bell className="w-5 h-5" />
+                {(summary?.total ?? 0) > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">
+                    {(summary?.total ?? 0) > 99 ? "99+" : summary?.total}
+                  </span>
+                )}
+              </Link>
+            )}
+            <div className="relative">
+              <button type="button" onClick={() => setUserMenu((v) => !v)} className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-lg hover:bg-gray-100 transition-colors">
+                <span className="w-8 h-8 rounded-full bg-angola-navy text-white flex items-center justify-center text-xs font-bold">{initial}</span>
+                <span className="hidden sm:block text-sm font-medium text-gray-700 max-w-[120px] truncate">{user.name?.split(" ")[0]}</span>
+                <ChevronDown className="hidden sm:block w-4 h-4 text-gray-400" />
+              </button>
+              {userMenu && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setUserMenu(false)} />
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-gray-200 shadow-lg z-20 py-1.5">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
+                      <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                    </div>
+                    <Link href="/admin/perfil" className="flex items-center gap-2.5 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <User className="w-4 h-4 text-gray-400" /> O meu perfil
+                    </Link>
+                    <button type="button" onClick={() => logout()} className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                      <LogOut className="w-4 h-4" /> Terminar sessão
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 p-4 md:p-7 lg:p-8 max-w-6xl w-full mx-auto">
+          {allowed ? children : (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <Loader2 className="w-6 h-6 animate-spin text-angola-gold mb-3" />
               <p className="text-gray-500 text-sm">Não tem permissão para esta secção. A redirecionar...</p>
