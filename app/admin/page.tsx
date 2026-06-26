@@ -10,7 +10,9 @@ import {
   Loader2, Layers, Eye, Bell, ArrowRight, Activity, Users,
   FileCheck, FileText, ShieldAlert, MessageSquare, Inbox, School, CalendarDays,
   GraduationCap, BookOpen, ClipboardList, Stethoscope, ShieldCheck, Award,
+  Coins, Pill, ChevronRight,
 } from "lucide-react";
+import { kz } from "@/lib/recibo";
 import { api } from "@/lib/api";
 import { ManagedUser, College, Interno, Programa, Rotation } from "@/lib/admin-types";
 import { useAdminAuth } from "@/components/admin/auth-context";
@@ -93,8 +95,11 @@ function GeneralDashboard() {
   const [team, setTeam] = useState<ManagedUser[]>([]);
   const [ordem, setOrdem] = useState<{
     medicos: number; regular: number; irregular: number; internos: number;
-    especialistas: number; solicitacoes: number; eventosRealizados: number;
+    especialistas: number; orientadores: number; vigor: number; suspensa: number; cancelada: number;
+    novosMes: number; porMes: { mes: string; total: number }[];
+    solicitacoes: number; eventosRealizados: number; receitas: number;
   } | null>(null);
+  const [quota, setQuota] = useState<{ arrecadadoTotal: number; arrecadadoMes: number; cotaMensal: number; pagamentosMes: number } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -148,13 +153,16 @@ function GeneralDashboard() {
           setTeam(users.filter((u) => u.role !== "universidade").slice(0, 10));
         } catch { /* ignora */ }
         try {
-          const [ms, srs, evs] = await Promise.allSettled([
-            api.get<{ total: number; regular: number; irregular: number; internos: number; especialistas: number }>("/members/stats", true),
+          const [ms, srs, evs, qs, rx] = await Promise.allSettled([
+            api.get<{ total: number; regular: number; irregular: number; internos: number; especialistas: number; orientadores: number; vigor: number; suspensa: number; cancelada: number; novosMes: number; porMes: { mes: string; total: number }[] }>("/members/stats", true),
             api.get<unknown[]>("/service-requests/admin/all", true),
             api.get<{ items?: { startDate?: string }[] } | { startDate?: string }[]>("/events/admin/all?limit=500", true),
+            api.get<{ arrecadadoTotal: number; arrecadadoMes: number; cotaMensal: number; pagamentosMes: number }>("/quotas/stats", true),
+            api.get<unknown[]>("/prescriptions/admin/all", true),
           ]);
-          const m = ms.status === "fulfilled" ? ms.value : { total: 0, regular: 0, irregular: 0, internos: 0, especialistas: 0 };
+          const m = ms.status === "fulfilled" ? ms.value : { total: 0, regular: 0, irregular: 0, internos: 0, especialistas: 0, orientadores: 0, vigor: 0, suspensa: 0, cancelada: 0, novosMes: 0, porMes: [] };
           const solicitacoes = srs.status === "fulfilled" ? (srs.value as unknown[]).length : 0;
+          const receitas = rx.status === "fulfilled" ? (rx.value as unknown[]).length : 0;
           let eventosRealizados = 0;
           if (evs.status === "fulfilled") {
             const v = evs.value as { items?: { startDate?: string }[] } | { startDate?: string }[];
@@ -162,7 +170,8 @@ function GeneralDashboard() {
             const nowTs = Date.now();
             eventosRealizados = items.filter((e) => e.startDate && new Date(e.startDate).getTime() < nowTs).length;
           }
-          setOrdem({ medicos: m.total, regular: m.regular, irregular: m.irregular, internos: m.internos, especialistas: m.especialistas, solicitacoes, eventosRealizados });
+          setOrdem({ medicos: m.total, regular: m.regular, irregular: m.irregular, internos: m.internos, especialistas: m.especialistas, orientadores: m.orientadores ?? 0, vigor: m.vigor ?? 0, suspensa: m.suspensa ?? 0, cancelada: m.cancelada ?? 0, novosMes: m.novosMes ?? 0, porMes: m.porMes ?? [], solicitacoes, eventosRealizados, receitas });
+          if (qs.status === "fulfilled") setQuota(qs.value);
         } catch { /* ignora */ }
       }
       setLoading(false);
@@ -180,12 +189,21 @@ function GeneralDashboard() {
   }
 
   const pendencias = summary?.total ?? 0;
-  const solicitacoes = (summary?.counts.validacoes ?? 0) + (summary?.counts.solicitacoes ?? 0);
-  const allowedNotif = NOTIF_META.filter((m) => manager || m.perm.some((p) => perms.includes(p)));
+  const pctRegular = ordem && ordem.medicos ? Math.round((ordem.regular / ordem.medicos) * 100) : 0;
+  const actionItems = [
+    { label: "Aprovações", count: summary?.counts.aprovacoes ?? 0, link: "/admin/aprovacoes" },
+    { label: "Validações de documentos", count: summary?.counts.validacoes ?? 0, link: "/admin/validacoes" },
+    { label: "Documentos da Ordem", count: summary?.counts.solicitacoes ?? 0, link: "/admin/solicitacoes" },
+    { label: "Mensagens", count: summary?.counts.mensagens ?? 0, link: "/admin/mensagens" },
+    { label: "Denúncias", count: summary?.counts.denuncias ?? 0, link: "/admin/denuncias" },
+    { label: "Inscrições em eventos", count: summary?.counts.inscricoes ?? 0, link: "/admin/eventos" },
+    { label: "Apoio à pesquisa", count: summary?.counts.apoioPesquisa ?? 0, link: "/admin/apoio-pesquisa" },
+    { label: "Listas de instituições", count: summary?.counts.listas ?? 0, link: "/admin/listas-universidades" },
+  ].filter((a) => manager || a.count > 0).sort((a, b) => b.count - a.count);
 
   return (
-    <div>
-      <div className="flex items-end justify-between flex-wrap gap-3 mb-7">
+    <div className="space-y-7">
+      <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">Olá, {user?.name?.split(" ")[0]}</h1>
           <p className="text-sm text-gray-400">Visão geral da plataforma ORMED</p>
@@ -193,49 +211,74 @@ function GeneralDashboard() {
         <p className="text-xs text-gray-400 capitalize">{new Date().toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</p>
       </div>
 
-      {ordem && (
-        <div className="mb-8">
-          <SectionLabel>Visão geral da Ordem</SectionLabel>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            <Kpi icon={Stethoscope} label="Médicos" value={ordem.medicos} tone="navy" />
-            <Kpi icon={ShieldCheck} label="Em situação regular" value={ordem.regular} tone="emerald" />
-            <Kpi icon={ShieldAlert} label="Em situação irregular" value={ordem.irregular} tone="red" />
-            <Kpi icon={GraduationCap} label="Internos" value={ordem.internos} tone="blue" />
-            <Kpi icon={Award} label="Especialistas" value={ordem.especialistas} tone="indigo" />
-            <Kpi icon={Inbox} label="Solicitações" value={ordem.solicitacoes} tone="amber" />
-            <Kpi icon={CalendarDays} label="Eventos realizados" value={ordem.eventosRealizados} tone="teal" />
-          </div>
+      {/* HERO — indicadores-chave para o gestor */}
+      {ordem ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard icon={Stethoscope} tone="navy" label="Médicos inscritos" value={ordem.medicos}
+            sub={ordem.novosMes > 0 ? `+${ordem.novosMes} novo(s) este mês` : "sem novos este mês"}>
+            <Spark data={(ordem.porMes ?? []).map((p) => ({ total: p.total }))} />
+          </StatCard>
+          <StatCard icon={ShieldCheck} tone="emerald" label="Em situação regular" value={ordem.regular}
+            sub={`${pctRegular}% do total · ${ordem.irregular} irregular(es)`}>
+            <Progress value={pctRegular} color="bg-emerald-500" />
+          </StatCard>
+          <StatCard icon={Coins} tone="amber" label="Cotas arrecadadas" value={kz(quota?.arrecadadoTotal ?? 0)} valueSmall
+            sub={quota ? `+${kz(quota.arrecadadoMes)} este mês · cota ${kz(quota.cotaMensal)}` : "—"} />
+          <StatCard icon={Bell} tone="amber" highlight={pendencias > 0} label="A precisar de ação" value={pendencias}
+            sub={pendencias > 0 ? "aprovações, validações, mensagens…" : "tudo em dia ✓"} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <Kpi icon={Layers} label="Total de registos" value={totals.all} tone="navy" />
+          <Kpi icon={Eye} label="Publicados" value={totals.published} tone="emerald" />
+          <Kpi icon={FileText} label="Rascunhos" value={totals.draft} tone="amber" />
+          <Kpi icon={Bell} label="Pendências" value={pendencias} tone="indigo" highlight={pendencias > 0} />
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-[1fr_330px] gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 items-start">
         {/* ===== Coluna principal ===== */}
         <div className="space-y-7 min-w-0">
-          {/* KPIs de conteúdo / operação */}
-          <div>
-            <SectionLabel>Conteúdo e operação</SectionLabel>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <Kpi icon={Layers} label="Total de registos" value={totals.all} tone="navy" />
-              <Kpi icon={Eye} label="Publicados" value={totals.published} tone="emerald" />
-              <Kpi icon={Bell} label="Pendências" value={pendencias} tone="amber" highlight={pendencias > 0} />
-              <Kpi icon={FileCheck} label="Solicitações em curso" value={solicitacoes} tone="indigo" />
-            </div>
-          </div>
+          {/* Corpo clínico */}
+          {ordem && (
+            <Card title="Corpo clínico">
+              <div className="grid sm:grid-cols-[170px_1fr] gap-5 items-center">
+                <div className="relative">
+                  <ResponsiveContainer width="100%" height={168}>
+                    <PieChart>
+                      <Pie data={[{ name: "Em vigor", value: ordem.vigor }, { name: "Suspensas", value: ordem.suspensa }, { name: "Canceladas", value: ordem.cancelada }]}
+                        dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={52} outerRadius={78} paddingAngle={2} stroke="none">
+                        <Cell fill="#10B981" /><Cell fill="#F59E0B" /><Cell fill="#EF4444" />
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-2xl font-bold text-gray-900 tabular-nums">{ordem.medicos}</span>
+                    <span className="text-[11px] text-gray-400">médicos</span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                  <MiniStat label="Em vigor" value={ordem.vigor} dot="bg-emerald-500" />
+                  <MiniStat label="Suspensas" value={ordem.suspensa} dot="bg-amber-500" />
+                  <MiniStat label="Canceladas" value={ordem.cancelada} dot="bg-red-500" />
+                  <MiniStat label="Internos" value={ordem.internos} />
+                  <MiniStat label="Especialistas" value={ordem.especialistas} />
+                  <MiniStat label="Orientadores" value={ordem.orientadores} />
+                </div>
+              </div>
+            </Card>
+          )}
 
-          {/* Tiras de pendentes por serviço */}
-          {allowedNotif.length > 0 && (
+          {/* Operação rápida */}
+          {ordem && (
             <div>
-              <SectionLabel>Pendentes por serviço</SectionLabel>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-                {allowedNotif.map((m) => {
-                  const n = (summary?.counts as Record<string, number>)?.[m.key] ?? 0;
-                  return (
-                    <Link key={m.key} href={m.link} className={`group rounded-xl px-3.5 py-3 border flex items-center justify-between transition-all hover:-translate-y-0.5 ${n > 0 ? "border-angola-gold/50 bg-angola-gold/[0.06] hover:shadow-[0_4px_16px_-8px_rgba(0,33,71,0.3)]" : "border-gray-200/70 bg-white hover:border-gray-300"}`}>
-                      <span className="text-xs text-gray-600 leading-tight font-medium">{m.label}</span>
-                      <span className={`text-base font-bold tabular-nums ${n > 0 ? "text-angola-navy" : "text-gray-300"}`}>{n}</span>
-                    </Link>
-                  );
-                })}
+              <SectionLabel>Operação</SectionLabel>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <Kpi icon={Layers} label="Registos de conteúdo" value={totals.all} tone="navy" />
+                <Kpi icon={Inbox} label="Solicitações" value={ordem.solicitacoes} tone="indigo" />
+                <Kpi icon={CalendarDays} label="Eventos realizados" value={ordem.eventosRealizados} tone="teal" />
+                <Kpi icon={Pill} label="Receitas emitidas" value={ordem.receitas} tone="violet" />
               </div>
             </div>
           )}
@@ -307,7 +350,27 @@ function GeneralDashboard() {
         </div>
 
         {/* ===== Coluna lateral ===== */}
-        <aside className="space-y-6 xl:sticky xl:top-6">
+        <aside className="space-y-6 xl:sticky xl:top-[5.5rem]">
+          {/* A precisar da sua ação */}
+          {actionItems.length > 0 && (
+            <div className="bg-white border border-gray-200/80 rounded-xl p-5">
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><ShieldCheck className="w-[18px] h-[18px]" /></span>
+                <h2 className="text-sm font-semibold text-gray-900">A precisar da sua ação</h2>
+              </div>
+              <div className="space-y-0.5">
+                {actionItems.map((a) => (
+                  <Link key={a.link} href={a.link} className={`flex items-center gap-3 px-2.5 py-2 rounded-lg transition-colors ${a.count > 0 ? "hover:bg-amber-50" : "hover:bg-gray-50"}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${a.count > 0 ? "bg-amber-500" : "bg-gray-200"}`} />
+                    <span className="text-[13px] text-gray-700 flex-1 truncate">{a.label}</span>
+                    <span className={`text-sm font-bold tabular-nums ${a.count > 0 ? "text-amber-600" : "text-gray-300"}`}>{a.count}</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Centro de notificações */}
           <div className="bg-white border border-gray-200/80 rounded-xl p-5">
             <div className="flex items-center gap-2.5 mb-4">
@@ -397,6 +460,60 @@ function Card({ title, children, className = "" }: { title: string; children: Re
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return <h2 className="text-[13px] font-semibold text-gray-400 uppercase tracking-wider mb-3">{children}</h2>;
+}
+
+function StatCard({ icon: Icon, label, value, sub, tone = "navy", highlight, valueSmall, children }: {
+  icon: typeof Layers; label: string; value: number | string; sub?: string; tone?: string; highlight?: boolean; valueSmall?: boolean; children?: React.ReactNode;
+}) {
+  return (
+    <div className={`bg-white rounded-xl border p-5 transition-all hover:shadow-[0_4px_24px_-12px_rgba(0,33,71,0.25)] ${highlight ? "border-angola-gold/60 ring-1 ring-angola-gold/15" : "border-gray-200/80"}`}>
+      <div className="flex items-center justify-between">
+        <span className={`w-9 h-9 rounded-lg flex items-center justify-center ${TONES[tone] ?? TONES.navy}`}><Icon className="w-[18px] h-[18px]" /></span>
+        {highlight && typeof value === "number" && value > 0 && <span className="w-2 h-2 rounded-full bg-angola-gold mt-1 animate-pulse" />}
+      </div>
+      <p className={`${valueSmall ? "text-xl" : "text-[28px]"} leading-none font-bold text-gray-900 mt-3.5 tabular-nums tracking-tight`}>{value}</p>
+      <p className="text-sm text-gray-500 mt-1.5 font-medium">{label}</p>
+      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+      {children && <div className="mt-3">{children}</div>}
+    </div>
+  );
+}
+
+function Spark({ data }: { data: { total: number }[] }) {
+  if (!data || data.length === 0) return null;
+  return (
+    <ResponsiveContainer width="100%" height={34}>
+      <AreaChart data={data} margin={{ top: 2, right: 0, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id="spk" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#002147" stopOpacity={0.22} />
+            <stop offset="100%" stopColor="#002147" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <Area type="monotone" dataKey="total" stroke="#002147" strokeWidth={1.6} fill="url(#spk)" />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+}
+
+function Progress({ value, color = "bg-emerald-500" }: { value: number; color?: string }) {
+  return (
+    <div className="h-1.5 rounded-full bg-gray-100 overflow-hidden">
+      <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+    </div>
+  );
+}
+
+function MiniStat({ label, value, dot }: { label: string; value: number; dot?: string }) {
+  return (
+    <div className="rounded-lg border border-gray-100 bg-gray-50/60 px-3 py-2.5">
+      <div className="flex items-center gap-1.5">
+        {dot && <span className={`w-2 h-2 rounded-full ${dot}`} />}
+        <span className="text-[11px] text-gray-500 truncate">{label}</span>
+      </div>
+      <p className="text-lg font-bold text-gray-900 tabular-nums mt-0.5">{value}</p>
+    </div>
+  );
 }
 
 // ===== Dashboard do Presidente do Colégio =====
