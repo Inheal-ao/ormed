@@ -46,6 +46,7 @@ import {
   Search,
   Bell,
   X,
+  Pill,
 } from "lucide-react";
 import { useAdminAuth } from "@/components/admin/auth-context";
 import { useNotifications, NotifSummary } from "@/components/admin/notifications-context";
@@ -105,6 +106,7 @@ const navLinks: NavLink[] = [
   { href: "/admin/validacoes", label: "Validação de Docs", icon: FileCheck, key: "validacoes", group: "Médicos & Serviços" },
   { href: "/admin/solicitacoes", label: "Documentos da Ordem", icon: FileText, key: "solicitacoes", group: "Médicos & Serviços" },
   { href: "/admin/apoio-pesquisa", label: "Apoio à Pesquisa", icon: Inbox, key: "apoio-pesquisa", group: "Médicos & Serviços" },
+  { href: "/admin/receitas", label: "Receitas (Prescrições)", icon: Pill, key: "receitas", group: "Médicos & Serviços" },
   { href: "/admin/listas-universidades", label: "Universidades", icon: School, key: "listas-universidades", group: "Instituições de Ensino" },
   { href: "/admin/listas-universidades?tipo=ies", label: "IES", icon: Building2, key: "listas-universidades", group: "Instituições de Ensino" },
   { href: "/admin/listas-universidades?tipo=inaarees", label: "INAAREES", icon: Building2, key: "listas-universidades", group: "Instituições de Ensino" },

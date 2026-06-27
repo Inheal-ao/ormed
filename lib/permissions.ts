@@ -24,6 +24,7 @@ export const PERMISSION_SECTIONS: { key: string; label: string }[] = [
   { key: "solicitacoes", label: "Documentos da Ordem" },
   { key: "listas-universidades", label: "Universidades" },
   { key: "membros", label: "Membros (Médicos)" },
+  { key: "receitas", label: "Receitas (Prescrições)" },
   { key: "denuncias", label: "Denúncias" },
   { key: "mensagens", label: "Mensagens" },
   { key: "newsletter", label: "Newsletter" },
