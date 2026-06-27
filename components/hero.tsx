@@ -101,7 +101,7 @@ export function Hero() {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-angola-navy">
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-angola-navy pt-28 lg:pt-44">
       {/* Background Slides */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
@@ -128,7 +128,7 @@ export function Hero() {
       </AnimatePresence>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-32 pb-20 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-12 w-full">
         <div className="max-w-2xl">
           <AnimatePresence mode="wait">
             <motion.div

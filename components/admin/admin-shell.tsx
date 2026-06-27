@@ -184,6 +184,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
   const [navQuery, setNavQuery] = useState("");
+  const [topSearch, setTopSearch] = useState("");
   const [userMenu, setUserMenu] = useState(false);
 
   // Normaliza barras finais (o site usa trailingSlash)
@@ -233,6 +234,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const pageTitle = pageTitleFor(normalizedPath);
   const allowed = isPathAllowed(user.role, user.permissions ?? [], normalizedPath);
   const initial = (user.name || user.email || "?").charAt(0).toUpperCase();
+
+  // Pesquisa global do topo: salta para a secção cujo nome corresponde.
+  const submitTop = (e: React.FormEvent) => {
+    e.preventDefault();
+    const term = topSearch.trim().toLowerCase();
+    if (!term) return;
+    const match = links.find((l) => l.label.toLowerCase().includes(term));
+    if (match) { router.push(match.href); setTopSearch(""); }
+  };
 
   const renderItem = (link: NavLink) => {
     const active = link.exact ? normalizedPath === link.href : normalizedPath.startsWith(link.href);
@@ -349,9 +359,23 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <button type="button" onClick={() => setMobileOpen(true)} className="md:hidden p-2 -ml-2 text-gray-600 hover:text-gray-900" aria-label="Abrir menu">
             <Menu className="w-5 h-5" />
           </button>
-          <h1 className="text-base md:text-lg font-semibold text-gray-900 truncate">{pageTitle}</h1>
+          <h1 className="text-base md:text-lg font-semibold text-gray-900 truncate shrink-0">{pageTitle}</h1>
 
-          <div className="ml-auto flex items-center gap-1">
+          {/* Pesquisa em destaque (salta para a secção) */}
+          <form onSubmit={submitTop} className="hidden lg:flex flex-1 justify-center px-4">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                value={topSearch}
+                onChange={(e) => setTopSearch(e.target.value)}
+                placeholder="Pesquisar secção do painel…"
+                aria-label="Pesquisar no painel"
+                className="w-full h-10 pl-10 pr-4 rounded-full bg-gray-100 border border-transparent text-sm text-gray-900 placeholder:text-gray-400 outline-none transition-colors focus:bg-white focus:border-angola-gold focus:ring-2 focus:ring-angola-gold/20"
+              />
+            </div>
+          </form>
+
+          <div className="ml-auto lg:ml-0 flex items-center gap-1">
             {user.role !== "universidade" && (
               <Link href="/admin" className="relative p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors" aria-label="Notificações">
                 <Bell className="w-5 h-5" />
