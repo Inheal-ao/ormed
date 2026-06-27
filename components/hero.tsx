@@ -101,7 +101,7 @@ export function Hero() {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-angola-navy pt-24 lg:pt-28">
+    <section className="relative min-h-[90vh] overflow-hidden bg-angola-navy">
       {/* Background Slides */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
@@ -114,19 +114,24 @@ export function Hero() {
           transition={{ duration: 0.8, ease: "easeInOut" }}
           className="absolute inset-0"
         >
+          {/* Preenchimento desfocado: garante que nunca há barras vazias */}
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{
-              backgroundImage: `url(${safeSlide.image})`,
-            }}
+            className="absolute inset-0 bg-cover bg-center scale-110 blur-2xl"
+            style={{ backgroundImage: `url(${safeSlide.image})` }}
+            aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-angola-navy/95 via-angola-navy/80 to-angola-navy/40" />
+          {/* Imagem inteira: nunca corta o rosto/sujeito, seja qual for o ecrã */}
+          <div
+            className="absolute inset-0 bg-contain bg-center bg-no-repeat"
+            style={{ backgroundImage: `url(${safeSlide.image})` }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-angola-navy/95 via-angola-navy/70 to-angola-navy/30" />
           <div className="absolute inset-0 bg-gradient-to-t from-angola-navy via-transparent to-transparent" />
         </motion.div>
       </AnimatePresence>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 pt-28 lg:pt-52 pb-12 w-full">
         <div className="max-w-2xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -136,7 +141,7 @@ export function Hero() {
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.5 }}
             >
-              <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold text-white mb-4 leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
                 {safeSlide.title}
               </h1>
               <p className="text-xl md:text-2xl text-angola-gold font-display mb-6 drop-shadow-sm">
