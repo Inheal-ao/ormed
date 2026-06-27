@@ -11,9 +11,10 @@ import { AiAssistant } from "@/components/ai-assistant";
  */
 export function ConditionalChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin = pathname?.startsWith("/admin");
+  // O painel admin e o portal do médico têm o seu próprio shell (sidebar).
+  const isApp = pathname?.startsWith("/admin") || pathname?.startsWith("/area-membro");
 
-  if (isAdmin) {
+  if (isApp) {
     return <>{children}</>;
   }
 
