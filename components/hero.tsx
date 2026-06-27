@@ -21,7 +21,7 @@ const DEFAULT_SLIDES: Slide[] = [
     subtitle: "Rumo à Excelência",
     description:
       "Há mais de 35 anos que existimos para garantir, ao profissional médico, o exercício da medicina em Angola com a dignidade merecida.",
-    image: "/images/bastonaria-campaign.jpg",
+    image: "/images/bastonaria-campaign-wide.jpg",
     cta: { label: "Inscreva-se Agora", href: "/inscricao/" },
     cta2: { label: "Saber Mais", href: "/sobre/" },
   },
@@ -30,7 +30,7 @@ const DEFAULT_SLIDES: Slide[] = [
     subtitle: "Pilares da Profissão",
     description:
       "Pautamo-nos pelo rigor e cumprimento escrupuloso da ética e da deontologia profissional, visando prestar um serviço de saúde com qualidade.",
-    image: "/images/bastonaria-2.jpg",
+    image: "/images/bastonaria-2-wide.jpg",
     cta: { label: "Código Deontológico", href: "/codigo-deontologico/" },
     cta2: { label: "Denúncias", href: "/denuncias/" },
   },
@@ -39,7 +39,7 @@ const DEFAULT_SLIDES: Slide[] = [
     subtitle: "Educação Permanente",
     description:
       "Programas de formação, workshops, webinars e congressos para manter os médicos angolanos na vanguarda do conhecimento médico.",
-    image: "/images/bastonaria-1.jpg",
+    image: "/images/bastonaria-1-wide.jpg",
     cta: { label: "Próximos Eventos", href: "/eventos/" },
     cta2: { label: "Área do Membro", href: "/area-membro/" },
   },
@@ -115,11 +115,9 @@ export function Hero() {
           className="absolute inset-0"
         >
           <div
-            className="absolute inset-0 bg-cover bg-no-repeat"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage: `url(${safeSlide.image})`,
-              // Favorece o terço superior, onde ficam os rostos, em vez de cortar ao centro.
-              backgroundPosition: "center 20%",
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-angola-navy/95 via-angola-navy/80 to-angola-navy/40" />
