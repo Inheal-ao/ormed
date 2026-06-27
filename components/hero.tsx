@@ -115,9 +115,11 @@ export function Hero() {
           className="absolute inset-0"
         >
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-no-repeat"
             style={{
               backgroundImage: `url(${safeSlide.image})`,
+              // Favorece o terço superior, onde ficam os rostos, em vez de cortar ao centro.
+              backgroundPosition: "center 20%",
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-angola-navy/95 via-angola-navy/80 to-angola-navy/40" />

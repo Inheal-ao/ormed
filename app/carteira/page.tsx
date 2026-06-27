@@ -1,15 +1,19 @@
-import { ServicePortal } from "@/components/service-portal";
+import { ServiceInfo } from "@/components/service-info";
 
 export const metadata = { title: "Carteira Profissional" };
 
 export default function CarteiraPage() {
   return (
-    <ServicePortal
-      serviceType="carteira-profissional"
+    <ServiceInfo
       title="Carteira Profissional"
-      description="Solicite a emissão ou a 2ª via da sua carteira profissional de médico, acompanhe pelo código e pague online."
-      paid
-      intro="Submeta o pedido com os documentos necessários. Após análise, receberá as coordenadas de pagamento no separador de consulta, onde poderá enviar o comprovativo e descarregar o recibo."
+      description="Peça a emissão ou a 2ª via da sua carteira profissional de médico, de forma segura, no portal do médico."
+      passos={[
+        "Entre na Área do Membro com as suas credenciais.",
+        "Aceda a 'Serviços & Dados' e escolha Carteira Profissional (emissão ou 2ª via).",
+        "Confirme os seus dados e submeta o pedido.",
+        "Acompanhe o estado, efetue o pagamento e levante/descarregue o comprovativo.",
+      ]}
+      nota="A carteira é emitida a médicos com inscrição em vigor. A 2ª via aplica-se em caso de perda, roubo ou dano."
     />
   );
 }

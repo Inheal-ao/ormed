@@ -6,8 +6,6 @@ import {
   User,
   MapPin,
   GraduationCap,
-  Shield,
-  Filter,
   CheckCircle,
   XCircle,
   Stethoscope,
@@ -81,9 +79,9 @@ export default function ConsultaMedicosPage() {
   const [selectedSpecialty, setSelectedSpecialty] = useState("Todas");
 
   const filteredDoctors = mockDoctors.filter((doctor) => {
-    const matchesSearch =
-      doctor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doctor.registration.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = doctor.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const matchesProvince =
       selectedProvince === "Todas" || doctor.province === selectedProvince;
     const matchesSpecialty =
@@ -117,7 +115,7 @@ export default function ConsultaMedicosPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input
                   className="pl-10"
-                  placeholder="Nome ou número de registo..."
+                  placeholder="Nome do médico..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -188,10 +186,6 @@ export default function ConsultaMedicosPage() {
                           <span className="flex items-center gap-1">
                             <MapPin className="w-3.5 h-3.5" />
                             {doctor.province}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Shield className="w-3.5 h-3.5" />
-                            {doctor.registration}
                           </span>
                         </div>
                       </div>
