@@ -101,7 +101,7 @@ export function Hero() {
   };
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-angola-navy pt-28 lg:pt-44">
+    <section className="relative min-h-[90vh] flex items-center overflow-hidden bg-angola-navy pt-24 lg:pt-28">
       {/* Background Slides */}
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
@@ -126,7 +126,7 @@ export function Hero() {
       </AnimatePresence>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-12 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-8 w-full">
         <div className="max-w-2xl">
           <AnimatePresence mode="wait">
             <motion.div
@@ -142,7 +142,7 @@ export function Hero() {
               <p className="text-xl md:text-2xl text-angola-gold font-display mb-6 drop-shadow-sm">
                 {safeSlide.subtitle}
               </p>
-              <p className="text-gray-300 text-lg mb-8 leading-relaxed max-w-xl">
+              <p className="text-gray-300 text-lg mb-6 leading-relaxed max-w-xl">
                 {safeSlide.description}
               </p>
 
@@ -176,7 +176,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
-            className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4"
+            className="mt-8 lg:mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4"
           >
             {quickStats.map((stat, index) => {
               const Icon = getStatIcon(stat.icon);

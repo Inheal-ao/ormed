@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ClipboardList,
@@ -167,9 +167,19 @@ function groupedNav(links: NavLink[]) {
   return { standalone, groups };
 }
 
-function pageTitleFor(path: string): string {
+// Extrai o valor de ?tipo= de um href (ou "" se não existir).
+function hrefTipo(href: string): string {
+  const i = href.indexOf("tipo=");
+  return i >= 0 ? href.slice(i + 5).split("&")[0] : "";
+}
+
+function pageTitleFor(path: string, tipo: string): string {
   if (path === "/admin") return "Painel";
   if (path === "/admin/perfil") return "O meu perfil";
+  // Universidades / IES / INAAREES partilham o mesmo caminho — distingue-se pelo ?tipo=.
+  if (path === "/admin/listas-universidades") {
+    return tipo === "ies" ? "IES" : tipo === "inaarees" ? "INAAREES" : "Universidades";
+  }
   const match = navLinks
     .filter((l) => !l.exact && path.startsWith(l.href.split("?")[0]))
     .sort((a, b) => b.href.split("?")[0].length - a.href.split("?")[0].length)[0];
@@ -178,6 +188,8 @@ function pageTitleFor(path: string): string {
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const tipo = searchParams.get("tipo") || "";
   const router = useRouter();
   const { user, loading, logout } = useAdminAuth();
   const { summary } = useNotifications();
@@ -231,7 +243,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const links = visibleLinks(user.role, user.permissions ?? []);
   const q = navQuery.trim().toLowerCase();
   const filtered = q ? links.filter((l) => l.label.toLowerCase().includes(q)) : null;
-  const pageTitle = pageTitleFor(normalizedPath);
+  const pageTitle = pageTitleFor(normalizedPath, tipo);
   const allowed = isPathAllowed(user.role, user.permissions ?? [], normalizedPath);
   const initial = (user.name || user.email || "?").charAt(0).toUpperCase();
 
@@ -245,7 +257,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   };
 
   const renderItem = (link: NavLink) => {
-    const active = link.exact ? normalizedPath === link.href : normalizedPath.startsWith(link.href);
+    const linkPath = link.href.split("?")[0];
+    let active: boolean;
+    if (linkPath === "/admin/listas-universidades") {
+      // As três entradas partilham o caminho; distingue-se pelo ?tipo=.
+      active = normalizedPath === linkPath && hrefTipo(link.href) === tipo;
+    } else {
+      active = link.exact ? normalizedPath === link.href : normalizedPath.startsWith(linkPath);
+    }
     const count = badgeFor(link, summary);
     return (
       <Link
