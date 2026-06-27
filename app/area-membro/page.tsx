@@ -41,38 +41,55 @@ const TIPO_LABEL: Record<string, string> = { programa: "Programa de Ensino", map
 const inputClass = "w-full px-3 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900";
 
 export default function AreaMembroPage() {
+  const [mode, setMode] = useState<"email" | "legacy" | "recover">("email");
   const [creds, setCreds] = useState({ numeroUtente: "", biPassaporte: "", phone: "", numeroOrdem: "", code: "" });
+  const [loginF, setLoginF] = useState({ email: "", password: "", code: "" });
+  const [recoverF, setRecoverF] = useState({ email: "", code: "", password: "", password2: "" });
   const [ficha, setFicha] = useState<FichaData | null>(null);
+  const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [okMsg, setOkMsg] = useState<string | null>(null);
 
   const set = (k: keyof typeof creds, v: string) => setCreds((p) => ({ ...p, [k]: v }));
 
+  // Login legado (5 credenciais)
   const access = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+    e.preventDefault(); setLoading(true); setError(null);
     try {
-      const res = await fetch(`${API_URL}/members/access`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(creds),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Dados de acesso inválidos.");
-      }
-      setFicha(await res.json());
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao aceder.");
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch(`${API_URL}/members/access`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(creds) });
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || "Dados de acesso inválidos."); }
+      setFicha(await res.json()); setCode(creds.code);
+    } catch (err) { setError(err instanceof Error ? err.message : "Erro ao aceder."); } finally { setLoading(false); }
   };
 
-  const logout = () => { setFicha(null); setCreds({ numeroUtente: "", biPassaporte: "", phone: "", numeroOrdem: "", code: "" }); };
+  // Login novo (email + senha + código)
+  const emailLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); setLoading(true); setError(null);
+    try {
+      const res = await fetch(`${API_URL}/members/portal/login`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(loginF) });
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || "Credenciais inválidas."); }
+      setFicha(await res.json()); setCode(loginF.code);
+    } catch (err) { setError(err instanceof Error ? err.message : "Erro ao aceder."); } finally { setLoading(false); }
+  };
 
-  if (ficha) return <MemberPortal ficha={ficha} code={creds.code} onLogout={logout} />;
+  // Recuperar senha (email + código → nova senha)
+  const doRecover = async (e: React.FormEvent) => {
+    e.preventDefault(); setError(null); setOkMsg(null);
+    if (recoverF.password !== recoverF.password2) { setError("As senhas não coincidem."); return; }
+    if (recoverF.password.length < 8) { setError("A senha deve ter no mínimo 8 caracteres."); return; }
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/members/portal/recover`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: recoverF.email, code: recoverF.code, password: recoverF.password }) });
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || "Não foi possível recuperar."); }
+      setOkMsg("Senha redefinida. Já pode entrar com a nova senha."); setMode("email");
+      setLoginF({ email: recoverF.email, password: "", code: "" });
+    } catch (err) { setError(err instanceof Error ? err.message : "Erro."); } finally { setLoading(false); }
+  };
+
+  const logout = () => { setFicha(null); setCode(""); setCreds({ numeroUtente: "", biPassaporte: "", phone: "", numeroOrdem: "", code: "" }); setLoginF({ email: "", password: "", code: "" }); };
+
+  if (ficha) return <MemberPortal ficha={ficha} code={code} onLogout={logout} />;
 
   // ===== Login (ecrã inteiro, sem chrome do site) =====
   return (
@@ -83,39 +100,67 @@ export default function AreaMembroPage() {
           <h1 className="text-xl font-bold text-gray-900">Portal do Médico</h1>
           <p className="text-sm text-gray-500">Ordem dos Médicos de Angola</p>
         </div>
-        <form onSubmit={access} className="bg-white border border-gray-200 rounded-2xl p-6 md:p-7 shadow-sm space-y-4">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-angola-gold" />
-            <h2 className="font-bold text-gray-900">Aceder ao portal</h2>
-          </div>
-          <p className="text-sm text-gray-500">Introduza os dados que recebeu da Ordem após a aprovação da sua inscrição.</p>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Número de Utente</label>
-            <input className={`${inputClass} font-mono`} required value={creds.numeroUtente} onChange={(e) => set("numeroUtente", e.target.value.toUpperCase())} placeholder="UT-2026-00000" />
-          </div>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">BI / Passaporte</label>
-              <input className={inputClass} required value={creds.biPassaporte} onChange={(e) => set("biPassaporte", e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contacto telefónico</label>
-              <input className={inputClass} required value={creds.phone} onChange={(e) => set("phone", e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Número de Ordem</label>
-              <input className={inputClass} required value={creds.numeroOrdem} onChange={(e) => set("numeroOrdem", e.target.value)} />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5"><KeyRound className="w-4 h-4 text-angola-gold" /> Código (6 dígitos)</label>
-              <input className={`${inputClass} font-mono text-center`} maxLength={6} required value={creds.code} onChange={(e) => set("code", e.target.value.replace(/\D/g, ""))} placeholder="000000" />
-            </div>
-          </div>
-          {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
-          <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <User className="w-4 h-4" />} Entrar no portal
-          </button>
-        </form>
+
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 md:p-7 shadow-sm">
+          {okMsg && <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mb-4 flex items-center gap-1.5"><Check className="w-4 h-4" /> {okMsg}</div>}
+
+          {mode === "recover" ? (
+            <form onSubmit={doRecover} className="space-y-4">
+              <h2 className="font-bold text-gray-900">Recuperar senha</h2>
+              <p className="text-sm text-gray-500">Introduza o seu email e um dos seus códigos de recuperação de 6 dígitos.</p>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" className={inputClass} required value={recoverF.email} onChange={(e) => setRecoverF((p) => ({ ...p, email: e.target.value }))} /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Código de recuperação</label><input className={`${inputClass} font-mono text-center`} maxLength={6} required value={recoverF.code} onChange={(e) => setRecoverF((p) => ({ ...p, code: e.target.value.replace(/\D/g, "") }))} placeholder="000000" /></div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Nova senha</label><input type="password" className={inputClass} required value={recoverF.password} onChange={(e) => setRecoverF((p) => ({ ...p, password: e.target.value }))} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Confirmar</label><input type="password" className={inputClass} required value={recoverF.password2} onChange={(e) => setRecoverF((p) => ({ ...p, password2: e.target.value }))} /></div>
+              </div>
+              {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />} Redefinir senha
+              </button>
+              <button type="button" onClick={() => { setMode("email"); setError(null); }} className="w-full text-sm text-gray-500 hover:underline">Voltar ao login</button>
+            </form>
+          ) : (
+            <>
+              <div className="flex gap-1 mb-5 bg-gray-100 rounded-lg p-1">
+                <button type="button" onClick={() => { setMode("email"); setError(null); }} className={`flex-1 text-sm font-medium py-2 rounded-md ${mode === "email" ? "bg-white shadow-sm text-angola-navy" : "text-gray-500"}`}>Email + Senha</button>
+                <button type="button" onClick={() => { setMode("legacy"); setError(null); }} className={`flex-1 text-sm font-medium py-2 rounded-md ${mode === "legacy" ? "bg-white shadow-sm text-angola-navy" : "text-gray-500"}`}>Primeiro acesso</button>
+              </div>
+
+              {mode === "email" ? (
+                <form onSubmit={emailLogin} className="space-y-4">
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" className={inputClass} required value={loginF.email} onChange={(e) => setLoginF((p) => ({ ...p, email: e.target.value }))} placeholder="medico@exemplo.ao" /></div>
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">Senha</label><input type="password" className={inputClass} required value={loginF.password} onChange={(e) => setLoginF((p) => ({ ...p, password: e.target.value }))} /></div>
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5"><KeyRound className="w-4 h-4 text-angola-gold" /> Código de 6 dígitos</label><input className={`${inputClass} font-mono text-center`} maxLength={6} required value={loginF.code} onChange={(e) => setLoginF((p) => ({ ...p, code: e.target.value.replace(/\D/g, "") }))} placeholder="000000" /></div>
+                  {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+                  <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <User className="w-4 h-4" />} Entrar
+                  </button>
+                  <button type="button" onClick={() => { setMode("recover"); setError(null); }} className="w-full text-sm text-angola-blue hover:underline">Esqueci a senha</button>
+                </form>
+              ) : (
+                <form onSubmit={access} className="space-y-4">
+                  <p className="text-sm text-gray-500">Primeiro acesso ou sem senha definida: use os dados que recebeu da Ordem. Depois, defina senha e gere os seus códigos em <strong>Segurança</strong>.</p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Número de Utente</label>
+                    <input className={`${inputClass} font-mono`} required value={creds.numeroUtente} onChange={(e) => set("numeroUtente", e.target.value.toUpperCase())} placeholder="UT-2026-00000" />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">BI / Passaporte</label><input className={inputClass} required value={creds.biPassaporte} onChange={(e) => set("biPassaporte", e.target.value)} /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Contacto</label><input className={inputClass} required value={creds.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1">Número de Ordem</label><input className={inputClass} required value={creds.numeroOrdem} onChange={(e) => set("numeroOrdem", e.target.value)} /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5"><KeyRound className="w-4 h-4 text-angola-gold" /> Código</label><input className={`${inputClass} font-mono text-center`} maxLength={6} required value={creds.code} onChange={(e) => set("code", e.target.value.replace(/\D/g, ""))} placeholder="000000" /></div>
+                  </div>
+                  {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</div>}
+                  <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 bg-angola-navy text-white font-semibold py-3 rounded-lg hover:brightness-110 disabled:opacity-60">
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <User className="w-4 h-4" />} Entrar
+                  </button>
+                </form>
+              )}
+            </>
+          )}
+        </div>
+
         <p className="text-xs text-gray-400 text-center mt-4">
           Ainda não é membro? <a href="/inscricao/" className="text-angola-blue hover:underline">Inscreva-se</a> · <a href="/" className="text-angola-blue hover:underline">Voltar ao site</a>
         </p>
@@ -136,6 +181,7 @@ function MemberPortal({ ficha, code, onLogout }: { ficha: FichaData; code: strin
     ...(isInterno ? [{ id: "internato", label: "Internato & Notas", icon: GraduationCap }] : []),
     { id: "atividade", label: "Atividade & Certificados", icon: Activity },
     { id: "prescricao", label: "Prescrição", icon: Pill },
+    { id: "seguranca", label: "Segurança", icon: ShieldCheck },
   ];
   const current = nav.find((n) => n.id === section) ?? nav[0];
 
@@ -196,6 +242,7 @@ function MemberPortal({ ficha, code, onLogout }: { ficha: FichaData; code: strin
           {section === "internato" && isInterno && <InternatoSection numeroUtente={ficha.numeroUtente} code={code} />}
           {section === "atividade" && <AtividadeSection numeroUtente={ficha.numeroUtente} code={code} />}
           {section === "prescricao" && <ReceitasSection numeroUtente={ficha.numeroUtente} code={code} medico={{ name: ficha.name, numeroOrdem: ficha.numeroOrdem, especialidade: ficha.especialidade }} />}
+          {section === "seguranca" && <SegurancaSection ficha={ficha} code={code} />}
         </main>
       </div>
     </div>
@@ -318,6 +365,102 @@ function ServicosSection({ ficha, code }: { ficha: FichaData; code: string }) {
         <button type="button" onClick={submit} disabled={saving} className="mt-4 inline-flex items-center gap-2 bg-angola-navy text-white font-semibold px-5 py-2.5 rounded-lg disabled:opacity-60">
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Solicitar alteração
         </button>
+      </div>
+    </>
+  );
+}
+
+function SegurancaSection({ ficha, code }: { ficha: FichaData; code: string }) {
+  const [pw, setPw] = useState({ password: "", password2: "" });
+  const [savingPw, setSavingPw] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [codes, setCodes] = useState<string[] | null>(null);
+  const [genLoading, setGenLoading] = useState(false);
+  const [genErr, setGenErr] = useState<string | null>(null);
+
+  const savePassword = async () => {
+    setPwMsg(null);
+    if (pw.password !== pw.password2) { setPwMsg({ ok: false, text: "As senhas não coincidem." }); return; }
+    if (pw.password.length < 8) { setPwMsg({ ok: false, text: "A senha deve ter no mínimo 8 caracteres." }); return; }
+    setSavingPw(true);
+    try {
+      const res = await fetch(`${API_URL}/members/portal/set-password`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ numeroUtente: ficha.numeroUtente, code, password: pw.password }) });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Falha ao definir a senha."); }
+      setPwMsg({ ok: true, text: "Senha definida. Passe a entrar com Email + Senha + Código." }); setPw({ password: "", password2: "" });
+    } catch (err) { setPwMsg({ ok: false, text: err instanceof Error ? err.message : "Erro." }); } finally { setSavingPw(false); }
+  };
+
+  const generate = async () => {
+    if (!confirm("Gerar um novo conjunto de códigos? Os códigos anteriores deixam de funcionar e poderá ter de entrar novamente.")) return;
+    setGenLoading(true); setGenErr(null);
+    try {
+      const res = await fetch(`${API_URL}/members/portal/recovery-codes`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ numeroUtente: ficha.numeroUtente, code }) });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Falha ao gerar."); }
+      const data = await res.json() as { codes: string[] };
+      setCodes(data.codes);
+    } catch (err) { setGenErr(err instanceof Error ? err.message : "Erro."); } finally { setGenLoading(false); }
+  };
+
+  const download = () => {
+    if (!codes) return;
+    const txt = `ORDEM DOS MÉDICOS DE ANGOLA — Códigos de acesso\n\nMédico: ${ficha.name}\nNº de Utente: ${ficha.numeroUtente}\nNº de Ordem: ${ficha.numeroOrdem}\n\n${codes.map((c, i) => `${i + 1}. ${c}`).join("\n")}\n\nGuarde estes códigos em local seguro. Cada código serve para ENTRAR (com email + senha) e para RECUPERAR a senha.\nSe os perder, terá de solicitar à Ordem.`;
+    const url = URL.createObjectURL(new Blob([txt], { type: "text/plain;charset=utf-8" }));
+    const a = document.createElement("a"); a.href = url; a.download = `ormed-codigos-${ficha.numeroUtente}.txt`; a.click(); URL.revokeObjectURL(url);
+  };
+  const printCodes = () => {
+    if (!codes) return;
+    const w = window.open("", "_blank", "width=520,height=640"); if (!w) return;
+    const logo = `${window.location.origin}/images/logo.svg`;
+    w.document.write(`<!doctype html><html lang="pt"><head><meta charset="utf-8"><title>Códigos ORMED</title>
+    <style>body{font-family:Arial,sans-serif;color:#111;margin:28px}.head{display:flex;gap:10px;align-items:center;border-bottom:2px solid #FFD700;padding-bottom:8px}.head img{height:46px}.org{font-size:12px;color:#002147;font-weight:bold}
+    h1{font-size:16px;margin:14px 0 2px}.meta{font-size:12px;color:#555}ol{font-family:monospace;font-size:16px;line-height:1.9;margin-top:14px}.warn{font-size:11px;color:#888;margin-top:18px}</style></head><body>
+    <div class="head"><img src="${logo}" onerror="this.style.display='none'"/><span class="org">ORDEM DOS MÉDICOS DE ANGOLA</span></div>
+    <h1>Códigos de acesso ao Portal do Médico</h1>
+    <p class="meta">${ficha.name} · Nº de Utente: ${ficha.numeroUtente}</p>
+    <ol>${codes.map((c) => `<li>${c}</li>`).join("")}</ol>
+    <p class="warn">Guarde em local seguro. Cada código serve para entrar (com email + senha) e para recuperar a senha. Se os perder, solicite à Ordem.</p>
+    <script>window.onload=function(){setTimeout(function(){window.print()},400)}</script></body></html>`);
+    w.document.close();
+  };
+
+  return (
+    <>
+      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><KeyRound className="w-5 h-5 text-angola-navy" /> Senha de acesso</h3>
+        <p className="text-sm text-gray-500 mb-4">Defina ou altere a sua senha. O login passa a ser <strong>Email + Senha + um código de 6 dígitos</strong>.</p>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Nova senha</label><input type="password" className={inputClass} value={pw.password} onChange={(e) => setPw((p) => ({ ...p, password: e.target.value }))} /></div>
+          <div><label className="block text-sm font-medium text-gray-700 mb-1">Confirmar senha</label><input type="password" className={inputClass} value={pw.password2} onChange={(e) => setPw((p) => ({ ...p, password2: e.target.value }))} /></div>
+        </div>
+        <p className="text-[11px] text-gray-400 mt-1.5">Mín. 8 caracteres. O seu email ({ficha.email || "—"}) é o utilizador do login.</p>
+        {pwMsg && <p className={`text-sm mt-3 flex items-center gap-1.5 ${pwMsg.ok ? "text-green-600" : "text-red-600"}`}>{pwMsg.ok && <Check className="w-4 h-4" />}{pwMsg.text}</p>}
+        <button type="button" onClick={savePassword} disabled={savingPw} className="mt-4 inline-flex items-center gap-2 bg-angola-navy text-white font-semibold px-5 py-2.5 rounded-lg disabled:opacity-60">
+          {savingPw ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} Guardar senha
+        </button>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+        <h3 className="font-bold text-gray-900 mb-1 flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-angola-navy" /> Códigos de acesso</h3>
+        <p className="text-sm text-gray-500 mb-4">Gere o seu conjunto de códigos de 6 dígitos. <strong>Baixe ou imprima</strong> — vai precisar de um para entrar e para recuperar a senha. Se os perder, só a Ordem os pode regenerar.</p>
+        {codes ? (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <p className="text-xs text-amber-800 mb-2">⚠️ Guarde estes códigos agora — <strong>não voltam a ser mostrados</strong>.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-center">
+              {codes.map((c) => <span key={c} className="bg-white border border-gray-200 rounded-lg py-2 text-sm tracking-wider">{c}</span>)}
+            </div>
+            <div className="flex gap-2 mt-4">
+              <button type="button" onClick={download} className="inline-flex items-center gap-1.5 text-sm px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50"><FileText className="w-4 h-4" /> Baixar</button>
+              <button type="button" onClick={printCodes} className="inline-flex items-center gap-1.5 text-sm px-3 py-2 bg-angola-navy text-white rounded-lg"><Receipt className="w-4 h-4" /> Imprimir</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {genErr && <p className="text-sm text-red-600 mb-3">{genErr}</p>}
+            <button type="button" onClick={generate} disabled={genLoading} className="inline-flex items-center gap-2 bg-angola-gold text-angola-navy font-semibold px-5 py-2.5 rounded-lg hover:brightness-95 disabled:opacity-60">
+              {genLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />} Gerar novos códigos
+            </button>
+          </>
+        )}
       </div>
     </>
   );
