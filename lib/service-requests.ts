@@ -30,6 +30,8 @@ export const STATUS_META: Record<string, StatusMeta> = {
   "pagamento-em-analise": { label: "Pagamento em análise", className: "bg-amber-100 text-amber-700" },
   pago: { label: "Pago", className: "bg-emerald-100 text-emerald-700" },
   "recibo-emitido": { label: "Recibo emitido", className: "bg-teal-100 text-teal-700" },
+  "enviado-bastonaria": { label: "Enviado à Bastonária", className: "bg-purple-100 text-purple-700" },
+  "aprovado-impressao": { label: "Aprovado p/ impressão", className: "bg-indigo-100 text-indigo-700" },
   concluido: { label: "Concluído", className: "bg-green-100 text-green-700" },
 };
 
@@ -68,6 +70,7 @@ export interface ServiceTrack {
   hasPaymentProof: boolean;
   receiptUrl: string | null;
   canSubmitProof: boolean;
+  credentialsIssued?: boolean;
   createdAt: string;
   timeline: TimelineEntry[];
 }
@@ -78,6 +81,11 @@ export const FLOW_PAGO = [
   "recebido", "em-analise", "validado", "aguarda-pagamento",
   "pagamento-em-analise", "pago", "recibo-emitido", "concluido",
 ];
+// Inscrição → 1ª carteira: inclui a aprovação da Bastonária e a emissão.
+export const FLOW_INSCRICAO = [
+  "recebido", "em-analise", "validado", "aguarda-pagamento",
+  "pagamento-em-analise", "pago", "enviado-bastonaria", "aprovado-impressao", "concluido",
+];
 export const STEP_LABEL: Record<string, string> = {
   ...Object.fromEntries(Object.entries(STATUS_META).map(([k, v]) => [k, v.label])),
   resultado: "Resultado",
@@ -87,12 +95,12 @@ export const NEGATIVE_STATUSES = ["rejeitado", "nao-validado"];
 export type StepState = "done" | "current" | "todo" | "error";
 
 /** Calcula o estado de cada etapa do fluxo para o estado atual. */
-export function computeSteps(isPaid: boolean, status: string): { key: string; label: string; state: StepState }[] {
-  const flow = isPaid ? FLOW_PAGO : FLOW_VALIDACAO;
+export function computeSteps(isPaid: boolean, status: string, isInscricao = false): { key: string; label: string; state: StepState }[] {
+  const flow = isInscricao ? FLOW_INSCRICAO : isPaid ? FLOW_PAGO : FLOW_VALIDACAO;
   const negative = NEGATIVE_STATUSES.includes(status);
   // Índice atingido no fluxo
   let reached: number;
-  if (!isPaid) {
+  if (!isPaid && !isInscricao) {
     reached = status === "recebido" ? 0 : status === "em-analise" ? 1 : 2;
   } else if (negative || status === "rejeitado") {
     reached = 2; // parou na fase de validação

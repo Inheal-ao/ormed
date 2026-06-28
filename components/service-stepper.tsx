@@ -4,8 +4,8 @@ import { Check, X } from "lucide-react";
 import { computeSteps } from "@/lib/service-requests";
 
 /** Gráfico horizontal das etapas do processo: concluídas, atual, por fazer ou erro. */
-export function ServiceStepper({ isPaid, status }: { isPaid: boolean; status: string }) {
-  const steps = computeSteps(isPaid, status);
+export function ServiceStepper({ isPaid, status, isInscricao = false }: { isPaid: boolean; status: string; isInscricao?: boolean }) {
+  const steps = computeSteps(isPaid, status, isInscricao);
   return (
     <div className="flex items-start overflow-x-auto pb-1">
       {steps.map((s, i) => (

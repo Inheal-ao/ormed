@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2, Check, Upload, Send, Search, FileText, Copy, Download, CreditCard, KeyRound } from "lucide-react";
 import { API_URL } from "@/lib/api";
 import { ServiceType, ServiceTrack, SERVICE_LABEL, STATUS_META } from "@/lib/service-requests";
@@ -159,6 +159,12 @@ export function ConsultPanel({ paid }: { paid: boolean }) {
   const [error, setError] = useState<string | null>(null);
   const [showRecover, setShowRecover] = useState(false);
 
+  // Preenche e consulta automaticamente quando se chega com ?code= (ex.: a partir do portal).
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("code");
+    if (q) { setCode(q.toUpperCase()); track(q); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const track = async (theCode?: string) => {
     const c = (theCode ?? code).trim();
     if (!c) return;
@@ -280,7 +286,7 @@ function TrackResult({ data, paid, onRefresh }: { data: ServiceTrack; paid: bool
       </div>
 
       <div className="bg-gray-50 rounded-lg p-4">
-        <ServiceStepper isPaid={data.isPaid} status={data.status} />
+        <ServiceStepper isPaid={data.isPaid} status={data.status} isInscricao={data.serviceType === "inscricao"} />
       </div>
 
       <div className="text-sm text-gray-600">
@@ -323,6 +329,14 @@ function TrackResult({ data, paid, onRefresh }: { data: ServiceTrack; paid: bool
         <a href={data.receiptUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-green-600 text-white py-2.5 rounded-lg font-medium hover:brightness-110">
           <Download className="w-4 h-4" /> Descarregar recibo
         </a>
+      )}
+
+      {/* Inscrição concluída: credenciais emitidas */}
+      {data.credentialsIssued && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-sm text-emerald-900">
+          <p className="font-semibold mb-1">Inscrição concluída — carteira emitida.</p>
+          <p>As suas credenciais de acesso à Área do Membro foram emitidas e serão enviadas para o seu email. Até as receber, pode continuar a acompanhar o processo aqui.</p>
+        </div>
       )}
 
       {msg && <p className="text-sm text-center text-gray-600">{msg}</p>}

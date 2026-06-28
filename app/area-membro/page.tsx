@@ -288,10 +288,9 @@ function ResumoSection({ ficha }: { ficha: FichaData }) {
 }
 
 const PORTAL_SERVICES = [
-  { href: "/declaracao/", label: "Declaração da Ordem", desc: "Solicitar uma declaração oficial.", icon: FileSignature },
-  { href: "/carteira/", label: "Carteira profissional / 2ª via", desc: "Pedir ou tratar a 2ª via da carteira.", icon: CreditCard },
-  { href: "/renovacao/", label: "Renovação de inscrição", desc: "Renovar a sua inscrição na Ordem.", icon: RefreshCw },
-  { href: "/validacao/", label: "Validação de documentos", desc: "Validar documentos junto da Ordem.", icon: FileText },
+  { serviceType: "declaracao", label: "Declaração da Ordem", desc: "Solicitar uma declaração oficial.", icon: FileSignature },
+  { serviceType: "carteira-profissional", label: "Carteira profissional (2ª via)", desc: "Pedir a 2ª via da carteira.", icon: CreditCard },
+  { serviceType: "renovacao-inscricao", label: "Renovação de inscrição", desc: "Renovar a sua inscrição na Ordem.", icon: RefreshCw },
 ];
 
 function ServicosSection({ ficha, code }: { ficha: FichaData; code: string }) {
@@ -303,6 +302,29 @@ function ServicosSection({ ficha, code }: { ficha: FichaData; code: string }) {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
   const set = (k: keyof typeof edit, v: string) => setEdit((p) => ({ ...p, [k]: v }));
+
+  // Submissão de pedidos de documentos (declaração, 2ª via carteira, renovação)
+  const [submittingReq, setSubmittingReq] = useState<string | null>(null);
+  const [reqError, setReqError] = useState<string | null>(null);
+  const [reqResult, setReqResult] = useState<{ serviceType: string; serviceCode: string } | null>(null);
+
+  const requestService = async (serviceType: string) => {
+    setSubmittingReq(serviceType); setReqError(null);
+    try {
+      if (!ficha.phone) throw new Error("Atualize o seu telefone antes de submeter o pedido.");
+      const form = new FormData();
+      form.append("serviceType", serviceType);
+      form.append("requesterName", ficha.name);
+      form.append("ownerName", ficha.name);
+      if (ficha.email) form.append("email", ficha.email);
+      form.append("phone", ficha.phone);
+      form.append("details", `Pedido submetido na Área do Membro · Nº Utente ${ficha.numeroUtente} · Nº Ordem ${ficha.numeroOrdem}`);
+      const res = await fetch(`${API_URL}/service-requests`, { method: "POST", body: form });
+      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Falha ao submeter o pedido."); }
+      const data = await res.json() as { serviceCode: string };
+      setReqResult({ serviceType, serviceCode: data.serviceCode });
+    } catch (err) { setReqError(err instanceof Error ? err.message : "Erro."); } finally { setSubmittingReq(null); }
+  };
 
   useEffect(() => { fetch(`${API_URL}/specialties`).then((r) => r.ok ? r.json() : []).then(setSpecialties).catch(() => {}); }, []);
 
@@ -321,20 +343,39 @@ function ServicosSection({ ficha, code }: { ficha: FichaData; code: string }) {
   return (
     <>
       <div className="bg-white border border-gray-200 rounded-2xl p-6">
-        <h3 className="font-bold text-gray-900 mb-1">Serviços da Ordem</h3>
-        <p className="text-sm text-gray-500 mb-4">Solicite documentos e serviços. Cada pedido recebe um código para consultar o estado.</p>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {PORTAL_SERVICES.map((s) => (
-            <Link key={s.href} href={s.href} className="flex items-center gap-3 border border-gray-200 rounded-xl p-3.5 hover:border-angola-gold/50 hover:bg-angola-gold/[0.04] transition-colors">
-              <span className="w-10 h-10 rounded-lg bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><s.icon className="w-5 h-5" /></span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-sm font-medium text-gray-900">{s.label}</span>
-                <span className="block text-xs text-gray-500">{s.desc}</span>
-              </span>
-              <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
-            </Link>
-          ))}
-        </div>
+        <h3 className="font-bold text-gray-900 mb-1">Solicitar documentos</h3>
+        <p className="text-sm text-gray-500 mb-4">Submeta o pedido aqui. Recebe um código para acompanhar o estado e, quando aprovado, as informações de pagamento.</p>
+
+        {reqResult ? (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+            <p className="text-sm font-semibold text-emerald-900 flex items-center gap-1.5"><Check className="w-4 h-4" /> Pedido submetido</p>
+            <p className="text-sm text-gray-700 mt-1">Guarde o seu código de acompanhamento:</p>
+            <p className="font-mono font-bold text-angola-navy text-lg my-2">{reqResult.serviceCode}</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={() => navigator.clipboard.writeText(reqResult.serviceCode)} className="text-sm px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Copiar código</button>
+              <Link href={`/consultar/?code=${reqResult.serviceCode}`} className="text-sm px-3 py-2 bg-angola-navy text-white rounded-lg">Consultar estado</Link>
+              <button type="button" onClick={() => setReqResult(null)} className="text-sm px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50">Fazer outro pedido</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {PORTAL_SERVICES.map((s) => (
+                <div key={s.serviceType} className="flex items-center gap-3 border border-gray-200 rounded-xl p-3.5">
+                  <span className="w-10 h-10 rounded-lg bg-angola-navy/5 text-angola-navy flex items-center justify-center shrink-0"><s.icon className="w-5 h-5" /></span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-medium text-gray-900">{s.label}</span>
+                    <span className="block text-xs text-gray-500">{s.desc}</span>
+                  </span>
+                  <button type="button" onClick={() => requestService(s.serviceType)} disabled={!!submittingReq} className="text-sm px-3 py-1.5 bg-angola-gold text-angola-navy font-semibold rounded-lg hover:brightness-95 disabled:opacity-60 shrink-0 inline-flex items-center gap-1.5">
+                    {submittingReq === s.serviceType ? <Loader2 className="w-4 h-4 animate-spin" /> : "Solicitar"}
+                  </button>
+                </div>
+              ))}
+            </div>
+            {reqError && <p className="text-sm text-red-600 mt-3">{reqError}</p>}
+          </>
+        )}
       </div>
 
       <div className="bg-white border border-gray-200 rounded-2xl p-6">

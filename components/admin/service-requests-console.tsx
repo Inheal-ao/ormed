@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import {
   Loader2, Download, Paperclip, Upload, Save, CreditCard, FileCheck,
   ChevronDown, ChevronUp, History, Clock, Printer, UserPlus, X, Check, Copy,
+  Send, ShieldCheck, Undo2, IdCard, Stamp,
 } from "lucide-react";
 import { api, tokenStore, API_URL } from "@/lib/api";
+import { useAdminAuth } from "@/components/admin/auth-context";
 import { Asset } from "@/lib/admin-types";
 import { PageHeader } from "@/components/admin/admin-ui";
 import { ServiceStepper } from "@/components/service-stepper";
@@ -32,6 +34,8 @@ interface ServiceRequest {
   paymentInstructions: string;
   paymentProof: Asset | null;
   receipt: Asset | null;
+  memberNumeroOrdem?: string;
+  credentialsIssued?: boolean;
   history: HistoryEntry[];
   createdAt: string;
 }
@@ -162,6 +166,33 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
   const [receipt, setReceipt] = useState<File | null>(null);
   const [uploadingReceipt, setUploadingReceipt] = useState(false);
   const [registar, setRegistar] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [deciding, setDeciding] = useState(false);
+  const { user } = useAdminAuth();
+  const canApprovePrint = user?.role === "bastonaria" || user?.role === "super_admin";
+  const isInscricao = r.serviceType === "inscricao";
+
+  const sendToBastonaria = async () => {
+    setSending(true);
+    try {
+      const u = await api.patch<ServiceRequest>(`/service-requests/${r._id}/send-to-bastonaria`, {});
+      onPatch(r._id, { status: "enviado-bastonaria", history: u.history });
+      setStatus("enviado-bastonaria");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const decide = async (decision: "aprovar" | "devolver", note?: string) => {
+    setDeciding(true);
+    try {
+      const u = await api.patch<ServiceRequest>(`/service-requests/${r._id}/bastonaria`, { decision, note });
+      onPatch(r._id, { status: u.status, statusDetail: u.statusDetail, history: u.history });
+      setStatus(u.status);
+    } finally {
+      setDeciding(false);
+    }
+  };
 
   const saveStatus = async () => {
     setSavingStatus(true);
@@ -208,7 +239,7 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
     <div className="border-t border-gray-100 p-4 space-y-5">
       {/* 1. Gráfico de progresso */}
       <div className="bg-gray-50 rounded-lg p-4">
-        <ServiceStepper isPaid={r.isPaid} status={r.status} />
+        <ServiceStepper isPaid={r.isPaid} status={r.status} isInscricao={isInscricao} />
       </div>
 
       {/* 2. Dados do processo */}
@@ -228,17 +259,71 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
         </div>
       )}
 
-      {/* Registar médico a partir da inscrição (único modo de criar um membro) */}
-      {r.serviceType === "inscricao" && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-sm font-semibold text-gray-700 mb-1">Aprovar e registar médico</p>
-          <p className="text-xs text-gray-500 mb-2">Após validar os documentos, registe o médico no banco da Ordem (gera nº de utente e código de acesso).</p>
-          <button type="button" onClick={() => setRegistar(true)} className="inline-flex items-center gap-1.5 text-sm px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-            <UserPlus className="w-4 h-4" /> Registar médico
-          </button>
+      {/* Fluxo da inscrição → 1ª carteira (etapas dependentes do estado e do papel) */}
+      {isInscricao && (
+        <div className="space-y-3">
+          {/* Etapa: enviar à Bastonária (após pagamento confirmado) */}
+          {["pago", "recibo-emitido"].includes(r.status) && (
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+              <p className="text-sm font-semibold text-purple-900 mb-1 flex items-center gap-1.5"><Send className="w-4 h-4" /> Enviar à Bastonária</p>
+              <p className="text-xs text-gray-600 mb-2">Pagamento confirmado. Envie o processo à Bastonária para aprovação da impressão da carteira.</p>
+              <button type="button" onClick={sendToBastonaria} disabled={sending} className="inline-flex items-center gap-1.5 text-sm px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-60">
+                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />} Enviar à Bastonária
+              </button>
+            </div>
+          )}
+
+          {/* Etapa: decisão da Bastonária */}
+          {r.status === "enviado-bastonaria" && (
+            canApprovePrint ? (
+              <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                <p className="text-sm font-semibold text-indigo-900 mb-1 flex items-center gap-1.5"><Stamp className="w-4 h-4" /> Decisão da Bastonária</p>
+                <p className="text-xs text-gray-600 mb-2">Aprove para a equipa atribuir o nº de ordem e emitir a carteira, ou devolva o processo.</p>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={() => decide("aprovar")} disabled={deciding} className="inline-flex items-center gap-1.5 text-sm px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-60">
+                    {deciding ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />} Aprovar para impressão
+                  </button>
+                  <button type="button" onClick={() => { const note = window.prompt("Motivo da devolução (opcional):") ?? undefined; decide("devolver", note); }} disabled={deciding} className="inline-flex items-center gap-1.5 text-sm px-4 py-2 border border-indigo-300 text-indigo-700 rounded-lg hover:bg-indigo-100 disabled:opacity-60">
+                    <Undo2 className="w-4 h-4" /> Devolver
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 text-sm text-purple-800 flex items-center gap-2">
+                <Clock className="w-4 h-4" /> A aguardar a aprovação da Bastonária para a impressão da carteira.
+              </div>
+            )
+          )}
+
+          {/* Etapa: emitir carteira (após aprovação da Bastonária) */}
+          {r.status === "aprovado-impressao" && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><IdCard className="w-4 h-4" /> Atribuir nº de ordem e emitir carteira</p>
+              <p className="text-xs text-gray-500 mb-2">Aprovado pela Bastonária. Registe o médico (gera nº de utente e código de acesso) e atribua o nº de ordem para emitir a carteira.</p>
+              <button type="button" onClick={() => setRegistar(true)} className="inline-flex items-center gap-1.5 text-sm px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                <UserPlus className="w-4 h-4" /> Registar médico e emitir carteira
+              </button>
+            </div>
+          )}
+
+          {/* Concluído */}
+          {r.status === "concluido" && r.credentialsIssued && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800 flex items-center gap-2">
+              <Check className="w-4 h-4" /> Carteira emitida{r.memberNumeroOrdem ? ` — nº de ordem ${r.memberNumeroOrdem}` : ""}. Credenciais emitidas para entrega ao candidato.
+            </div>
+          )}
         </div>
       )}
-      {registar && <RegistarMedicoModal req={r} onClose={() => setRegistar(false)} />}
+      {registar && (
+        <RegistarMedicoModal
+          req={r}
+          onClose={() => setRegistar(false)}
+          onEmitted={(numeroOrdem, history) => {
+            onPatch(r._id, { status: "concluido", credentialsIssued: true, memberNumeroOrdem: numeroOrdem, history });
+            setStatus("concluido");
+          }}
+        />
+      )}
 
       {/* 3. Documentos */}
       {r.attachments.length > 0 && (
@@ -338,7 +423,7 @@ function RequestDetail({ r, onPatch }: { r: ServiceRequest; onPatch: (id: string
 
 const mInput = "w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-angola-gold text-gray-900 text-sm";
 
-function RegistarMedicoModal({ req, onClose }: { req: ServiceRequest; onClose: () => void }) {
+function RegistarMedicoModal({ req, onClose, onEmitted }: { req: ServiceRequest; onClose: () => void; onEmitted?: (numeroOrdem: string, history: HistoryEntry[]) => void }) {
   const [f, setF] = useState({
     name: req.requesterName ?? "", numeroOrdem: "", biPassaporte: "", phone: req.phone ?? "",
     email: req.email ?? "", especialidade: "", provincia: "", pais: "Angola",
@@ -357,6 +442,13 @@ function RegistarMedicoModal({ req, onClose }: { req: ServiceRequest; onClose: (
     setSaving(true);
     try {
       const res = await api.post<{ numeroUtente: string; accessCode: string }>("/members", f, true);
+      // Marca a inscrição como concluída (carteira emitida + credenciais emitidas).
+      let history: HistoryEntry[] | undefined;
+      try {
+        const u = await api.patch<ServiceRequest>(`/service-requests/${req._id}/emitida`, { numeroOrdem: f.numeroOrdem });
+        history = u.history;
+      } catch { /* o médico foi criado; a marcação pode ser repetida pelo estado */ }
+      onEmitted?.(f.numeroOrdem, history ?? req.history);
       setCreds({ numeroUtente: res.numeroUtente, accessCode: res.accessCode });
     } catch (err) { setError(err instanceof Error ? err.message : "Erro ao registar."); } finally { setSaving(false); }
   };
@@ -371,7 +463,7 @@ function RegistarMedicoModal({ req, onClose }: { req: ServiceRequest; onClose: (
         {creds ? (
           <div className="text-center py-3">
             <div className="w-12 h-12 rounded-full bg-green-500 text-white flex items-center justify-center mx-auto mb-3"><Check className="w-6 h-6" /></div>
-            <p className="text-sm text-gray-600 mb-3">Médico registado. Entregue estas credenciais (o código não volta a aparecer):</p>
+            <p className="text-sm text-gray-600 mb-3">Carteira emitida. Envie estas credenciais para o email do candidato{req.email ? ` (${req.email})` : ""} — o código não volta a aparecer:</p>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono text-sm space-y-1 mb-3">
               <p><span className="text-gray-400">Nº Utente:</span> {creds.numeroUtente}</p>
               <p><span className="text-gray-400">Código:</span> {creds.accessCode}</p>
